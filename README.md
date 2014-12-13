@@ -1,5 +1,5 @@
-OpenWlanMapNlpBackend
-=====================
+Local WiFi Backend
+==================
 [UnifiedNlp](https://github.com/microg/android_packages_apps_UnifiedNlp) backend that uses locally acquired WiFi AP data to resolve user location.
 
 This backend consists of two parts sharing a common database. One part passively monitors the GPS. If the GPS has acquired and has a good position accuracy, then the WiFi APs detected by the phone are stored.
