@@ -1,0 +1,5 @@
+bin/
+gen/
+tags
+.DS_Store
+
