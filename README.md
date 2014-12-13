@@ -33,6 +33,9 @@ Used libraries
 -	[UnifiedNlpApi](https://github.com/microg/android_packages_apps_UnifiedNlp)
 -	[libwlocate](http://sourceforge.net/projects/libwlocate/) (included)
 
+Other IP used
+-------------
+Public domain icon from https://en.wikipedia.org/wiki/File:Wireless-icon.png
 
 Changes
 -------

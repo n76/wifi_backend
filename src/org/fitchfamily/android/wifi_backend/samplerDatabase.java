@@ -74,7 +74,6 @@ public class samplerDatabase {
     private SQLiteStatement sqlSampleInsert;
     private SQLiteStatement sqlSampleUpdate;
     private SQLiteStatement sqlAPdrop;
-    private SQLiteStatement sqlLocationQuery;
 
     private samplerDatabase() {}
 
@@ -139,14 +138,6 @@ public class samplerDatabase {
                                                     "WHERE " + COL_BSSID + "=?;");
 
         sqlAPdrop = database.compileStatement("DELETE FROM " +
-                                                    TABLE_SAMPLES +
-                                                    " WHERE " + COL_BSSID + "=?;");
-
-        sqlLocationQuery = database.compileStatement("SELECT " +
-                                                    COL_BSSID + ", " +
-                                                    COL_LATITUDE + ", " +
-                                                    COL_LONGITUDE +
-                                                    " FROM " +
                                                     TABLE_SAMPLES +
                                                     " WHERE " + COL_BSSID + "=?;");
 
@@ -248,7 +239,7 @@ public class samplerDatabase {
         }
     }
 
-    public Location ApLocation( String bssid ) {
+    public synchronized Location ApLocation( String bssid ) {
         final String canonicalBSSID = bssid.replace(":","");
         Cursor c = database.query(TABLE_SAMPLES,
                                        new String[]{COL_BSSID,
@@ -271,6 +262,7 @@ public class samplerDatabase {
                 return result;
             }
         }
+//        if (DEBUG) Log.d(TAG, "AP not found in database: " + bssid );
         return null;
     }
 

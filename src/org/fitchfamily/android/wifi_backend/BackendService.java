@@ -125,10 +125,12 @@ public class BackendService extends LocationBackendService {
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className,
                 IBinder binder) {
+            if (DEBUG) Log.e(TAG, "mConnection.ServiceConnection()");
             WiFiSamplerService.MyBinder b = (WiFiSamplerService.MyBinder) binder;
             collectorService = b.getService();
         }
         public void onServiceDisconnected(ComponentName className) {
+            if (DEBUG) Log.e(TAG, "mConnection.onServiceDisconnected()");
             collectorService = null;
         }
     };

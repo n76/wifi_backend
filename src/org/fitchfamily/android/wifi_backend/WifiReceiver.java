@@ -33,7 +33,7 @@ public class WifiReceiver extends BroadcastReceiver {
 
     private boolean scanStarted = false;
     private WifiManager wifi;
-    private String TAG = WifiReceiver.class.getName();
+    private String TAG = constants.TAG_PREFIX+"WiFiReceiver";
     private boolean DEBUG = true;
     private WifiReceivedCallback callback;
 
@@ -49,7 +49,7 @@ public class WifiReceiver extends BroadcastReceiver {
         setScanStarted(false);
         List<ScanResult> configs = wifi.getScanResults();
 
-        if (DEBUG) Log.d(TAG, "Got " + configs.size() + " wifi access points");
+//        if (DEBUG) Log.d(TAG, "Got " + configs.size() + " wifi access points");
 
         if (configs.size() > 0) {
 
