@@ -32,24 +32,25 @@ class constants {
     // Location of database
     public static final String DB_NAME = "wifi.db";
 
-//     public static final File ROOT_DIR = Environment.getExternalStorageDirectory();
-//     public static final File DB_DIR = new File(ROOT_DIR, ".nogapps");
-//     public static final File DB_FILE = new File(DB_DIR, DB_NAME);
-
-    // How accurate should our position be to bother recording WiFi signals?
-    // From experience, GPS can claim 5m and we are trying to locate something
-    // that has a coverage radius of maybe 50m, so set this to around 7.5
-    // so that an accurate GPS reading will be accepted.
-    public static final float MIN_ACCURACY = 20.0f; // meters
-
-    // If new report is too far away from our current estimate then
-    // we assume the AP has moved. This sets the threshold for that
-    // check.
-    public static final float MOVED_THRESHOLD = 200.0f; // meters
+    // How accurate should our GPS position be to bother recording WiFi signals?
+    public static final float MIN_ACCURACY = 15.0f; // meters
 
     // Minimum time and distance for new GPS report
     public static final long MIN_TIME = 5000;       // ms
     public static final float MIN_DISTANCE = 0.0f;  // meters
+
+    // If new report is too far away from our current estimate then
+    // we assume the AP has moved. MOVED_THRESHOLD sets the value for that
+    // check.
+    //
+    // We set a guard against using the moved AP until we get a number
+    // of samples confirming that it has a stable location. We get a new
+    // GPS sample every MIN_TIME and we decrease the move guard count
+    // by one for each good sample for the specific AP. Set this value
+    // so big enough so that if we are near a parked WiFi AP equipped bus
+    // it is likely to move before we count down to zero.
+    public static final float MOVED_THRESHOLD = 200.0f; // meters
+    public static int MOVED_GUARD_COUNT = 100;      // samples
 
     // For reporting our results to the network backend we will
     // guess about the accuracy

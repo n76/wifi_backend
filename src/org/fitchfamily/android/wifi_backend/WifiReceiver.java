@@ -38,7 +38,7 @@ public class WifiReceiver extends BroadcastReceiver {
     private WifiReceivedCallback callback;
 
     public WifiReceiver(Context ctx, WifiReceivedCallback aCallback) {
-        if (DEBUG) Log.d(TAG, "WifiReceiver() constructor");
+//        if (DEBUG) Log.d(TAG, "WifiReceiver() constructor");
         wifi = (WifiManager) ctx.getSystemService(Context.WIFI_SERVICE);
         callback = aCallback;
     }

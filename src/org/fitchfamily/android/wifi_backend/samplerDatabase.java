@@ -70,6 +70,7 @@ public class samplerDatabase {
     private static final String COL_D12 = "d12";
     private static final String COL_D23 = "d23";
     private static final String COL_D31 = "d31";
+    private static final String COL_MOVED_GUARD = "move_guard";
 
     private SQLiteStatement sqlSampleInsert;
     private SQLiteStatement sqlSampleUpdate;
@@ -86,25 +87,13 @@ public class samplerDatabase {
 //         File jFile = new File(constants.DB_FILE.getAbsolutePath() + "-journal");
 //         if (jFile.exists())
 //             jFile.delete();
-        database = SQLiteDatabase.openDatabase(dbFile.getAbsolutePath(),
-                                               null,
-                                               SQLiteDatabase.NO_LOCALIZED_COLLATORS +
-                                               SQLiteDatabase.OPEN_READWRITE +
-                                               SQLiteDatabase.CREATE_IF_NECESSARY
-                                               );
-        database.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_SAMPLES + "(" +
-                         COL_BSSID + " STRING PRIMARY KEY, " +
-                         COL_LATITUDE + " REAL, " +
-                         COL_LONGITUDE + " REAL, "+
-                         COL_LAT1 + " REAL, " +
-                         COL_LON1 + " REAL, " +
-                         COL_LAT2 + " REAL, " +
-                         COL_LON2 + " REAL, " +
-                         COL_LAT3 + " REAL, " +
-                         COL_LON3 + " REAL, " +
-                         COL_D12 + " REAL, " +
-                         COL_D23 + " REAL, " +
-                         COL_D31 + " REAL);");
+//         jFile = new File(constants.DB_FILE.getAbsolutePath() + "-shm");
+//         if (jFile.exists())
+//             jFile.delete();
+//         jFile = new File(constants.DB_FILE.getAbsolutePath() + "-wal");
+//         if (jFile.exists())
+//             jFile.delete();
+        setupDatabase(dbFile);
 
         sqlSampleInsert = database.compileStatement("INSERT INTO " +
                                                     TABLE_SAMPLES + "("+
@@ -119,8 +108,9 @@ public class samplerDatabase {
                                                     COL_LON3 + ", " +
                                                     COL_D12 + ", " +
                                                     COL_D23 + ", " +
-                                                    COL_D31 + ") " +
-                                                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+                                                    COL_D31 + ", " +
+                                                    COL_MOVED_GUARD + ") " +
+                                                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 
         sqlSampleUpdate = database.compileStatement("UPDATE " +
                                                     TABLE_SAMPLES + " SET "+
@@ -134,7 +124,8 @@ public class samplerDatabase {
                                                     COL_LON3 + "=?, " +
                                                     COL_D12 + "=?, " +
                                                     COL_D23 + "=?, " +
-                                                    COL_D31 + "=? " +
+                                                    COL_D31 + "=?, " +
+                                                    COL_MOVED_GUARD + "=? " +
                                                     "WHERE " + COL_BSSID + "=?;");
 
         sqlAPdrop = database.compileStatement("DELETE FROM " +
@@ -154,36 +145,75 @@ public class samplerDatabase {
         throw new CloneNotSupportedException();
     }
 
-    public synchronized void addSample( String bssid, double lat, double lon ) {
-        final String canonicalBSSID = bssid.replace(":","");
-        final Location sampleLoc = new Location("wifi");
-        apInfo curInfo;
 
-        sampleLoc.setLatitude(lat);
-        sampleLoc.setLongitude(lon);
+    private void setupDatabase(File dbFile) {
+        database = SQLiteDatabase.openDatabase(dbFile.getAbsolutePath(),
+                                               null,
+                                               SQLiteDatabase.NO_LOCALIZED_COLLATORS +
+                                               SQLiteDatabase.OPEN_READWRITE +
+                                               SQLiteDatabase.CREATE_IF_NECESSARY +
+                                               SQLiteDatabase.ENABLE_WRITE_AHEAD_LOGGING
+                                               );
+
+        // Always create version 0 of database, then update the schema
+        // in the same order it might occur "in the wild". Avoids having
+        // to check to see if the table exists (may be old version)
+        // or not (can be new version).
+        database.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_SAMPLES + "(" +
+                         COL_BSSID + " STRING PRIMARY KEY, " +
+                         COL_LATITUDE + " REAL, " +
+                         COL_LONGITUDE + " REAL, "+
+                         COL_LAT1 + " REAL, " +
+                         COL_LON1 + " REAL, " +
+                         COL_LAT2 + " REAL, " +
+                         COL_LON2 + " REAL, " +
+                         COL_LAT3 + " REAL, " +
+                         COL_LON3 + " REAL, " +
+                         COL_D12 + " REAL, " +
+                         COL_D23 + " REAL, " +
+                         COL_D31 + " REAL);");
+
+        // First release of database does not have COL_MOVED_GUARD so see
+        // if we need to update
+        Integer curVer = database.getVersion();
+        if (DEBUG) Log.d(TAG, "setupDatabase() version was " + curVer);
+        if (curVer < 2) { // upgrade to 2
+            database.execSQL("ALTER TABLE " + TABLE_SAMPLES +
+                             " ADD COLUMN " + COL_MOVED_GUARD +
+                             " INTEGER;");
+            database.execSQL("UPDATE " + TABLE_SAMPLES +
+                             " SET " + COL_MOVED_GUARD + "=0;");
+            database.setVersion(2);
+        }
+        if (DEBUG) Log.d(TAG, "setupDatabase() version is " + database.getVersion());
+    }
+
+    public void addSample( String bssid, Location sampleLoc ) {
+        final String canonicalBSSID = bssid.replace(":","");
+        apInfo curInfo;
 
         database.beginTransaction();
 
         Cursor cursor =
-        database.query(TABLE_SAMPLES,
-                       new String[]{COL_BSSID,
-                                    COL_LATITUDE,
-                                    COL_LONGITUDE,
-                                    COL_LAT1,
-                                    COL_LON1,
-                                    COL_LAT2,
-                                    COL_LON2,
-                                    COL_LAT3,
-                                    COL_LON3,
-                                    COL_D12,
-                                    COL_D23,
-                                    COL_D31
-                                    },
-                       COL_BSSID+"=?",
-                       new String[]{canonicalBSSID},
-                       null,
-                       null,
-                       null);
+            database.query(TABLE_SAMPLES,
+                           new String[]{COL_BSSID,
+                                        COL_LATITUDE,
+                                        COL_LONGITUDE,
+                                        COL_LAT1,
+                                        COL_LON1,
+                                        COL_LAT2,
+                                        COL_LON2,
+                                        COL_LAT3,
+                                        COL_LON3,
+                                        COL_D12,
+                                        COL_D23,
+                                        COL_D31
+                                        },
+                           COL_BSSID+"=?",
+                           new String[]{canonicalBSSID},
+                           null,
+                           null,
+                           null);
         if (cursor != null) {
             if (cursor.getCount() == 0) {
                 new apInfo(bssid, sampleLoc).insert();
@@ -198,7 +228,7 @@ public class samplerDatabase {
         database.endTransaction();
     }
 
-    public synchronized void dropAP( String bssid ) {
+    public void dropAP( String bssid ) {
         final String canonicalBSSID = bssid.replace(":","");
         if (DEBUG) Log.d(TAG, "Dropping " + canonicalBSSID + " from db" );
         sqlAPdrop.bindString(1, canonicalBSSID);
@@ -215,14 +245,14 @@ public class samplerDatabase {
     private void updateAP(apInfo curInfo, Location sampleLoc ) {
         apInfo best = new apInfo(curInfo);
         float bestPerimeter = best.perimeter();
-        boolean changed = false;
 
         float diff = curInfo.distanceTo(sampleLoc);
         if (diff >= constants.MOVED_THRESHOLD) {
             best.reset(sampleLoc);
-            changed = true;
+            best.setMoved();
             if (DEBUG) Log.d(TAG, "Sample is " + diff + "from AP, assume AP " + curInfo.getBSSID() + " has moved.");
         } else {
+            best.decMoved();
             for (int i=0; i<3; i++) {
                 apInfo guess = new apInfo(curInfo);
                 guess.setSample(i, sampleLoc);
@@ -230,23 +260,22 @@ public class samplerDatabase {
                 if (guessPerimeter > bestPerimeter) {
                     best = guess;
                     bestPerimeter = guessPerimeter;
-                    changed = true;
                 }
             }
         }
-        if (changed) {
-            best.update();
-        }
+//        if (DEBUG) Log.d(TAG, "Sample: " + best.toString());
+        best.update();
     }
 
-    public synchronized Location ApLocation( String bssid ) {
+    public Location ApLocation( String bssid ) {
         final String canonicalBSSID = bssid.replace(":","");
         Cursor c = database.query(TABLE_SAMPLES,
                                        new String[]{COL_BSSID,
                                                     COL_LATITUDE,
                                                     COL_LONGITUDE
                                                     },
-                                       COL_BSSID+"=?",
+                                       COL_BSSID+"=? AND " +
+                                       COL_MOVED_GUARD + "=0",
                                        new String[]{canonicalBSSID},
                                        null,
                                        null,
@@ -261,6 +290,7 @@ public class samplerDatabase {
                 c.close();
                 return result;
             }
+            c.close();
         }
 //        if (DEBUG) Log.d(TAG, "AP not found in database: " + bssid );
         return null;
@@ -273,12 +303,15 @@ public class samplerDatabase {
         private Location estimate;
         private Location[] sample;
         private float[] distance;
+        private int moved_guard;
+        private boolean changed = true;
 
         private apInfo() {};
 
         public apInfo(String bssid, Location s1) {
             this.bssid = bssid.replace(":","");
             this.reset(s1);
+            this.changed = true;
         }
 
         public apInfo(Cursor c) {
@@ -302,6 +335,7 @@ public class samplerDatabase {
                 distance[0] = c.getFloat(c.getColumnIndexOrThrow(COL_D12));
                 distance[1] = c.getFloat(c.getColumnIndexOrThrow(COL_D23));
                 distance[2] = c.getFloat(c.getColumnIndexOrThrow(COL_D31));
+                changed = false;
             }
         }
 
@@ -314,6 +348,7 @@ public class samplerDatabase {
                 this.sample[i] = new Location(x.sample[i]);
                 this.distance[i] = x.distance[i];
             }
+            changed = false;
         }
 
         public void reset(Location s1) {
@@ -323,6 +358,19 @@ public class samplerDatabase {
             for (int i=0; i<3; i++) {
                 sample[i] = s1;
                 distance[i] = 0.0f;
+            }
+            changed = true;
+        }
+
+        public void setMoved() {
+            moved_guard = constants.MOVED_GUARD_COUNT;
+            changed = true;
+        }
+
+        public void decMoved() {
+            if (moved_guard > 0) {
+                moved_guard--;
+                changed = true;
             }
         }
 
@@ -362,6 +410,7 @@ public class samplerDatabase {
                 }
                 estimate.setLatitude(newLat/3.0);
                 estimate.setLongitude(newLon/3.0);
+                changed = true;
             }
         }
 
@@ -380,27 +429,33 @@ public class samplerDatabase {
             sqlSampleInsert.bindString(10, String.valueOf(distance[0]));
             sqlSampleInsert.bindString(11, String.valueOf(distance[1]));
             sqlSampleInsert.bindString(12, String.valueOf(distance[2]));
+            sqlSampleInsert.bindString(13, String.valueOf(moved_guard));
             long newID = sqlSampleInsert.executeInsert();
             sqlSampleInsert.clearBindings();
+            changed = false;
         }
 
         public void update() {
-            if (DEBUG) Log.d(TAG, "apInfo.update(): updating " + bssid + " in database" );
+            if (changed) {
+                if (DEBUG) Log.d(TAG, "apInfo.update(): updating " + bssid + " in database" );
 
-            sqlSampleUpdate.bindString(1, String.valueOf(estimate.getLatitude()));
-            sqlSampleUpdate.bindString(2, String.valueOf(estimate.getLongitude()));
-            sqlSampleUpdate.bindString(3, String.valueOf(sample[0].getLatitude()));
-            sqlSampleUpdate.bindString(4, String.valueOf(sample[0].getLongitude()));
-            sqlSampleUpdate.bindString(5, String.valueOf(sample[1].getLatitude()));
-            sqlSampleUpdate.bindString(6, String.valueOf(sample[1].getLongitude()));
-            sqlSampleUpdate.bindString(7, String.valueOf(sample[2].getLatitude()));
-            sqlSampleUpdate.bindString(8, String.valueOf(sample[2].getLongitude()));
-            sqlSampleUpdate.bindString(9, String.valueOf(distance[0]));
-            sqlSampleUpdate.bindString(10, String.valueOf(distance[1]));
-            sqlSampleUpdate.bindString(11, String.valueOf(distance[2]));
-            sqlSampleUpdate.bindString(12, bssid);
-            long newID = sqlSampleUpdate.executeInsert();
-            sqlSampleUpdate.clearBindings();
+                sqlSampleUpdate.bindString(1, String.valueOf(estimate.getLatitude()));
+                sqlSampleUpdate.bindString(2, String.valueOf(estimate.getLongitude()));
+                sqlSampleUpdate.bindString(3, String.valueOf(sample[0].getLatitude()));
+                sqlSampleUpdate.bindString(4, String.valueOf(sample[0].getLongitude()));
+                sqlSampleUpdate.bindString(5, String.valueOf(sample[1].getLatitude()));
+                sqlSampleUpdate.bindString(6, String.valueOf(sample[1].getLongitude()));
+                sqlSampleUpdate.bindString(7, String.valueOf(sample[2].getLatitude()));
+                sqlSampleUpdate.bindString(8, String.valueOf(sample[2].getLongitude()));
+                sqlSampleUpdate.bindString(9, String.valueOf(distance[0]));
+                sqlSampleUpdate.bindString(10, String.valueOf(distance[1]));
+                sqlSampleUpdate.bindString(11, String.valueOf(distance[2]));
+                sqlSampleUpdate.bindString(12, String.valueOf(moved_guard));
+                sqlSampleUpdate.bindString(13, bssid);
+                long newID = sqlSampleUpdate.executeInsert();
+                sqlSampleUpdate.clearBindings();
+            }
+            changed = false;
         }
 
         public String toString() {
@@ -408,7 +463,9 @@ public class samplerDatabase {
                    "s1(" + sample[0].toString() + "), " +
                    "s2(" + sample[1].toString() + "), " +
                    "s3(" + sample[2].toString() + "), " +
-                   "dist(" + distance[0] + ","+ distance[1] + ","+ distance[2] + ")}";
+                   "dist(" + distance[0] + ","+ distance[1] + ","+ distance[2] + ") " +
+                   "moved_guard" + moved_guard + ", " +
+                   "changed" + changed + "}";
         }
     }
 }

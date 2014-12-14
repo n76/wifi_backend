@@ -49,7 +49,7 @@ public class BackendService extends LocationBackendService {
 
     @Override
     protected void onOpen() {
-        if (DEBUG) Log.d(TAG, "BackendService.onOpen()");
+        if (DEBUG) Log.d(TAG, "onOpen()");
         sDb = samplerDatabase.getInstance(this);
 
         if (wifiReceiver == null) {
@@ -65,22 +65,21 @@ public class BackendService extends LocationBackendService {
 
     @Override
     protected void onClose() {
-        if (DEBUG) Log.d(TAG, "onClose");
+        if (DEBUG) Log.d(TAG, "onClose()");
         unregisterReceiver(wifiReceiver);
         wifiReceiver = null;
     }
 
     @Override
     protected Location update() {
-//        if (DEBUG) Log.d(TAG, "update");
+//        if (DEBUG) Log.d(TAG, "update()");
 
         if (wifiReceiver != null) {
-//            if (DEBUG) Log.d(TAG, "Starting scan for WiFi APs");
+//            if (DEBUG) Log.d(TAG, "update(): Starting scan for WiFi APs");
             wifiReceiver.startScan();
         } else {
-            if (DEBUG) Log.d(TAG, "no wifiReceiver???");
+            if (DEBUG) Log.d(TAG, "update(): no wifiReceiver???");
         }
-
         return null;
     }
 

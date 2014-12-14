@@ -218,7 +218,7 @@ public class WiFiSamplerService extends Service {
                 case GOTSCAN:
                     List<String> foundBssids = (List<String>) msg.obj;
                     for (String bssid : foundBssids) {
-                        sDb.addSample( bssid, mLocation.getLatitude(), mLocation.getLongitude());
+                        sDb.addSample( bssid, mLocation );
                     }
                 break;
 
