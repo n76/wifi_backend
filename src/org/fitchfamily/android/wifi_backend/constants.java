@@ -27,13 +27,13 @@ class constants {
 
     // Logging related values
     public static final String TAG_PREFIX = "wifi-backend-";
-    public static boolean DEBUG = true;
+    public static boolean DEBUG = false;
 
     // Location of database
     public static final String DB_NAME = "wifi.db";
 
     // How accurate should our GPS position be to bother recording WiFi signals?
-    public static final float MIN_ACCURACY = 10.0f; // meters
+    public static final float MIN_ACCURACY = 15.0f; // meters
 
     // Minimum time and distance for new GPS report
     public static final long MIN_TIME = 5000;       // ms
@@ -53,7 +53,7 @@ class constants {
     public static int MOVED_GUARD_COUNT = 100;      // samples
 
     // For reporting our results to the network backend we will
-    // guess about the accuracy
+    // guess about the minimum accuracy (coverage radius) for an AP
     public static final float ASSUMED_ACCURACY = 50.0f; // meters
 
 }

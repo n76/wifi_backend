@@ -49,6 +49,8 @@ import android.util.Log;
  *      d12         - Distance, in meters, between sample 1 and sample 2
  *      d23         - Distance, in meters, between sample 2 and sample 3
  *      d31         - Distance, in meters, between sample 3 and sample 1
+ *      move_guard  - Count down of times to ignore moved AP
+ *      radius      - Estimated coverage radius of AP
  */
 public class samplerDatabase {
     private final static String TAG = constants.TAG_PREFIX + "samplerDatabase";
@@ -61,6 +63,7 @@ public class samplerDatabase {
     private static final String COL_BSSID = "bssid";
     private static final String COL_LATITUDE = "latitude";
     private static final String COL_LONGITUDE = "longitude";
+    private static final String COL_RADIUS = "radius";
     private static final String COL_LAT1 = "lat1";
     private static final String COL_LON1 = "lon1";
     private static final String COL_LAT2 = "lat2";
@@ -100,6 +103,7 @@ public class samplerDatabase {
                                                     COL_BSSID + ", " +
                                                     COL_LATITUDE + ", " +
                                                     COL_LONGITUDE + ", " +
+                                                    COL_RADIUS + ", " +
                                                     COL_LAT1 + ", " +
                                                     COL_LON1 + ", " +
                                                     COL_LAT2 + ", " +
@@ -110,12 +114,13 @@ public class samplerDatabase {
                                                     COL_D23 + ", " +
                                                     COL_D31 + ", " +
                                                     COL_MOVED_GUARD + ") " +
-                                                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+                                                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 
         sqlSampleUpdate = database.compileStatement("UPDATE " +
                                                     TABLE_SAMPLES + " SET "+
                                                     COL_LATITUDE + "=?, " +
                                                     COL_LONGITUDE + "=?, " +
+                                                    COL_RADIUS + "=?, " +
                                                     COL_LAT1 + "=?, " +
                                                     COL_LON1 + "=?, " +
                                                     COL_LAT2 + "=?, " +
@@ -185,10 +190,19 @@ public class samplerDatabase {
                              " SET " + COL_MOVED_GUARD + "=0;");
             database.setVersion(2);
         }
+        if (curVer < 3) { // upgrade to 3
+            database.execSQL("ALTER TABLE " + TABLE_SAMPLES +
+                             " ADD COLUMN " + COL_RADIUS +
+                             " REAL;");
+            database.execSQL("UPDATE " + TABLE_SAMPLES +
+                             " SET " + COL_RADIUS + "=-1.0;");
+            database.setVersion(3);
+        }
         if (DEBUG) Log.d(TAG, "setupDatabase() version is " + database.getVersion());
     }
 
     public void addSample( String bssid, Location sampleLoc ) {
+        final long entryTime = System.currentTimeMillis();
         final String canonicalBSSID = bssid.replace(":","");
         apInfo curInfo;
 
@@ -199,6 +213,7 @@ public class samplerDatabase {
                            new String[]{COL_BSSID,
                                         COL_LATITUDE,
                                         COL_LONGITUDE,
+                                        COL_RADIUS,
                                         COL_LAT1,
                                         COL_LON1,
                                         COL_LAT2,
@@ -226,6 +241,7 @@ public class samplerDatabase {
         }
         database.setTransactionSuccessful();
         database.endTransaction();
+        if (DEBUG) Log.d(TAG,"addSample time: "+(System.currentTimeMillis()-entryTime)+"ms");
     }
 
     public void dropAP( String bssid ) {
@@ -272,7 +288,8 @@ public class samplerDatabase {
         Cursor c = database.query(TABLE_SAMPLES,
                                        new String[]{COL_BSSID,
                                                     COL_LATITUDE,
-                                                    COL_LONGITUDE
+                                                    COL_LONGITUDE,
+                                                    COL_RADIUS
                                                     },
                                        COL_BSSID+"=? AND " +
                                        COL_MOVED_GUARD + "=0",
@@ -286,6 +303,9 @@ public class samplerDatabase {
                 Location result = new Location("wifi");
                 result.setLatitude(c.getDouble(c.getColumnIndexOrThrow(COL_LATITUDE)));
                 result.setLongitude(c.getDouble(c.getColumnIndexOrThrow(COL_LONGITUDE)));
+                float radius = c.getFloat(c.getColumnIndexOrThrow(COL_RADIUS));
+                if (radius < constants.ASSUMED_ACCURACY)
+                    radius = constants.ASSUMED_ACCURACY;
                 result.setAccuracy(constants.ASSUMED_ACCURACY);
                 c.close();
                 return result;
@@ -300,27 +320,31 @@ public class samplerDatabase {
     // In memory representation of a APs table record
     private class apInfo {
         private String bssid;
-        private Location estimate;
-        private Location[] sample;
-        private float[] distance;
-        private int moved_guard;
-        private boolean changed = true;
+        private Location estimate;      // Guess on AP location
+        private float radius;           // Coverage range for AP
+        private Location[] sample;      // Our three saved samples
+        private float[] distance;       // Distance betweeen saved samples
+        private int moved_guard;        // Countdown for ignoring moved AP
+        private boolean changed = true; // If true we need to update this record in Db
 
         private apInfo() {};
 
         public apInfo(String bssid, Location s1) {
+//            if (DEBUG) Log.d(TAG, "apInfo(" + bssid + ", " + s1 + ")" );
             this.bssid = bssid.replace(":","");
             this.reset(s1);
             this.changed = true;
         }
 
         public apInfo(Cursor c) {
+//            if (DEBUG) Log.d(TAG, "apInfo( Cursor c )" );
             if (!c.isLast()) {
                 c.moveToNext();
                 bssid = c.getString(c.getColumnIndexOrThrow(COL_BSSID));
                 estimate = new Location("wifi");
                 estimate.setLatitude(c.getDouble(c.getColumnIndexOrThrow(COL_LATITUDE)));
                 estimate.setLongitude(c.getDouble(c.getColumnIndexOrThrow(COL_LONGITUDE)));
+                radius = c.getFloat(c.getColumnIndexOrThrow(COL_RADIUS));
                 sample = new Location[3];
                 sample[0] = new Location("wifi");
                 sample[0].setLatitude(c.getDouble(c.getColumnIndexOrThrow(COL_LAT1)));
@@ -336,12 +360,16 @@ public class samplerDatabase {
                 distance[1] = c.getFloat(c.getColumnIndexOrThrow(COL_D23));
                 distance[2] = c.getFloat(c.getColumnIndexOrThrow(COL_D31));
                 changed = false;
+            } else {
+                if (DEBUG) Log.d(TAG, "apInfo( Cursor c ) failed!" );
             }
         }
 
         public apInfo(apInfo x) {
+//            if (DEBUG) Log.d(TAG, "apInfo( apInfo x )" );
             this.bssid = x.bssid;
-            estimate = new Location("wifi");
+            estimate = new Location(x.estimate);
+            radius = x.radius;
             sample = new Location[3];
             distance = new float[3];
             for (int i=0; i<3; i++) {
@@ -354,6 +382,7 @@ public class samplerDatabase {
         public void reset(Location s1) {
             estimate = s1;
             sample = new Location[3];
+            radius = -1;
             distance = new float[3];
             for (int i=0; i<3; i++) {
                 sample[i] = s1;
@@ -389,6 +418,21 @@ public class samplerDatabase {
             return result;
         }
 
+        public float calcRadius() {
+            float result = constants.ASSUMED_ACCURACY;
+//            if (DEBUG) Log.d(TAG, "apInfo.calcRadius("+bssid+"): " + estimate.toString() );
+            for (int i=0; i<3; i++) {
+                float thisRadius = estimate.distanceTo(sample[i]);
+//                if (DEBUG) Log.d(TAG, "apInfo.calcRadius("+bssid+"): sample[" + i + "] = " + thisRadius );
+                if (thisRadius > result) {
+//                    if (DEBUG) Log.d(TAG, "apInfo.calcRadius("+bssid+"): sample[" + i + "] = " + sample[i].toString() );
+                    result = thisRadius;
+                }
+            }
+            if (DEBUG) Log.d(TAG, "apInfo.calcRadius(): " + result );
+            return result;
+        }
+
         public Location getSample(int index) {
             if ((index >=0) && (index < 3)) {
                 return sample[index];
@@ -410,48 +454,56 @@ public class samplerDatabase {
                 }
                 estimate.setLatitude(newLat/3.0);
                 estimate.setLongitude(newLon/3.0);
+                radius = -1.0f;
                 changed = true;
             }
         }
 
         public void insert() {
             if (DEBUG) Log.d(TAG, "apInfo.insert(): adding " + bssid + " to database" );
-
+            if (radius < constants.ASSUMED_ACCURACY)
+                radius = calcRadius();
             sqlSampleInsert.bindString(1, bssid);
             sqlSampleInsert.bindString(2, String.valueOf(estimate.getLatitude()));
             sqlSampleInsert.bindString(3, String.valueOf(estimate.getLongitude()));
-            sqlSampleInsert.bindString(4, String.valueOf(sample[0].getLatitude()));
-            sqlSampleInsert.bindString(5, String.valueOf(sample[0].getLongitude()));
-            sqlSampleInsert.bindString(6, String.valueOf(sample[1].getLatitude()));
-            sqlSampleInsert.bindString(7, String.valueOf(sample[1].getLongitude()));
-            sqlSampleInsert.bindString(8, String.valueOf(sample[2].getLatitude()));
-            sqlSampleInsert.bindString(9, String.valueOf(sample[2].getLongitude()));
-            sqlSampleInsert.bindString(10, String.valueOf(distance[0]));
-            sqlSampleInsert.bindString(11, String.valueOf(distance[1]));
-            sqlSampleInsert.bindString(12, String.valueOf(distance[2]));
-            sqlSampleInsert.bindString(13, String.valueOf(moved_guard));
+            sqlSampleInsert.bindString(4, String.valueOf(radius));
+            sqlSampleInsert.bindString(5, String.valueOf(sample[0].getLatitude()));
+            sqlSampleInsert.bindString(6, String.valueOf(sample[0].getLongitude()));
+            sqlSampleInsert.bindString(7, String.valueOf(sample[1].getLatitude()));
+            sqlSampleInsert.bindString(8, String.valueOf(sample[1].getLongitude()));
+            sqlSampleInsert.bindString(9, String.valueOf(sample[2].getLatitude()));
+            sqlSampleInsert.bindString(10, String.valueOf(sample[2].getLongitude()));
+            sqlSampleInsert.bindString(11, String.valueOf(distance[0]));
+            sqlSampleInsert.bindString(12, String.valueOf(distance[1]));
+            sqlSampleInsert.bindString(13, String.valueOf(distance[2]));
+            sqlSampleInsert.bindString(14, String.valueOf(moved_guard));
             long newID = sqlSampleInsert.executeInsert();
             sqlSampleInsert.clearBindings();
             changed = false;
         }
 
         public void update() {
+            if (radius < constants.ASSUMED_ACCURACY) {
+                radius = calcRadius();
+                changed = true;
+            }
             if (changed) {
                 if (DEBUG) Log.d(TAG, "apInfo.update(): updating " + bssid + " in database" );
 
                 sqlSampleUpdate.bindString(1, String.valueOf(estimate.getLatitude()));
                 sqlSampleUpdate.bindString(2, String.valueOf(estimate.getLongitude()));
-                sqlSampleUpdate.bindString(3, String.valueOf(sample[0].getLatitude()));
-                sqlSampleUpdate.bindString(4, String.valueOf(sample[0].getLongitude()));
-                sqlSampleUpdate.bindString(5, String.valueOf(sample[1].getLatitude()));
-                sqlSampleUpdate.bindString(6, String.valueOf(sample[1].getLongitude()));
-                sqlSampleUpdate.bindString(7, String.valueOf(sample[2].getLatitude()));
-                sqlSampleUpdate.bindString(8, String.valueOf(sample[2].getLongitude()));
-                sqlSampleUpdate.bindString(9, String.valueOf(distance[0]));
-                sqlSampleUpdate.bindString(10, String.valueOf(distance[1]));
-                sqlSampleUpdate.bindString(11, String.valueOf(distance[2]));
-                sqlSampleUpdate.bindString(12, String.valueOf(moved_guard));
-                sqlSampleUpdate.bindString(13, bssid);
+                sqlSampleUpdate.bindString(3, String.valueOf(radius));
+                sqlSampleUpdate.bindString(4, String.valueOf(sample[0].getLatitude()));
+                sqlSampleUpdate.bindString(5, String.valueOf(sample[0].getLongitude()));
+                sqlSampleUpdate.bindString(6, String.valueOf(sample[1].getLatitude()));
+                sqlSampleUpdate.bindString(7, String.valueOf(sample[1].getLongitude()));
+                sqlSampleUpdate.bindString(8, String.valueOf(sample[2].getLatitude()));
+                sqlSampleUpdate.bindString(9, String.valueOf(sample[2].getLongitude()));
+                sqlSampleUpdate.bindString(10, String.valueOf(distance[0]));
+                sqlSampleUpdate.bindString(11, String.valueOf(distance[1]));
+                sqlSampleUpdate.bindString(12, String.valueOf(distance[2]));
+                sqlSampleUpdate.bindString(13, String.valueOf(moved_guard));
+                sqlSampleUpdate.bindString(14, bssid);
                 long newID = sqlSampleUpdate.executeInsert();
                 sqlSampleUpdate.clearBindings();
             }

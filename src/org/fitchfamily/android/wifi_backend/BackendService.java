@@ -19,6 +19,7 @@ package org.fitchfamily.android.wifi_backend;
  */
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.microg.nlp.api.LocationBackendService;
@@ -32,6 +33,7 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.net.wifi.WifiManager;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -108,7 +110,7 @@ public class BackendService extends LocationBackendService {
 
                 //TODO fix LocationHelper:average to not calculate with null values
                 //TODO sort out wifis obviously in the wrong spot
-                Location avgLoc = LocationHelper.average("wifi", locations);
+                Location avgLoc = weightedAverage("wifi", locations);
 
                 if (avgLoc == null) {
                     Log.e(TAG, "Averaging locations did not work.");
@@ -133,4 +135,94 @@ public class BackendService extends LocationBackendService {
             collectorService = null;
         }
     };
+
+        public Location weightedAverage(String source, Collection<Location> locations) {
+        Location rslt = null;
+
+        if (locations == null || locations.size() == 0) {
+            return null;
+        }
+        int num = locations.size();
+        int totalWeight = 0;
+        double latitude = 0;
+        double longitude = 0;
+        float accuracy = 0;
+        int altitudes = 0;
+        double altitude = 0;
+        for (Location value : locations) {
+            if (value != null) {
+                // Create weight value based on accuracy. Higher accuracy
+                // (lower coverage radius/range) get higher weight.
+                float thisAcc = (float) value.getAccuracy();
+                if (thisAcc < 1f)
+                    thisAcc = 1f;
+                int wgt = (int) (100000f / thisAcc);
+                if (wgt < 1)
+                    wgt = 1;
+
+                latitude += (value.getLatitude() * wgt);
+                longitude += (value.getLongitude() * wgt);
+                accuracy += (value.getAccuracy() * wgt);
+                totalWeight += wgt;
+
+//                if (DEBUG) Log.d(TAG, "(lat="+ latitude + ", lng=" + longitude + ", acc=" + accuracy + ") / wgt=" + totalWeight );
+
+                if (value.hasAltitude()) {
+                    altitude += value.getAltitude();
+                    altitudes++;
+                }
+            }
+        }
+                latitude = latitude / totalWeight;
+        longitude = longitude / totalWeight;
+        accuracy = accuracy / totalWeight;
+        altitude = altitude / altitudes;
+
+        Bundle extras = new Bundle();
+        extras.putInt("AVERAGED_OF", num);
+//        if (DEBUG) Log.d(TAG, "Location est (lat="+ latitude + ", lng=" + longitude + ", acc=" + accuracy);
+        if (altitudes > 0) {
+            rslt = LocationHelper.create(source,
+                          latitude,
+                          longitude ,
+                          altitude,
+                          accuracy,
+                          extras);
+        } else {
+            rslt = LocationHelper.create(source,
+                          latitude,
+                          longitude,
+                          accuracy,
+                          extras);
+        }
+
+
+        // Now that we have an estimated Lat/Lon, make a wild guess as to
+        // our accuracy. If we have overlapping coverages and our lat/lon
+        // is within the overlap then we will look at how far our lat/lon is
+        // from the transmitter and do a delta based on the transmitter range:
+        //
+        // XMIT Range +---------------------------------------------------->|
+        //                             EstLoc +
+        //                                    |---------------------------->|
+        //                                          Estimated Accuracy
+
+        float accEst = accuracy;
+        for (Location value : locations) {
+            float rng = value.distanceTo(rslt);
+            float xmitRng = value.getAccuracy();
+//            if (DEBUG) Log.d(TAG, "xmitRng="+xmitRng+", rng="+rng);
+            if (rng < xmitRng) {
+                float thisEst = xmitRng - rng;
+                if (thisEst < accEst) {
+//                    if (DEBUG) Log.d(TAG, "New accEst="+thisEst);
+                    accEst = thisEst;
+                }
+            }
+        }
+        rslt.setAccuracy(accEst);
+        rslt.setTime(System.currentTimeMillis());
+        return rslt;
+    }
+
 }

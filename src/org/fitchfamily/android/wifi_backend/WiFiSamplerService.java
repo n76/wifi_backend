@@ -117,7 +117,7 @@ public class WiFiSamplerService extends Service {
         public void onLocationChanged(Location location)
         {
             if (location.getProvider().equals("gps") &&
-                (location.getAccuracy() < constants.MIN_ACCURACY)) {
+                (location.getAccuracy() <= constants.MIN_ACCURACY)) {
 
                 // since this callback is asynchronous, we just pass the
                 // message back to the handler thread, to avoid race conditions
@@ -216,10 +216,12 @@ public class WiFiSamplerService extends Service {
                 break;
 
                 case GOTSCAN:
+                    long entryTime = System.currentTimeMillis();
                     List<String> foundBssids = (List<String>) msg.obj;
                     for (String bssid : foundBssids) {
                         sDb.addSample( bssid, mLocation );
                     }
+                    if (DEBUG) Log.d(TAG,"Scan process time: "+(System.currentTimeMillis()-entryTime)+"ms");
                 break;
 
                 case DROP_AP:
