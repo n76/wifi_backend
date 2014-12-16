@@ -33,7 +33,7 @@ class constants {
     public static final String DB_NAME = "wifi.db";
 
     // How accurate should our GPS position be to bother recording WiFi signals?
-    public static final float MIN_ACCURACY = 15.0f; // meters
+    public static final float MIN_ACCURACY = 10.0f; // meters
 
     // Minimum time and distance for new GPS report
     public static final long MIN_TIME = 5000;       // ms
@@ -49,7 +49,7 @@ class constants {
     // by one for each good sample for the specific AP. Set this value
     // so big enough so that if we are near a parked WiFi AP equipped bus
     // it is likely to move before we count down to zero.
-    public static final float MOVED_THRESHOLD = 200.0f; // meters
+    public static final float MOVED_THRESHOLD = 250.0f; // meters
     public static int MOVED_GUARD_COUNT = 100;      // samples
 
     // For reporting our results to the network backend we will
