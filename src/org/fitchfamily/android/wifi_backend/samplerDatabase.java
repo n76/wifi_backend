@@ -243,28 +243,28 @@ public class samplerDatabase {
     // a larger perimeter by replacing one of our current samples with
     // the new one.
     private void updateAP(apInfo curInfo, Location sampleLoc ) {
-        apInfo best = new apInfo(curInfo);
-        float bestPerimeter = best.perimeter();
+        apInfo bestAP = new apInfo(curInfo);
+        float bestPerimeter = bestAP.perimeter();
 
         float diff = curInfo.distanceTo(sampleLoc);
         if (diff >= constants.MOVED_THRESHOLD) {
-            best.reset(sampleLoc);
-            best.setMoved();
-            if (DEBUG) Log.d(TAG, "Sample is " + diff + "from AP, assume AP " + curInfo.getBSSID() + " has moved.");
+            bestAP.reset(sampleLoc);
+            bestAP.setMoved();
+            if (DEBUG) Log.d(TAG, "Sample is " + diff + " from AP, assume AP " + bestAP.getBSSID() + " has moved.");
         } else {
-            best.decMoved();
+            bestAP.decMoved();
             for (int i=0; i<3; i++) {
                 apInfo guess = new apInfo(curInfo);
                 guess.setSample(i, sampleLoc);
                 float guessPerimeter = guess.perimeter();
                 if (guessPerimeter > bestPerimeter) {
-                    best = guess;
+                    bestAP = guess;
                     bestPerimeter = guessPerimeter;
                 }
             }
         }
-//        if (DEBUG) Log.d(TAG, "Sample: " + best.toString());
-        best.update();
+//        if (DEBUG) Log.d(TAG, "Sample: " + bestAP.toString());
+        bestAP.update();
     }
 
     public Location ApLocation( String bssid ) {
