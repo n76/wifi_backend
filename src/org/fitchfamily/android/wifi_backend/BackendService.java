@@ -41,8 +41,8 @@ import android.util.Log;
 import org.fitchfamily.android.wifi_backend.WifiReceiver.WifiReceivedCallback;
 
 public class BackendService extends LocationBackendService {
-    private static final String TAG = constants.TAG_PREFIX + "backend-service";
-    private final static boolean DEBUG = constants.DEBUG;
+    private static final String TAG = configuration.TAG_PREFIX + "backend-service";
+    private final static boolean DEBUG = configuration.DEBUG;
 
     private samplerDatabase sDb;
     private WifiReceiver wifiReceiver;
@@ -52,6 +52,11 @@ public class BackendService extends LocationBackendService {
     @Override
     protected void onOpen() {
         if (DEBUG) Log.d(TAG, "onOpen()");
+
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        configuration.fillFromPrefs(sharedPrefs);
+        sharedPrefs.registerOnSharedPreferenceChangeListener(configuration.listener);
+
         sDb = samplerDatabase.getInstance(this);
 
         if (wifiReceiver == null) {
@@ -69,6 +74,9 @@ public class BackendService extends LocationBackendService {
     protected void onClose() {
         if (DEBUG) Log.d(TAG, "onClose()");
         unregisterReceiver(wifiReceiver);
+
+        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPrefs.unregisterOnSharedPreferenceChangeListener(configuration.listener);
         wifiReceiver = null;
     }
 

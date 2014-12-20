@@ -53,8 +53,8 @@ import android.util.Log;
  *      radius      - Estimated coverage radius of AP
  */
 public class samplerDatabase {
-    private final static String TAG = constants.TAG_PREFIX + "samplerDatabase";
-    private final static boolean DEBUG = constants.DEBUG;
+    private final static String TAG = configuration.TAG_PREFIX + "samplerDatabase";
+    private final static boolean DEBUG = configuration.DEBUG;
 
     private static samplerDatabase mInstance;
 
@@ -83,17 +83,17 @@ public class samplerDatabase {
 
     private samplerDatabase(Context context) {
         if (DEBUG) Log.d(TAG, "samplerDatabase.samplerDatabase()");
-        File dbFile = new File(context.getFilesDir(), constants.DB_NAME);
+        File dbFile = new File(context.getFilesDir(), configuration.DB_NAME);
         context.getFilesDir().mkdirs();
-//         if (constants.DB_FILE.exists())
-//             constants.DB_FILE.delete();
-//         File jFile = new File(constants.DB_FILE.getAbsolutePath() + "-journal");
+//         if (configuration.DB_FILE.exists())
+//             configuration.DB_FILE.delete();
+//         File jFile = new File(configuration.DB_FILE.getAbsolutePath() + "-journal");
 //         if (jFile.exists())
 //             jFile.delete();
-//         jFile = new File(constants.DB_FILE.getAbsolutePath() + "-shm");
+//         jFile = new File(configuration.DB_FILE.getAbsolutePath() + "-shm");
 //         if (jFile.exists())
 //             jFile.delete();
-//         jFile = new File(constants.DB_FILE.getAbsolutePath() + "-wal");
+//         jFile = new File(configuration.DB_FILE.getAbsolutePath() + "-wal");
 //         if (jFile.exists())
 //             jFile.delete();
         setupDatabase(dbFile);
@@ -263,7 +263,7 @@ public class samplerDatabase {
         float bestPerimeter = bestAP.perimeter();
 
         float diff = curInfo.distanceTo(sampleLoc);
-        if (diff >= constants.MOVED_THRESHOLD) {
+        if (diff >= configuration.apMovedThreshold) {
             bestAP.reset(sampleLoc);
             bestAP.setMoved();
             if (DEBUG) Log.d(TAG, "Sample is " + diff + " from AP, assume AP " + bestAP.getBSSID() + " has moved.");
@@ -304,9 +304,9 @@ public class samplerDatabase {
                 result.setLatitude(c.getDouble(c.getColumnIndexOrThrow(COL_LATITUDE)));
                 result.setLongitude(c.getDouble(c.getColumnIndexOrThrow(COL_LONGITUDE)));
                 float radius = c.getFloat(c.getColumnIndexOrThrow(COL_RADIUS));
-                if (radius < constants.ASSUMED_ACCURACY)
-                    radius = constants.ASSUMED_ACCURACY;
-                result.setAccuracy(constants.ASSUMED_ACCURACY);
+                if (radius < configuration.apAssumedAccuracy)
+                    radius = configuration.apAssumedAccuracy;
+                result.setAccuracy(configuration.apAssumedAccuracy);
                 c.close();
                 return result;
             }
@@ -392,7 +392,7 @@ public class samplerDatabase {
         }
 
         public void setMoved() {
-            moved_guard = constants.MOVED_GUARD_COUNT;
+            moved_guard = configuration.apMovedGuardCount;
             changed = true;
         }
 
@@ -419,7 +419,7 @@ public class samplerDatabase {
         }
 
         public float calcRadius() {
-            float result = constants.ASSUMED_ACCURACY;
+            float result = configuration.apAssumedAccuracy;
 //            if (DEBUG) Log.d(TAG, "apInfo.calcRadius("+bssid+"): " + estimate.toString() );
             for (int i=0; i<3; i++) {
                 float thisRadius = estimate.distanceTo(sample[i]);
@@ -461,7 +461,7 @@ public class samplerDatabase {
 
         public void insert() {
             if (DEBUG) Log.d(TAG, "apInfo.insert(): adding " + bssid + " to database" );
-            if (radius < constants.ASSUMED_ACCURACY)
+            if (radius < configuration.apAssumedAccuracy)
                 radius = calcRadius();
             sqlSampleInsert.bindString(1, bssid);
             sqlSampleInsert.bindString(2, String.valueOf(estimate.getLatitude()));
@@ -483,7 +483,7 @@ public class samplerDatabase {
         }
 
         public void update() {
-            if (radius < constants.ASSUMED_ACCURACY) {
+            if (radius < configuration.apAssumedAccuracy) {
                 radius = calcRadius();
                 changed = true;
             }

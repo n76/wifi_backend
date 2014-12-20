@@ -47,8 +47,8 @@ import android.util.Log;
 
 
 public class WiFiSamplerService extends Service {
-    private final static String TAG = constants.TAG_PREFIX + "SamplerService";
-    private final static boolean DEBUG = constants.DEBUG;
+    private final static String TAG = configuration.TAG_PREFIX + "SamplerService";
+    private final static boolean DEBUG = configuration.DEBUG;
 
     private boolean scanStarted = false;
     private long servicestartedat;
@@ -95,8 +95,8 @@ public class WiFiSamplerService extends Service {
         sDb = samplerDatabase.getInstance(this);
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
-                                               constants.MIN_TIME,
-                                               constants.MIN_DISTANCE,
+                                               configuration.gpsMinTime,
+                                               configuration.gpsMinDistance,
                                                new GPSLocationListener());
         mWifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         mReceiverWifi = new WifiSampleReceiver();
@@ -116,8 +116,10 @@ public class WiFiSamplerService extends Service {
         @Override
         public void onLocationChanged(Location location)
         {
+            if (DEBUG) Log.d(TAG, "GPS min accuracy from settings: " + configuration.gpsMinAccuracy);
             if (location.getProvider().equals("gps") &&
-                (location.getAccuracy() <= constants.MIN_ACCURACY)) {
+                (location.getAccuracy() <= configuration.gpsMinAccuracy)) {
+                if (DEBUG) Log.d(TAG, "GPS accuracy: " + location.getAccuracy());
 
                 // since this callback is asynchronous, we just pass the
                 // message back to the handler thread, to avoid race conditions

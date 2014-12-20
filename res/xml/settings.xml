@@ -1,0 +1,54 @@
+<PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+            android:title="@string/gps_config">
+        <EditTextPreference
+                android:key="gps_accuracy_preference"
+                android:title="@string/gps_accuracy"
+                android:dialogTitle="@string/gps_accuracy_description"
+                android:defaultValue="@string/gps_accuracy_default"
+                android:hint="@string/gps_accuracy_hint"
+                android:inputType="number"
+                />
+        <EditTextPreference
+                android:key="gps_min_distance_preference"
+                android:title="@string/gps_min_distance"
+                android:defaultValue="@string/gps_min_distance_default"
+                android:inputType="numberDecimal"
+                android:digits="0123456789"
+                />
+        <EditTextPreference
+                android:key="gps_min_time_preference"
+                android:title="@string/gps_min_time"
+                android:defaultValue="@string/gps_min_time_default"
+                android:inputType="numberDecimal"
+                android:digits="0123456789"
+                />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:title="@string/ap_config">
+        <EditTextPreference
+                android:key="ap_min_range_preference"
+                android:title="@string/ap_min_range"
+                android:defaultValue="@string/ap_min_range_default"
+                android:inputType="numberDecimal"
+                android:digits="0123456789"
+                />
+        <EditTextPreference
+                android:key="ap_moved_range_preference"
+                android:title="@string/ap_moved_range"
+                android:defaultValue="@string/ap_moved_range_default"
+                android:inputType="numberDecimal"
+                android:digits="0123456789"
+                />
+        <EditTextPreference
+                android:key="ap_moved_guard_preference"
+                android:title="@string/ap_moved_guard"
+                android:defaultValue="@string/ap_moved_guard_default"
+                android:inputType="numberDecimal"
+                android:digits="0123456789"
+                />
+    </PreferenceCategory>
+</PreferenceScreen>

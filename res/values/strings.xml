@@ -2,4 +2,31 @@
 <resources>
     <string name="app_name">WiFi Backend</string>
     <string name="app_title">WiFi Backend</string>
+
+    <!-- GMS prefernces -->
+    <string name="gps_config">GSM Setup</string>
+
+    <string name="gps_accuracy">Required Accuracy (meters)</string>
+    <string name="gps_accuracy_description">GPS accuracy must be at least (meters).</string>
+    <string name="gps_accuracy_hint">Specify the maximum accuracy value of a location reported by the GPS that will trigger a WiFi scan.</string>
+    <string name="gps_accuracy_default">10</string>
+
+    <string name="gps_min_distance">Sample distance (meters)</string>
+    <string name="gps_min_distance_default">0</string>
+
+    <string name="gps_min_time">Sample time (seconds)</string>
+    <string name="gps_min_time_default">5</string>
+
+    <!-- AP preferences -->
+    <string name="ap_config">WiFi AP Assumptions</string>
+
+    <string name="ap_min_range">Minimum AP range meters)</string>
+    <string name="ap_min_range_default">50</string>
+
+    <string name="ap_moved_range">Moved threshold (meters)</string>
+    <string name="ap_moved_range_default">250</string>
+
+    <string name="ap_moved_guard">Move guard count</string>
+    <string name="ap_moved_guard_default">100</string>
+
 </resources>

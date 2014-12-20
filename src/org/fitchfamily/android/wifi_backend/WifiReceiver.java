@@ -33,8 +33,8 @@ public class WifiReceiver extends BroadcastReceiver {
 
     private boolean scanStarted = false;
     private WifiManager wifi;
-    private String TAG = constants.TAG_PREFIX+"WiFiReceiver";
-    private boolean DEBUG = true;
+    private String TAG = configuration.TAG_PREFIX+"WiFiReceiver";
+    private boolean DEBUG = configuration.DEBUG;
     private WifiReceivedCallback callback;
 
     public WifiReceiver(Context ctx, WifiReceivedCallback aCallback) {
