@@ -116,10 +116,8 @@ public class WiFiSamplerService extends Service {
         @Override
         public void onLocationChanged(Location location)
         {
-            if (DEBUG) Log.d(TAG, "GPS min accuracy from settings: " + configuration.gpsMinAccuracy);
             if (location.getProvider().equals("gps") &&
                 (location.getAccuracy() <= configuration.gpsMinAccuracy)) {
-                if (DEBUG) Log.d(TAG, "GPS accuracy: " + location.getAccuracy());
 
                 // since this callback is asynchronous, we just pass the
                 // message back to the handler thread, to avoid race conditions
