@@ -28,22 +28,31 @@ Setup on phone
 ==============
 In the NLP Controller app (interface for µg UnifiedNlp) select the "Personal WiFi Backend".
 
-Used libraries
+Settings
+--------
+-	Required Accuracy: Sets the maximum error that a GPS location report can have for the sampler to trigger the collection of WiFi Access Point (AP) data.
+-	Sample Distance: Sets the minimum distance change in a GPS location for the Android OS to give the sampler a new location.
+-	Sample Interval: Sets the minimum time between GPS location reports from the Android OS. Smaller values may improve AP range detection but will cause higher processing loads.
+-	Mimimun AP Range: Sets the minimum range (accuracy) value back end will report for an AP.
+-	Moved Threshold: If a new GPS location sample for an AP is too far from our old estimate we assume the AP has been moved. This value sets the distance that will trigger the moved AP logic.
+-	Move Guard: Once an AP has been detected as moved we block its location from being used until we are sure it is stable. Stable is defined as having received a number of GPS location updates for the AP that area plausible. This value sets the number of samples required to clear the "moved" indication.
+
+Libraries Used
 --------------
 -	[UnifiedNlpApi](https://github.com/microg/android_packages_apps_UnifiedNlp)
--	[libwlocate](http://sourceforge.net/projects/libwlocate/) (included)
 
 Other IP used
--------------
+=============
 Public domain icon from https://en.wikipedia.org/wiki/File:Wireless-icon.png
 
 Changes
--------
+=======
 
 0.1.0 - Initial version by n76
+0.6.0 - Configurable settings for data collection and use. Some improvements in performance
 
 License
--------
+=======
 
     Copyright (C) 2014 Tod Fitch
 
