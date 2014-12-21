@@ -45,8 +45,9 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
 
+import org.fitchfamily.android.wifi_backend.configuration.gpsSamplingCallback;
 
-public class WiFiSamplerService extends Service {
+public class WiFiSamplerService extends Service implements gpsSamplingCallback {
     private final static String TAG = configuration.TAG_PREFIX + "SamplerService";
     private final static boolean DEBUG = configuration.DEBUG;
 
@@ -74,6 +75,8 @@ public class WiFiSamplerService extends Service {
 
     private samplerDatabase sDb;
 
+    private GPSLocationListener mGpsLocationListener = new GPSLocationListener();
+
     public class MyBinder extends Binder {
         WiFiSamplerService getService() {
             return WiFiSamplerService.this;
@@ -97,7 +100,8 @@ public class WiFiSamplerService extends Service {
         locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
                                                configuration.gpsMinTime,
                                                configuration.gpsMinDistance,
-                                               new GPSLocationListener());
+                                               mGpsLocationListener);
+        configuration.setGpsSamplingCallback(this);
         mWifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
         mReceiverWifi = new WifiSampleReceiver();
         registerReceiver(mReceiverWifi, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
@@ -108,7 +112,18 @@ public class WiFiSamplerService extends Service {
     {
         super.onDestroy();
 
+        configuration.setGpsSamplingCallback(null);
+        locationManager.removeUpdates(mGpsLocationListener);
         if (DEBUG) Log.d(TAG, "service destroyed");
+    }
+
+    public void updateSamplingConf(long sampleTime, float sampleDistance) {
+        if (DEBUG) Log.d(TAG, "updateSamplingConf(" + sampleTime + ", " + sampleDistance + ")");
+        locationManager.removeUpdates(mGpsLocationListener);
+        locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
+                                               sampleTime,
+                                               sampleDistance,
+                                               mGpsLocationListener);
     }
 
     public class GPSLocationListener implements LocationListener
@@ -116,6 +131,7 @@ public class WiFiSamplerService extends Service {
         @Override
         public void onLocationChanged(Location location)
         {
+            if (DEBUG) Log.d(TAG, "onLocationChanged(" + location + ")");
             if (location.getProvider().equals("gps") &&
                 (location.getAccuracy() <= configuration.gpsMinAccuracy)) {
 

@@ -62,11 +62,16 @@ class configuration {
 
     private static final String TAG = TAG_PREFIX+"configuation";
     public static ConfigChangedListener listener = new ConfigChangedListener();
+    private static gpsSamplingCallback mCallback = null;
 
     public static void fillFromPrefs(SharedPreferences sharedPrefs) {
         gpsMinAccuracy = Float.valueOf(sharedPrefs.getString("gps_accuracy_preference", "15.0"));
-        gpsMinTime = Integer.valueOf(sharedPrefs.getString("gps_min_time_preference", "5")) * 1000;
-        gpsMinDistance = Float.valueOf(sharedPrefs.getString("gps_min_distance_preference", "5"));
+        final long newGpsMinTime = Integer.valueOf(sharedPrefs.getString("gps_min_time_preference", "5")) * 1000;
+        final float newGpsMinDistance = Float.valueOf(sharedPrefs.getString("gps_min_distance_preference", "5"));
+        final boolean samplingChanged = (newGpsMinTime != gpsMinTime) ||
+                                        (newGpsMinDistance != gpsMinDistance);
+        gpsMinTime = newGpsMinTime;
+        gpsMinDistance = newGpsMinDistance;
 
         apAssumedAccuracy = Float.valueOf(sharedPrefs.getString("ap_min_range_preference", "50.0"));
         apMovedThreshold = Float.valueOf(sharedPrefs.getString("ap_moved_range_preference", "50.0"));
@@ -78,6 +83,8 @@ class configuration {
         Log.d(TAG, "fillFromPrefs(): AP min range: " + apAssumedAccuracy);
         Log.d(TAG, "fillFromPrefs(): AP moved threshold: " + apMovedThreshold);
         Log.d(TAG, "fillFromPrefs(): AP moved guard count: " + apMovedGuardCount);
+        if (mCallback != null)
+            mCallback.updateSamplingConf(gpsMinTime, gpsMinDistance);
     }
 
     public static class ConfigChangedListener implements OnSharedPreferenceChangeListener {
@@ -87,6 +94,14 @@ class configuration {
                 String key) {
             fillFromPrefs(sharedPreferences);
         }
+    }
+
+    public interface gpsSamplingCallback {
+        void updateSamplingConf(long sampleTime, float sampleDistance);
+    }
+
+    public static void setGpsSamplingCallback(gpsSamplingCallback newCallback) {
+        mCallback = newCallback;
     }
 
 }
