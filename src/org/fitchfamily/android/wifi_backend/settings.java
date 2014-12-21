@@ -32,22 +32,22 @@ public class settings extends Activity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.settings);
 
-            setPrefSummary("gps_accuracy_preference");
-            setPrefSummary("gps_min_distance_preference");
-            setPrefSummary("gps_min_time_preference");
-            setPrefSummary("ap_min_range_preference");
-            setPrefSummary("ap_moved_range_preference");
-            setPrefSummary("ap_moved_guard_preference");
+            setPrefSummary("gps_accuracy_preference", getString(R.string.meters));
+            setPrefSummary("gps_min_distance_preference", getString(R.string.meters));
+            setPrefSummary("gps_min_time_preference", getString(R.string.seconds));
+            setPrefSummary("ap_min_range_preference", getString(R.string.meters));
+            setPrefSummary("ap_moved_range_preference", getString(R.string.meters));
+            setPrefSummary("ap_moved_guard_preference", getString(R.string.samples));
         }
 
-        private void setPrefSummary(String prefKey) {
+        private void setPrefSummary(String prefKey, String suffix) {
             EditTextPreference myPreference = (EditTextPreference) this.findPreference(prefKey);
             if (myPreference != null) {
                 if(myPreference.getText()==null) {      //Assure no null values
                     myPreference.setText("");
                 }
                 if (DEBUG) Log.d(TAG, "prefsFragment.onCreate(): " + prefKey + " is "+myPreference.getText());
-                myPreference.setSummary(myPreference.getText());
+                myPreference.setSummary(myPreference.getText() + " " + suffix);
                 myPreference.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
                     @Override
                     public boolean onPreferenceChange(Preference preference, Object newValue) {
