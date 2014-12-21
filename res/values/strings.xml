@@ -14,8 +14,8 @@
     <string name="gps_min_distance_description">Minimum distance between GPS location samples (meters).</string>
     <string name="gps_min_distance_default">0</string>
 
-    <string name="gps_min_time">Sample time</string>
-    <string name="gps_min_time_description">Minimum time between GPS location samples (seconds).</string>
+    <string name="gps_min_time">Sample interval</string>
+    <string name="gps_min_time_description">Time between GPS location samples (seconds).</string>
     <string name="gps_min_time_default">5</string>
 
     <!-- AP preferences -->
