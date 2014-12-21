@@ -419,8 +419,7 @@ public class samplerDatabase {
         }
 
         public float calcRadius() {
-            float result = configuration.apAssumedAccuracy;
-//            if (DEBUG) Log.d(TAG, "apInfo.calcRadius("+bssid+"): " + estimate.toString() );
+            float result = 0.0f;
             for (int i=0; i<3; i++) {
                 float thisRadius = estimate.distanceTo(sample[i]);
 //                if (DEBUG) Log.d(TAG, "apInfo.calcRadius("+bssid+"): sample[" + i + "] = " + thisRadius );
@@ -461,8 +460,7 @@ public class samplerDatabase {
 
         public void insert() {
             if (DEBUG) Log.d(TAG, "apInfo.insert(): adding " + bssid + " to database" );
-            if (radius < configuration.apAssumedAccuracy)
-                radius = calcRadius();
+            radius = calcRadius();
             sqlSampleInsert.bindString(1, bssid);
             sqlSampleInsert.bindString(2, String.valueOf(estimate.getLatitude()));
             sqlSampleInsert.bindString(3, String.valueOf(estimate.getLongitude()));
@@ -483,7 +481,7 @@ public class samplerDatabase {
         }
 
         public void update() {
-            if (radius < configuration.apAssumedAccuracy) {
+            if (radius < 0.0f) {
                 radius = calcRadius();
                 changed = true;
             }
