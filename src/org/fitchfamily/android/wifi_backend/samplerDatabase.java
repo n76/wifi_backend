@@ -26,6 +26,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.location.Location;
 import android.util.Log;
+import android.util.LruCache;
 
 /*
  * We estimate the AP location by keeping three samples that form a triangle.
@@ -80,6 +81,18 @@ public class samplerDatabase {
     private SQLiteStatement sqlAPdrop;
 
     private samplerDatabase() {}
+
+
+    /**
+     * DB negative query cache (not found in db).
+     */
+    private LruCache<String, Boolean> queryResultNegativeCache =
+            new LruCache<String, Boolean>(100);
+    /**
+     * DB positive query cache (found in the db).
+     */
+    private LruCache<String, Location> queryResultCache =
+            new LruCache<String, Location>(100);
 
     private samplerDatabase(Context context) {
         if (DEBUG) Log.d(TAG, "samplerDatabase.samplerDatabase()");
@@ -283,8 +296,28 @@ public class samplerDatabase {
         bestAP.update();
     }
 
-    public Location ApLocation( String bssid ) {
+    private synchronized void resetLocationCache() {
+        if (DEBUG) Log.d(TAG,"resetLocationCache");
+        queryResultCache = new LruCache<String, Location>(100);
+        queryResultNegativeCache = new LruCache<String, Boolean>(100);
+    }
+
+    public synchronized Location ApLocation( String bssid ) {
+        final long entryTime = System.currentTimeMillis();
         final String canonicalBSSID = bssid.replace(":","");
+
+        Boolean negative = queryResultNegativeCache.get(canonicalBSSID);
+        if (negative != null && negative.booleanValue()) {
+            if (DEBUG) Log.d(TAG,"ApLocation negative cache: "+(System.currentTimeMillis()-entryTime)+"ms");
+            return null;
+        }
+        Location cached = queryResultCache.get(canonicalBSSID);
+        if (cached != null) {
+            if (DEBUG) Log.d(TAG,"ApLocation positive cache: "+(System.currentTimeMillis()-entryTime)+"ms");
+            return cached;
+        }
+
+
         Cursor c = database.query(TABLE_SAMPLES,
                                        new String[]{COL_BSSID,
                                                     COL_LATITUDE,
@@ -306,13 +339,17 @@ public class samplerDatabase {
                 float radius = c.getFloat(c.getColumnIndexOrThrow(COL_RADIUS));
                 if (radius < configuration.apAssumedAccuracy)
                     radius = configuration.apAssumedAccuracy;
-                result.setAccuracy(configuration.apAssumedAccuracy);
+                result.setAccuracy(radius);
                 c.close();
+                if (DEBUG) Log.d(TAG, bssid + " at " + result.toString());
+                if (DEBUG) Log.d(TAG,"ApLocation time: "+(System.currentTimeMillis()-entryTime)+"ms");
+                queryResultCache.put(canonicalBSSID, result);
                 return result;
             }
             c.close();
         }
 //        if (DEBUG) Log.d(TAG, "AP not found in database: " + bssid );
+        queryResultNegativeCache.put(canonicalBSSID, true);
         return null;
     }
 
@@ -477,6 +514,7 @@ public class samplerDatabase {
             sqlSampleInsert.bindString(14, String.valueOf(moved_guard));
             long newID = sqlSampleInsert.executeInsert();
             sqlSampleInsert.clearBindings();
+            resetLocationCache();
             changed = false;
         }
 
@@ -504,6 +542,7 @@ public class samplerDatabase {
                 sqlSampleUpdate.bindString(14, bssid);
                 long newID = sqlSampleUpdate.executeInsert();
                 sqlSampleUpdate.clearBindings();
+                resetLocationCache();
             }
             changed = false;
         }
