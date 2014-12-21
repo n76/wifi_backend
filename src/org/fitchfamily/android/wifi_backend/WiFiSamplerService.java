@@ -164,14 +164,37 @@ public class WiFiSamplerService extends Service {
                 for (ScanResult config : configs) {
                     // some strange devices use a dot instead of :
                     final String canonicalBSSID = config.BSSID.toUpperCase(Locale.US).replace(".",":");
-                    // ignore APs that have _nomap suffix on SSID
-                    if (config.SSID.endsWith("_nomap")) {
+
+                    // ignore APs that are likely to be moving around.
+                    String SSIDlower = config.SSID.toLowerCase(Locale.US);
+                    boolean noMap = (SSIDlower.endsWith("_nomap") ||            // Google unsubscibe option
+                                     config.SSID.startsWith("Audi") ||          // some cars seem to have this AP on-board
+                                     SSIDlower.contains("iphone") ||            // mobile AP
+                                     SSIDlower.contains("ipad") ||              // mobile AP
+                                     SSIDlower.contains("android") ||           // mobile AP
+                                     SSIDlower.contains("motorola") ||          // mobile AP
+                                     SSIDlower.contains("deinbus.de") ||        // WLAN network on board of German bus
+                                     SSIDlower.contains("db ic bus") ||         // WLAN network on board of German bus
+                                     SSIDlower.contains("fernbus") ||           // WLAN network on board of German bus
+                                     SSIDlower.contains("flixbus") ||           // WLAN network on board of German bus
+                                     SSIDlower.contains("postbus") ||           // WLAN network on board of bus line
+                                     SSIDlower.contains("ecolines") ||          // WLAN network on board of German bus
+                                     SSIDlower.contains("eurolines_wifi") ||    // WLAN network on board of German bus
+                                     SSIDlower.contains("contiki-wifi") ||      // WLAN network on board of bus
+                                     SSIDlower.contains("muenchenlinie") ||     // WLAN network on board of bus
+                                     SSIDlower.contains("guest@ms ") ||         // WLAN network on Hurtigruten ships
+                                     SSIDlower.contains("admin@ms ") ||         // WLAN network on Hurtigruten ships
+                                     SSIDlower.contains("telekom_ice") ||       // WLAN network on DB trains
+                                     SSIDlower.contains("nsb_interakti"));
+
+                    if (noMap) {
                         if (DEBUG) Log.d(TAG, "Ignoring AP '" + config.SSID + "' BSSID: " + canonicalBSSID);
                         Message m = new Message();
                         m.what = DROP_AP;
                         m.obj = canonicalBSSID;
                         handler.sendMessage(m);
                     } else {
+                        if (DEBUG) Log.d(TAG, "Scan found: '" + config.SSID + "' BSSID: " + canonicalBSSID);
                         foundBssids.add(canonicalBSSID);
                     }
                 }
