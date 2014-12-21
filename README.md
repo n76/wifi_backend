@@ -35,7 +35,7 @@ Settings
 -	Sample Interval: Sets the minimum time between GPS location reports from the Android OS. Smaller values may improve AP range detection but will cause higher processing loads.
 -	Mimimun AP Range: Sets the minimum range (accuracy) value back end will report for an AP.
 -	Moved Threshold: If a new GPS location sample for an AP is too far from our old estimate we assume the AP has been moved. This value sets the distance that will trigger the moved AP logic.
--	Move Guard: Once an AP has been detected as moved we block its location from being used until we are sure it is stable. Stable is defined as having received a number of GPS location updates for the AP that area plausible. This value sets the number of samples required to clear the "moved" indication.
+-	Move Guard: Once an AP has been detected as moved we block its location from being used until we are sure it is stable. Stable is defined as having received a number of GPS location updates for the AP that are plausible. This value sets the number of samples required to clear the "moved" indication.
 
 Libraries Used
 --------------
@@ -48,8 +48,8 @@ Public domain icon from https://en.wikipedia.org/wiki/File:Wireless-icon.png
 Changes
 =======
 
-0.1.0 - Initial version by n76
-0.6.0 - Configurable settings for data collection and use. Some improvements in performance
+-	0.1.0 - Initial version by n76
+-	0.6.0 - Configurable settings for data collection and use. Some improvements in performance
 
 License
 =======
