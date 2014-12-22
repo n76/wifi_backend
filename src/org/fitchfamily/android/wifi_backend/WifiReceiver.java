@@ -87,7 +87,13 @@ public class WifiReceiver extends BroadcastReceiver {
 
     public void startScan() {
         setScanStarted(true);
-        if (!wifi.isWifiEnabled() && !wifi.isScanAlwaysAvailable()) {
+        boolean scanAlwaysAvailable = false;
+        try {
+            scanAlwaysAvailable = wifi.isScanAlwaysAvailable();
+        } catch (NoSuchMethodError e) {
+            scanAlwaysAvailable = false;
+        }
+        if (!wifi.isWifiEnabled() && !scanAlwaysAvailable) {
             Log.d(TAG, "Wifi is disabled and we can't scan either. Not doing anything.");
         }
         wifi.startScan();
