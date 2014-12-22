@@ -246,7 +246,13 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
                     mLocation = (Location) msg.obj;
 
                     // If WiFi scanning is possible, kick off a scan
-                    if (mWifi.isWifiEnabled() || mWifi.isScanAlwaysAvailable()) {
+                    boolean scanAlwaysAvailable = false;
+                    try {
+                        scanAlwaysAvailable = mWifi.isScanAlwaysAvailable();
+                    } catch (NoSuchMethodError e) {
+                        scanAlwaysAvailable = false;
+                    }
+                    if (mWifi.isWifiEnabled() || scanAlwaysAvailable) {
                         mWifi.startScan();
                         setScanStarted(true);
                     } else {
