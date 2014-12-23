@@ -34,11 +34,11 @@ public class WifiReceiver extends BroadcastReceiver {
     private boolean scanStarted = false;
     private WifiManager wifi;
     private String TAG = configuration.TAG_PREFIX+"WiFiReceiver";
-    private boolean DEBUG = configuration.DEBUG;
+    private final static int DEBUG = configuration.DEBUG;
     private WifiReceivedCallback callback;
 
     public WifiReceiver(Context ctx, WifiReceivedCallback aCallback) {
-//        if (DEBUG) Log.d(TAG, "WifiReceiver() constructor");
+        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "WifiReceiver() constructor");
         wifi = (WifiManager) ctx.getSystemService(Context.WIFI_SERVICE);
         callback = aCallback;
     }
@@ -49,7 +49,7 @@ public class WifiReceiver extends BroadcastReceiver {
         setScanStarted(false);
         List<ScanResult> configs = wifi.getScanResults();
 
-//        if (DEBUG) Log.d(TAG, "Got " + configs.size() + " wifi access points");
+        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "Got " + configs.size() + " wifi access points");
 
         if (configs.size() > 0) {
 
@@ -60,7 +60,7 @@ public class WifiReceiver extends BroadcastReceiver {
                 final String canonicalBSSID = config.BSSID.toUpperCase(Locale.US).replace(".",":");
                 // ignore APs that have _nomap suffix on SSID
                 if (config.SSID.endsWith("_nomap")) {
-                    if (DEBUG) Log.d(TAG, "Ignoring AP '" + config.SSID + "' BSSID: " + canonicalBSSID);
+                    if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "Ignoring AP '" + config.SSID + "' BSSID: " + canonicalBSSID);
                 } else {
                     foundBssids.add(canonicalBSSID);
                 }

@@ -30,7 +30,11 @@ class configuration {
 
     // Logging related values
     public static final String TAG_PREFIX = "wifi-backend-";
-    public static boolean DEBUG = false;
+    public static final int DEBUG_NONE = 0;
+    public static final int DEBUG_SPARSE = 1;
+    public static final int DEBUG_NORMAL = 2;
+    public static final int DEBUG_VERBOSE = 3;
+    public static final int DEBUG = DEBUG_SPARSE;
 
     // Location of database
     public static final String DB_NAME = "wifi.db";

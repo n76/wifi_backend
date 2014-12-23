@@ -49,7 +49,7 @@ import org.fitchfamily.android.wifi_backend.configuration.gpsSamplingCallback;
 
 public class WiFiSamplerService extends Service implements gpsSamplingCallback {
     private final static String TAG = configuration.TAG_PREFIX + "SamplerService";
-    private final static boolean DEBUG = configuration.DEBUG;
+    private final static int DEBUG = configuration.DEBUG;
 
     private boolean scanStarted = false;
     private long servicestartedat;
@@ -93,7 +93,7 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
 
         super.onCreate();
 
-        if (DEBUG) Log.d(TAG, "service started");
+        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "service started");
 
         sDb = samplerDatabase.getInstance(this);
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -114,11 +114,11 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
 
         configuration.setGpsSamplingCallback(null);
         locationManager.removeUpdates(mGpsLocationListener);
-        if (DEBUG) Log.d(TAG, "service destroyed");
+        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "service destroyed");
     }
 
     public void updateSamplingConf(long sampleTime, float sampleDistance) {
-        if (DEBUG) Log.d(TAG, "updateSamplingConf(" + sampleTime + ", " + sampleDistance + ")");
+        if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "updateSamplingConf(" + sampleTime + ", " + sampleDistance + ")");
         locationManager.removeUpdates(mGpsLocationListener);
         locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
                                                sampleTime,
@@ -131,7 +131,7 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
         @Override
         public void onLocationChanged(Location location)
         {
-            if (DEBUG) Log.d(TAG, "onLocationChanged(" + location + ")");
+            if (DEBUG >= configuration.DEBUG_NORMAL) Log.d(TAG, "onLocationChanged(" + location + ")");
             if (location.getProvider().equals("gps") &&
                 (location.getAccuracy() <= configuration.gpsMinAccuracy)) {
 
@@ -148,19 +148,19 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
         @Override
         public void onProviderDisabled(String arg0)
         {
-            if (DEBUG) Log.d(TAG, ":(");
+            if (DEBUG >= configuration.DEBUG_NORMAL) Log.d(TAG, ":(");
         }
 
         @Override
         public void onProviderEnabled(String arg0)
         {
-            if (DEBUG) Log.d(TAG, ":)");
+            if (DEBUG >= configuration.DEBUG_NORMAL) Log.d(TAG, ":)");
         }
 
         @Override
         public void onStatusChanged(String arg0, int arg1, Bundle arg2)
         {
-            if (DEBUG) Log.d(TAG, ":/");
+            if (DEBUG >= configuration.DEBUG_NORMAL) Log.d(TAG, ":/");
         }
     }
 
@@ -204,13 +204,13 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
                                      SSIDlower.contains("nsb_interakti"));
 
                     if (noMap) {
-                        if (DEBUG) Log.d(TAG, "Ignoring AP '" + config.SSID + "' BSSID: " + canonicalBSSID);
+                        if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "Ignoring AP '" + config.SSID + "' BSSID: " + canonicalBSSID);
                         Message m = new Message();
                         m.what = DROP_AP;
                         m.obj = canonicalBSSID;
                         handler.sendMessage(m);
                     } else {
-                        if (DEBUG) Log.d(TAG, "Scan found: '" + config.SSID + "' BSSID: " + canonicalBSSID);
+                        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "Scan found: '" + config.SSID + "' BSSID: " + canonicalBSSID);
                         foundBssids.add(canonicalBSSID);
                     }
                 }
@@ -256,7 +256,7 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
                         mWifi.startScan();
                         setScanStarted(true);
                     } else {
-                        if (DEBUG) Log.d(TAG, "Unable to start WiFi scan");
+                        if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "Unable to start WiFi scan");
                     }
                 break;
 
@@ -266,7 +266,7 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
                     for (String bssid : foundBssids) {
                         sDb.addSample( bssid, mLocation );
                     }
-                    if (DEBUG) Log.d(TAG,"Scan process time: "+(System.currentTimeMillis()-entryTime)+"ms");
+                    if (DEBUG >= configuration.DEBUG_NORMAL) Log.d(TAG,"Scan process time: "+(System.currentTimeMillis()-entryTime)+"ms");
                 break;
 
                 case DROP_AP:

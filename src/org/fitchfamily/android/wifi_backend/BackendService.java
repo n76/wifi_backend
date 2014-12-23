@@ -42,7 +42,7 @@ import org.fitchfamily.android.wifi_backend.WifiReceiver.WifiReceivedCallback;
 
 public class BackendService extends LocationBackendService {
     private static final String TAG = configuration.TAG_PREFIX + "backend-service";
-    private final static boolean DEBUG = configuration.DEBUG;
+    private final static int DEBUG = configuration.DEBUG;
 
     private samplerDatabase sDb;
     private WifiReceiver wifiReceiver;
@@ -51,7 +51,7 @@ public class BackendService extends LocationBackendService {
 
     @Override
     protected void onOpen() {
-        if (DEBUG) Log.d(TAG, "onOpen()");
+        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "onOpen()");
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         configuration.fillFromPrefs(sharedPrefs);
@@ -66,13 +66,13 @@ public class BackendService extends LocationBackendService {
 
         bindService(new Intent(this, WiFiSamplerService.class), mConnection, Context.BIND_AUTO_CREATE);
         if (collectorService == null) {
-            if (DEBUG) Log.d(TAG, "No collectorService?\n");
+            if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "No collectorService?\n");
         }
     }
 
     @Override
     protected void onClose() {
-        if (DEBUG) Log.d(TAG, "onClose()");
+        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "onClose()");
         unregisterReceiver(wifiReceiver);
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
@@ -82,13 +82,13 @@ public class BackendService extends LocationBackendService {
 
     @Override
     protected Location update() {
-//        if (DEBUG) Log.d(TAG, "update()");
+        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "update()");
 
         if (wifiReceiver != null) {
-//            if (DEBUG) Log.d(TAG, "update(): Starting scan for WiFi APs");
+            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "update(): Starting scan for WiFi APs");
             wifiReceiver.startScan();
         } else {
-            if (DEBUG) Log.d(TAG, "update(): no wifiReceiver???");
+            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "update(): no wifiReceiver???");
         }
         return null;
     }
@@ -134,12 +134,12 @@ public class BackendService extends LocationBackendService {
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className,
                 IBinder binder) {
-            if (DEBUG) Log.e(TAG, "mConnection.ServiceConnection()");
+            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.e(TAG, "mConnection.ServiceConnection()");
             WiFiSamplerService.MyBinder b = (WiFiSamplerService.MyBinder) binder;
             collectorService = b.getService();
         }
         public void onServiceDisconnected(ComponentName className) {
-            if (DEBUG) Log.e(TAG, "mConnection.onServiceDisconnected()");
+            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.e(TAG, "mConnection.onServiceDisconnected()");
             collectorService = null;
         }
     };
@@ -173,7 +173,7 @@ public class BackendService extends LocationBackendService {
                 accuracy += (value.getAccuracy() * wgt);
                 totalWeight += wgt;
 
-//                if (DEBUG) Log.d(TAG, "(lat="+ latitude + ", lng=" + longitude + ", acc=" + accuracy + ") / wgt=" + totalWeight );
+                if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "(lat="+ latitude + ", lng=" + longitude + ", acc=" + accuracy + ") / wgt=" + totalWeight );
 
                 if (value.hasAltitude()) {
                     altitude += value.getAltitude();
@@ -188,7 +188,7 @@ public class BackendService extends LocationBackendService {
 
         Bundle extras = new Bundle();
         extras.putInt("AVERAGED_OF", num);
-//        if (DEBUG) Log.d(TAG, "Location est (lat="+ latitude + ", lng=" + longitude + ", acc=" + accuracy);
+        if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "Location est (lat="+ latitude + ", lng=" + longitude + ", acc=" + accuracy);
         if (altitudes > 0) {
             rslt = LocationHelper.create(source,
                           latitude,
@@ -219,11 +219,11 @@ public class BackendService extends LocationBackendService {
         for (Location value : locations) {
             float rng = value.distanceTo(rslt);
             float xmitRng = value.getAccuracy();
-//            if (DEBUG) Log.d(TAG, "xmitRng="+xmitRng+", rng="+rng);
+            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "xmitRng="+xmitRng+", rng="+rng);
             if (rng < xmitRng) {
                 float thisEst = xmitRng - rng;
                 if (thisEst < accEst) {
-//                    if (DEBUG) Log.d(TAG, "New accEst="+thisEst);
+                    if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "New accEst="+thisEst);
                     accEst = thisEst;
                 }
             }
