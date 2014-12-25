@@ -112,6 +112,8 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
     {
         super.onDestroy();
 
+        unregisterReceiver(mReceiverWifi);
+        mReceiverWifi = null;
         configuration.setGpsSamplingCallback(null);
         locationManager.removeUpdates(mGpsLocationListener);
         if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "service destroyed");

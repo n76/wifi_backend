@@ -74,6 +74,7 @@ public class BackendService extends LocationBackendService {
     protected void onClose() {
         if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "onClose()");
         unregisterReceiver(wifiReceiver);
+        unbindService(mConnection);
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPrefs.unregisterOnSharedPreferenceChangeListener(configuration.listener);
