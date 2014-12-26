@@ -145,7 +145,7 @@ public class BackendService extends LocationBackendService {
         }
     };
 
-        public Location weightedAverage(String source, Collection<Location> locations) {
+    public Location weightedAverage(String source, Collection<Location> locations) {
         Location rslt = null;
 
         if (locations == null || locations.size() == 0) {
@@ -182,14 +182,14 @@ public class BackendService extends LocationBackendService {
                 }
             }
         }
-                latitude = latitude / totalWeight;
+        latitude = latitude / totalWeight;
         longitude = longitude / totalWeight;
         accuracy = accuracy / totalWeight;
         altitude = altitude / altitudes;
 
         Bundle extras = new Bundle();
         extras.putInt("AVERAGED_OF", num);
-        if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "Location est (lat="+ latitude + ", lng=" + longitude + ", acc=" + accuracy);
+        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "Location est (lat="+ latitude + ", lng=" + longitude + ", acc=" + accuracy);
         if (altitudes > 0) {
             rslt = LocationHelper.create(source,
                           latitude,
@@ -212,25 +212,30 @@ public class BackendService extends LocationBackendService {
         // from the transmitter and do a delta based on the transmitter range:
         //
         // XMIT Range +---------------------------------------------------->|
+        // rng        +---------------------->|
         //                             EstLoc +
         //                                    |---------------------------->|
         //                                          Estimated Accuracy
-
-        float accEst = accuracy;
+        //
+        // Average all of the estimated AP accuracy values thus determined
+        // for a new overall accuracy estimate..
+        float accAvg = 0.0f;
         for (Location value : locations) {
-            float rng = value.distanceTo(rslt);
-            float xmitRng = value.getAccuracy();
-            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "xmitRng="+xmitRng+", rng="+rng);
-            if (rng < xmitRng) {
-                float thisEst = xmitRng - rng;
-                if (thisEst < accEst) {
-                    if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "New accEst="+thisEst);
-                    accEst = thisEst;
-                }
+            final float rng = value.distanceTo(rslt);
+            final float xmitRng = value.getAccuracy();
+            float thisEst = xmitRng - rng;
+            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "xmitRng="+xmitRng+", rng="+rng+", accEst="+thisEst);
+            if (thisEst <= 0.0f) {
+                if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "location ("+thisEst+") is beyond AP range ("+xmitRng+")");
+                thisEst = accuracy;     // Beyond estimated AP range, use weighted avg for accuracy
             }
+            accAvg += thisEst;
         }
-        rslt.setAccuracy(accEst);
+        accAvg = accAvg/locations.size();
+        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "Revised accuracy estimate: "+accAvg);
+        rslt.setAccuracy(accAvg);
         rslt.setTime(System.currentTimeMillis());
+        if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, rslt.toString());
         return rslt;
     }
 
