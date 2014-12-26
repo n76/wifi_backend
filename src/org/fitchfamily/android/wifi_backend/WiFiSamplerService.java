@@ -75,6 +75,8 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
 
     private samplerDatabase sDb;
 
+    private long mSampleTime;
+    private float mSampleDistance;
     private GPSLocationListener mGpsLocationListener = new GPSLocationListener();
 
     public class MyBinder extends Binder {
@@ -97,9 +99,11 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
 
         sDb = samplerDatabase.getInstance(this);
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        mSampleTime = configuration.gpsMinTime;
+        mSampleDistance = configuration.gpsMinDistance;
         locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
-                                               configuration.gpsMinTime,
-                                               configuration.gpsMinDistance,
+                                               mSampleTime,
+                                               mSampleDistance,
                                                mGpsLocationListener);
         configuration.setGpsSamplingCallback(this);
         mWifi = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
@@ -121,11 +125,16 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
 
     public void updateSamplingConf(long sampleTime, float sampleDistance) {
         if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "updateSamplingConf(" + sampleTime + ", " + sampleDistance + ")");
-        locationManager.removeUpdates(mGpsLocationListener);
-        locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
-                                               sampleTime,
-                                               sampleDistance,
-                                               mGpsLocationListener);
+        if ((mSampleTime != sampleTime) || (mSampleDistance != sampleDistance)) {
+            mSampleTime = sampleTime;
+            mSampleDistance = sampleDistance;
+
+            locationManager.removeUpdates(mGpsLocationListener);
+            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
+                                                   mSampleTime,
+                                                   mSampleDistance,
+                                                   mGpsLocationListener);
+        }
     }
 
     public class GPSLocationListener implements LocationListener
