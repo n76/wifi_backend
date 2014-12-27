@@ -61,6 +61,7 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
     private final int GOTFIX = 1;
     private final int GOTSCAN = 2;
     private final int DROP_AP = 3;
+    private final int CHANGE_SAMPLING = 4;
 
     /* and for the upload thread: */
     private final int UPLOADLOCATION = 2;
@@ -124,17 +125,15 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
     }
 
     public void updateSamplingConf(long sampleTime, float sampleDistance) {
-        if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "updateSamplingConf(" + sampleTime + ", " + sampleDistance + ")");
-        if ((mSampleTime != sampleTime) || (mSampleDistance != sampleDistance)) {
-            mSampleTime = sampleTime;
-            mSampleDistance = sampleDistance;
-
-            locationManager.removeUpdates(mGpsLocationListener);
-            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
-                                                   mSampleTime,
-                                                   mSampleDistance,
-                                                   mGpsLocationListener);
-        }
+        if (DEBUG >= configuration.DEBUG_SPARSE)
+            Log.d(TAG, "updateSamplingConf(" + sampleTime + ", " + sampleDistance + ")");
+        // We are in a call back so we can't change the sampling configuration
+        // in the caller's thread context. Send a message to the main thread
+        // for it to deal with the issue.
+        Message m = new Message();
+        m.what = CHANGE_SAMPLING;
+        m.obj = null;
+        handler.sendMessage(m);
     }
 
     public class GPSLocationListener implements LocationListener
@@ -283,6 +282,23 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
                 case DROP_AP:
                     String bssid = (String) msg.obj;
                     sDb.dropAP(bssid);
+                break;
+
+                case CHANGE_SAMPLING:
+                    if ((mSampleTime != configuration.gpsMinTime) ||
+                        (mSampleDistance != configuration.gpsMinDistance)) {
+                        mSampleTime = configuration.gpsMinTime;
+                        mSampleDistance = configuration.gpsMinDistance;
+                        if (DEBUG >= configuration.DEBUG_SPARSE)
+                            Log.d(TAG,"Changing GPS sampling configuration: "+
+                                      mSampleTime+" ms, "+ mSampleDistance+" meters");
+
+                        locationManager.removeUpdates(mGpsLocationListener);
+                        locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
+                                                               mSampleTime,
+                                                               mSampleDistance,
+                                                               mGpsLocationListener);
+                    }
                 break;
 
                 default:
