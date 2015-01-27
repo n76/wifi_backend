@@ -20,7 +20,11 @@ package org.fitchfamily.android.wifi_backend;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.microg.nlp.api.LocationBackendService;
 import org.microg.nlp.api.LocationHelper;
@@ -119,7 +123,7 @@ public class BackendService extends LocationBackendService {
 
                 //TODO fix LocationHelper:average to not calculate with null values
                 //TODO sort out wifis obviously in the wrong spot
-                Location avgLoc = weightedAverage("wifi", locations);
+                Location avgLoc = weightedAverage("wifi", culledAPs(locations));
 
                 if (avgLoc == null) {
                     Log.e(TAG, "Averaging locations did not work.");
@@ -144,6 +148,74 @@ public class BackendService extends LocationBackendService {
             collectorService = null;
         }
     };
+
+    private static boolean locationCompatibleWithGroup(Location location,
+                                                       Set<Location> locGroup,
+                                                       double accuracy) {
+        for (Location other : locGroup) {
+            if ((location.distanceTo(other) - location.getAccuracy() - other.getAccuracy() -
+                accuracy) < 0) {
+            return true;
+            }
+        }
+        return false;
+    }
+
+    private static Set<Set<Location>> divideInGroups(Collection<Location> locations,
+                                                     double accuracy) {
+        Set<Set<Location>> bins = new HashSet<Set<Location>>();
+        for (Location location : locations) {
+            boolean used = false;
+            for (Set<Location> locGroup : bins) {
+                if (locationCompatibleWithGroup(location, locGroup, accuracy)) {
+                    locGroup.add(location);
+                    used = true;
+                }
+            }
+            if (!used) {
+                Set<Location> locGroup = new HashSet<Location>();
+                locGroup.add(location);
+                bins.add(locGroup);
+            }
+        }
+        return bins;
+    }
+
+    //
+    // The collector service attempts to detect and not report moved/moving APs.
+    // But it can't be perfect. This routine looks at all the APs and returns the
+    // largest subset (group) that are within a reasonable distance of one another.
+    //
+    // The hope is that a single moved/moving AP that is seen now but whose
+    // location was detected miles away can be excluded from the set of APs
+    // we use to determine where the phone is at this moment.
+    //
+    // We do this by creating collections of APs where all the APs in a group
+    // are within a plausible distance of one another. A single AP may end up
+    // in multiple groups. When done, we return the largest group.
+    public Set<Location> culledAPs(Collection<Location> locations) {
+        Set<Set<Location>> locationGroups = divideInGroups(locations,
+                                                           configuration.apMovedThreshold);
+        List<Set<Location>> clsList = new ArrayList<Set<Location>>(locationGroups);
+        Collections.sort(clsList, new Comparator<Set<Location>>() {
+            @Override
+            public int compare(Set<Location> lhs, Set<Location> rhs) {
+                return rhs.size() - lhs.size();
+            }
+        });
+
+        if (DEBUG >= configuration.DEBUG_VERBOSE) {
+            int i = 1;
+            for (Set<Location> set : clsList) {
+                Log.e(TAG, "culledAPs(): group[" + i + "] = "+set.size());
+                i++;
+            }
+        }
+        if (!clsList.isEmpty())
+            return clsList.get(0);
+        else
+            return null;
+    }
 
     public Location weightedAverage(String source, Collection<Location> locations) {
         Location rslt = null;
