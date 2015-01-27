@@ -152,13 +152,22 @@ public class BackendService extends LocationBackendService {
     private static boolean locationCompatibleWithGroup(Location location,
                                                        Set<Location> locGroup,
                                                        double accuracy) {
+        boolean result = true;
         for (Location other : locGroup) {
-            if ((location.distanceTo(other) - location.getAccuracy() - other.getAccuracy() -
-                accuracy) < 0) {
-            return true;
-            }
+            double testDistance = (location.distanceTo(other) -
+                                   location.getAccuracy() -
+                                   other.getAccuracy());
+            if (DEBUG >= configuration.DEBUG_VERBOSE)
+                Log.e(TAG, "locationCompatibleWithGroup():"+
+                           " To other=" + location.distanceTo(other) +
+                           " this.acc=" + location.getAccuracy() +
+                           " other.acc=" + other.getAccuracy() +
+                           " testDist=" + testDistance);
+            if (testDistance > accuracy)
+                result = false;
         }
-        return false;
+        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.e(TAG, "locationCompatibleWithGroup(): accuracy=" + accuracy + " result=" + result);
+        return result;
     }
 
     private static Set<Set<Location>> divideInGroups(Collection<Location> locations,
@@ -173,6 +182,7 @@ public class BackendService extends LocationBackendService {
                 }
             }
             if (!used) {
+                if (DEBUG >= configuration.DEBUG_VERBOSE) Log.e(TAG, "divideInGroups(): Creating new group");
                 Set<Location> locGroup = new HashSet<Location>();
                 locGroup.add(location);
                 bins.add(locGroup);
