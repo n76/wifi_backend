@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.Bundle;
 import android.util.Log;
 
 public class WifiReceiver extends BroadcastReceiver {
@@ -53,7 +54,7 @@ public class WifiReceiver extends BroadcastReceiver {
 
         if (configs.size() > 0) {
 
-            List<String> foundBssids = new ArrayList<String>(configs.size());
+            List<Bundle> foundBssids = new ArrayList<Bundle>(configs.size());
 
             for (ScanResult config : configs) {
                 // some strange devices use a dot instead of :
@@ -62,7 +63,10 @@ public class WifiReceiver extends BroadcastReceiver {
                 if (config.SSID.endsWith("_nomap")) {
                     if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "Ignoring AP '" + config.SSID + "' BSSID: " + canonicalBSSID);
                 } else {
-                    foundBssids.add(canonicalBSSID);
+                    Bundle extras = new Bundle();
+                    extras.putString(configuration.EXTRA_MAC_ADDRESS, canonicalBSSID);
+                    extras.putInt(configuration.EXTRA_SIGNAL_LEVEL, config.level);
+                    foundBssids.add(extras);
                 }
             }
 
@@ -81,7 +85,7 @@ public class WifiReceiver extends BroadcastReceiver {
 
     public interface WifiReceivedCallback {
 
-        void process(List<String> foundBssids);
+        void process(List<Bundle> foundBssids);
 
     }
 

@@ -63,6 +63,9 @@ class configuration {
     // guess about the minimum accuracy (coverage radius) for an AP
     public static float apAssumedAccuracy = 50.0f; // meters
 
+    // Identifiers for extra fields in Location records
+    public static final String EXTRA_MAC_ADDRESS = "MAC_ADDRESS";
+    public static final String EXTRA_SIGNAL_LEVEL = "SIGNAL_LEVEL";
 
     private static final String TAG = TAG_PREFIX+"configuation";
     public static ConfigChangedListener listener = new ConfigChangedListener();

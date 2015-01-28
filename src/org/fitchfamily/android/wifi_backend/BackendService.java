@@ -48,6 +48,8 @@ public class BackendService extends LocationBackendService {
     private static final String TAG = configuration.TAG_PREFIX + "backend-service";
     private final static int DEBUG = configuration.DEBUG;
 
+    private static final int MIN_SIGNAL_LEVEL = -200;
+
     private samplerDatabase sDb;
     private WifiReceiver wifiReceiver;
     private boolean networkAllowed;
@@ -101,29 +103,38 @@ public class BackendService extends LocationBackendService {
     private class WifiDBResolver implements WifiReceivedCallback {
 
         @Override
-        public void process(List<String> foundBssids) {
+        public void process(List<Bundle> foundBssids) {
 
             if (foundBssids == null || foundBssids.isEmpty()) {
                 return;
             }
             if (sDb != null) {
 
-                List<Location> locations = new ArrayList<Location>(foundBssids.size());
+                Set<Location> locations = new HashSet<Location>(foundBssids.size());
 
-                for (String bssid : foundBssids) {
-                    Location result = sDb.ApLocation(bssid);
+                for (Bundle extras : foundBssids) {
+                    Location result = sDb.ApLocation(extras.getString(configuration.EXTRA_MAC_ADDRESS));
                     if (result != null) {
+                        result.setExtras(extras);
                         locations.add(result);
                     }
                 }
 
                 if (locations.isEmpty()) {
+                    if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "WifiDBResolver.process(): No APs with known locations");
                     return;
                 }
 
-                //TODO fix LocationHelper:average to not calculate with null values
-                //TODO sort out wifis obviously in the wrong spot
-                Location avgLoc = weightedAverage("wifi", culledAPs(locations));
+                // Find largest group of AP locations. If we don't have at
+                // least two near each other then we don't have enough
+                // information to get a good location.
+                locations = culledAPs(locations);
+                if (locations.size() < 2) {
+                    if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "WifiDBResolver.process(): Insufficient number of WiFi hotspots to resolve location");
+                    return;
+                }
+
+                Location avgLoc = weightedAverage("wifi", locations);
 
                 if (avgLoc == null) {
                     Log.e(TAG, "Averaging locations did not work.");
@@ -139,12 +150,12 @@ public class BackendService extends LocationBackendService {
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className,
                 IBinder binder) {
-            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.e(TAG, "mConnection.ServiceConnection()");
+            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "mConnection.ServiceConnection()");
             WiFiSamplerService.MyBinder b = (WiFiSamplerService.MyBinder) binder;
             collectorService = b.getService();
         }
         public void onServiceDisconnected(ComponentName className) {
-            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.e(TAG, "mConnection.onServiceDisconnected()");
+            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "mConnection.onServiceDisconnected()");
             collectorService = null;
         }
     };
@@ -158,7 +169,7 @@ public class BackendService extends LocationBackendService {
                                    location.getAccuracy() -
                                    other.getAccuracy());
             if (DEBUG >= configuration.DEBUG_VERBOSE)
-                Log.e(TAG, "locationCompatibleWithGroup():"+
+                Log.d(TAG, "locationCompatibleWithGroup():"+
                            " To other=" + location.distanceTo(other) +
                            " this.acc=" + location.getAccuracy() +
                            " other.acc=" + other.getAccuracy() +
@@ -166,7 +177,7 @@ public class BackendService extends LocationBackendService {
             if (testDistance > accuracy)
                 result = false;
         }
-        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.e(TAG, "locationCompatibleWithGroup(): accuracy=" + accuracy + " result=" + result);
+        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "locationCompatibleWithGroup(): accuracy=" + accuracy + " result=" + result);
         return result;
     }
 
@@ -182,7 +193,7 @@ public class BackendService extends LocationBackendService {
                 }
             }
             if (!used) {
-                if (DEBUG >= configuration.DEBUG_VERBOSE) Log.e(TAG, "divideInGroups(): Creating new group");
+                if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "divideInGroups(): Creating new group");
                 Set<Location> locGroup = new HashSet<Location>();
                 locGroup.add(location);
                 bins.add(locGroup);
@@ -217,7 +228,7 @@ public class BackendService extends LocationBackendService {
         if (DEBUG >= configuration.DEBUG_VERBOSE) {
             int i = 1;
             for (Set<Location> set : clsList) {
-                Log.e(TAG, "culledAPs(): group[" + i + "] = "+set.size());
+                Log.d(TAG, "culledAPs(): group[" + i + "] = "+set.size());
                 i++;
             }
         }
@@ -227,6 +238,22 @@ public class BackendService extends LocationBackendService {
             return null;
     }
 
+    private int getSignalLevel(Location location) {
+        return Math.abs(location.getExtras().getInt(configuration.EXTRA_SIGNAL_LEVEL) -
+                MIN_SIGNAL_LEVEL);
+    }
+
+    // estimated range is based on the signal level and estimated coverage radius
+    // of the AP. Basically get a linear percentage (display type) version of the
+    // received signal strength and multiply that times the range. Could all be
+    // done in one expression but want to make it clear.
+    private double estRange(Location location) {
+        int dBm = location.getExtras().getInt(configuration.EXTRA_SIGNAL_LEVEL);
+        double sigPercent = WifiManager.calculateSignalLevel(dBm, 100)/100.0;
+        double apRange = Math.min(location.getAccuracy(), configuration.apAssumedAccuracy);
+        return sigPercent * apRange;
+    }
+
     public Location weightedAverage(String source, Collection<Location> locations) {
         Location rslt = null;
 
@@ -234,56 +261,59 @@ public class BackendService extends LocationBackendService {
             return null;
         }
         int num = locations.size();
-        int totalWeight = 0;
+        double totalWeight = 0;
         double latitude = 0;
         double longitude = 0;
-        float accuracy = 0;
-        int altitudes = 0;
+        double accuracy = 0;
+        double altitudeWeight = 0;
         double altitude = 0;
+
         for (Location value : locations) {
             if (value != null) {
-                // Create weight value based on accuracy. Higher accuracy
-                // (lower coverage radius/range) get higher weight.
-                float thisAcc = (float) value.getAccuracy();
-                if (thisAcc < 1f)
-                    thisAcc = 1f;
-                int wgt = (int) (100000f / thisAcc);
-                if (wgt < 1)
-                    wgt = 1;
+                String bssid = value.getExtras().getString(configuration.EXTRA_MAC_ADDRESS);
+
+                // We weight our average based on the estimated range to
+                // each AP with closer APs being given higher weighting.
+                double estRng = estRange(value);
+                double wgt = 1/estRng;
+                if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG,
+                                String.format("Using with weight=%f mac=%s signal=%d accuracy=%f " +
+                                "estRng=%f latitude=%f longitude=%f",
+                                wgt, bssid,
+                                value.getExtras().getInt(configuration.EXTRA_SIGNAL_LEVEL),
+                                value.getAccuracy(), estRng, value.getLatitude(),
+                                value.getLongitude()));
 
                 latitude += (value.getLatitude() * wgt);
                 longitude += (value.getLongitude() * wgt);
                 accuracy += (value.getAccuracy() * wgt);
-                totalWeight += wgt;
-
-                if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "(lat="+ latitude + ", lng=" + longitude + ", acc=" + accuracy + ") / wgt=" + totalWeight );
-
                 if (value.hasAltitude()) {
-                    altitude += value.getAltitude();
-                    altitudes++;
+                    altitude += value.getAltitude() * wgt;
+                    altitudeWeight += wgt;
                 }
+                totalWeight += wgt;
             }
         }
         latitude = latitude / totalWeight;
         longitude = longitude / totalWeight;
         accuracy = accuracy / totalWeight;
-        altitude = altitude / altitudes;
+        altitude = altitude / totalWeight;
 
         Bundle extras = new Bundle();
         extras.putInt("AVERAGED_OF", num);
         if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "Location est (lat="+ latitude + ", lng=" + longitude + ", acc=" + accuracy);
-        if (altitudes > 0) {
+        if (altitudeWeight > 0) {
             rslt = LocationHelper.create(source,
                           latitude,
                           longitude ,
                           altitude,
-                          accuracy,
+                          (float)accuracy,
                           extras);
         } else {
             rslt = LocationHelper.create(source,
                           latitude,
                           longitude,
-                          accuracy,
+                          (float)accuracy,
                           extras);
         }
 
@@ -301,6 +331,7 @@ public class BackendService extends LocationBackendService {
         //
         // Average all of the estimated AP accuracy values thus determined
         // for a new overall accuracy estimate..
+
         float accAvg = 0.0f;
         for (Location value : locations) {
             final float rng = value.distanceTo(rslt);
@@ -309,13 +340,14 @@ public class BackendService extends LocationBackendService {
             if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "xmitRng="+xmitRng+", rng="+rng+", accEst="+thisEst);
             if (thisEst <= 0.0f) {
                 if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "location ("+thisEst+") is beyond AP range ("+xmitRng+")");
-                thisEst = accuracy;     // Beyond estimated AP range, use weighted avg for accuracy
+                thisEst = rng;      // Beyond estimated AP range, use distance to AP for accuracy
             }
             accAvg += thisEst;
         }
         accAvg = accAvg/locations.size();
         if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "Revised accuracy estimate: "+accAvg);
         rslt.setAccuracy(accAvg);
+
         rslt.setTime(System.currentTimeMillis());
         if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, rslt.toString());
         return rslt;
