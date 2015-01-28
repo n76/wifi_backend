@@ -317,40 +317,55 @@ public class BackendService extends LocationBackendService {
                           extras);
         }
 
-
-        // Now that we have an estimated Lat/Lon, make a wild guess as to
-        // our accuracy. If we have overlapping coverages and our lat/lon
-        // is within the overlap then we will look at how far our lat/lon is
-        // from the transmitter and do a delta based on the transmitter range:
-        //
-        // XMIT Range +---------------------------------------------------->|
-        // rng        +---------------------->|
-        //                             EstLoc +
-        //                                    |---------------------------->|
-        //                                          Estimated Accuracy
-        //
-        // Average all of the estimated AP accuracy values thus determined
-        // for a new overall accuracy estimate..
-
-        float accAvg = 0.0f;
-        for (Location value : locations) {
-            final float rng = value.distanceTo(rslt);
-            final float xmitRng = value.getAccuracy();
-            float thisEst = xmitRng - rng;
-            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "xmitRng="+xmitRng+", rng="+rng+", accEst="+thisEst);
-            if (thisEst <= 0.0f) {
-                if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "location ("+thisEst+") is beyond AP range ("+xmitRng+")");
-                thisEst = rng;      // Beyond estimated AP range, use distance to AP for accuracy
-            }
-            accAvg += thisEst;
-        }
-        accAvg = accAvg/locations.size();
-        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "Revised accuracy estimate: "+accAvg);
-        rslt.setAccuracy(accAvg);
-
+        rslt.setAccuracy(guessAccuracy( rslt, locations));
         rslt.setTime(System.currentTimeMillis());
         if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, rslt.toString());
         return rslt;
     }
 
+    // The geometry of overlapping circles is hard to compute but overlapping
+    // boxes are easy. So we will see pretend each AP has a square coverage area
+    // and then find the smallest box covered by all the APs. That should bound
+    // our probable location.
+    //
+    // If our database is wrong about coverage radius values then we could end up
+    // with disjoint boxes. In that case we will bail out and simply return the
+    // weighted average accuracy measurement done when we computed the location.
+    public float guessAccuracy( Location rslt, Collection<Location> locations) {
+        double maxX = rslt.getAccuracy();
+        double minX = -maxX;
+        double maxY = maxX;
+        double minY = -maxY;
+        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG,
+                                                       String.format("guessAccuracy(): maxX=%f minX=%s maxY=%f minY=%f ",
+                                                       maxX, minX, maxY, minY));
+        for (Location value : locations) {
+            final double rng = rslt.distanceTo(value);
+            final double brg = rslt.bearingTo(value);
+            final double rad = Math.toRadians(brg);
+            final double dx = Math.cos(rad) * rng;
+            final double dy = Math.sin(rad) * rng;
+            final double r = value.getAccuracy();
+            if (r < rng) {
+                if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "guessAccuracy(): distance("+rng+") greater than coverage("+r+")");
+                return rslt.getAccuracy();
+            }
+
+            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG,
+                                                           String.format("guessAccuracy(): Bearing=%f Range=%s dx=%f dy=%f radius=%f",
+                                                           brg, rng, dx, dy, r));
+            maxX = Math.min(maxX, (dx+r));
+            minX = Math.max(minX, (dx-r));
+            maxY = Math.min(maxY, (dy+r));
+            minY = Math.max(minY, (dy-r));
+            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG,
+                                                           String.format("guessAccuracy(): maxX=%f minX=%s maxY=%f minY=%f ",
+                                                           maxX, minX, maxY, minY));
+        }
+        double guess = Math.max(Math.abs(maxX),Math.abs(minX));
+        guess = Math.max(guess,Math.abs(maxY));
+        guess = Math.max(guess,Math.abs(minY));
+        if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "revised accuracy from " + rslt.getAccuracy() + " to " + guess);
+        return (float)guess;
+    }
 }
