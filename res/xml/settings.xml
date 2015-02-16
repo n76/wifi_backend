@@ -55,4 +55,13 @@
                 android:digits="0123456789"
                 />
     </PreferenceCategory>
+
+    <EditTextPreference
+            android:key="db_size_preference"
+            android:title="@string/db_size_label"
+            android:dialogTitle="not used"
+            android:defaultValue=""
+            android:inputType="numberDecimal"
+            android:enabled="false"
+            />
 </PreferenceScreen>

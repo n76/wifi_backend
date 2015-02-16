@@ -79,6 +79,7 @@ public class samplerDatabase {
     private SQLiteStatement sqlSampleInsert;
     private SQLiteStatement sqlSampleUpdate;
     private SQLiteStatement sqlAPdrop;
+    private SQLiteStatement sqlAPcount;
 
     private samplerDatabase() {}
 
@@ -149,7 +150,6 @@ public class samplerDatabase {
         sqlAPdrop = database.compileStatement("DELETE FROM " +
                                                     TABLE_SAMPLES +
                                                     " WHERE " + COL_BSSID + "=?;");
-
     }
 
     public synchronized static samplerDatabase getInstance(Context context) {
@@ -212,6 +212,14 @@ public class samplerDatabase {
             database.setVersion(3);
         }
         if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "setupDatabase() version is " + database.getVersion());
+        publishSize();
+    }
+
+    private void publishSize() {
+        Cursor mCount= database.rawQuery("SELECT COUNT(*) FROM " + TABLE_SAMPLES + ";", null);
+        mCount.moveToFirst();
+        configuration.dbRecords = mCount.getLong(0);
+        mCount.close();
     }
 
     public void addSample( String bssid, Location sampleLoc ) {
@@ -254,6 +262,7 @@ public class samplerDatabase {
         }
         database.setTransactionSuccessful();
         database.endTransaction();
+        publishSize();
         if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG,"addSample time: "+(System.currentTimeMillis()-entryTime)+"ms");
     }
 
@@ -263,6 +272,7 @@ public class samplerDatabase {
         sqlAPdrop.bindString(1, canonicalBSSID);
         long newID = sqlAPdrop.executeInsert();
         sqlAPdrop.clearBindings();
+        publishSize();
     }
 
     // We attempt to estimate the position of the AP by making as

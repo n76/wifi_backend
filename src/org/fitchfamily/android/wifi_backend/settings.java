@@ -38,6 +38,7 @@ public class settings extends Activity {
             setPrefSummary("ap_min_range_preference", getString(R.string.meters));
             setPrefSummary("ap_moved_range_preference", getString(R.string.meters));
             setPrefSummary("ap_moved_guard_preference", getString(R.string.samples));
+            setPrefSummary("db_size_preference", String.valueOf(configuration.dbRecords) + " " + getString(R.string.records));
         }
 
         private void setPrefSummary(String prefKey, String suffix) {

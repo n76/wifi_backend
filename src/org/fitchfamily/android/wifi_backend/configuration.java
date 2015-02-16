@@ -63,6 +63,10 @@ class configuration {
     // guess about the minimum accuracy (coverage radius) for an AP
     public static float apAssumedAccuracy = 50.0f; // meters
 
+    // Not really a config item, but simply current status about database
+    // so we can show it to the user in the settings
+    public static long dbRecords = 987654321;
+
     // Identifiers for extra fields in Location records
     public static final String EXTRA_MAC_ADDRESS = "MAC_ADDRESS";
     public static final String EXTRA_SIGNAL_LEVEL = "SIGNAL_LEVEL";

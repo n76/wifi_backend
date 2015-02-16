@@ -33,8 +33,11 @@
     <string name="ap_moved_guard_description">Samples at new location before a moved AP is trusted.</string>
     <string name="ap_moved_guard_default">50</string>
 
+    <string name="db_size_label">Number of known APs</string>
+
     <!-- Generic suffix strings -->
     <string name="meters">meters</string>
     <string name="seconds">seconds</string>
     <string name="samples">samples</string>
+    <string name="records">APs</string>
 </resources>
