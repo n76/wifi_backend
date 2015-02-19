@@ -37,6 +37,10 @@ Settings
 -	Moved Threshold: If a new GPS location sample for an AP is too far from our old estimate we assume the AP has been moved. This value sets the distance that will trigger the moved AP logic.
 -	Move Guard: Once an AP has been detected as moved we block its location from being used until we are sure it is stable. Stable is defined as having received a number of GPS location updates for the AP that are plausible. This value sets the number of samples required to clear the "moved" indication.
 
+Collecting WiFi AP Data
+-----------------------
+To conserve power the collection process does not actually turn on the GPS. If some other app turns on the app, for example a map or navigation app, then the backend will monitor the location and collect WiFi data.
+
 Libraries Used
 --------------
 -	[UnifiedNlpApi](https://github.com/microg/android_packages_apps_UnifiedNlp)
