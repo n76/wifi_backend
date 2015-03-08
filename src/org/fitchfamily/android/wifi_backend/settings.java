@@ -19,7 +19,6 @@ import android.preference.Preference.OnPreferenceChangeListener;
 
 public class settings extends Activity {
     protected String TAG = configuration.TAG_PREFIX+"settings";
-    private final static int DEBUG = configuration.DEBUG;
 
     class prefsFragment extends PreferenceFragment {
 
@@ -47,7 +46,7 @@ public class settings extends Activity {
                 if(myPreference.getText()==null) {      //Assure no null values
                     myPreference.setText("");
                 }
-                if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "setPrefSummary(): " + prefKey + " is "+myPreference.getText());
+                if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "setPrefSummary(): " + prefKey + " is "+myPreference.getText());
                 myPreference.setSummary(myPreference.getText() + " " + suffix);
                 myPreference.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
                     @Override
@@ -57,7 +56,7 @@ public class settings extends Activity {
                     }
                 });
             } else {
-                if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "setPrefSummary(): " + prefKey + " is null");
+                if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "setPrefSummary(): " + prefKey + " is null");
             }
         }
 

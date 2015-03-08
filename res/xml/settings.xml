@@ -64,4 +64,13 @@
             android:inputType="numberDecimal"
             android:enabled="false"
             />
+
+    <EditTextPreference
+            android:key="debug_preference"
+            android:title="@string/dbg_level"
+            android:dialogTitle="@string/dbg_level_description"
+            android:defaultValue="@string/dbg_level_default"
+            android:inputType="numberDecimal"
+            android:digits="0123456789"
+            />
 </PreferenceScreen>

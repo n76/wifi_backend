@@ -55,7 +55,6 @@ import android.util.LruCache;
  */
 public class samplerDatabase {
     private final static String TAG = configuration.TAG_PREFIX + "samplerDatabase";
-    private final static int DEBUG = configuration.DEBUG;
 
     private static samplerDatabase mInstance;
 
@@ -96,7 +95,7 @@ public class samplerDatabase {
             new LruCache<String, Location>(100);
 
     private samplerDatabase(Context context) {
-        if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "samplerDatabase.samplerDatabase()");
+        if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "samplerDatabase.samplerDatabase()");
         File dbFile = new File(context.getFilesDir(), configuration.DB_NAME);
         context.getFilesDir().mkdirs();
 //         if (configuration.DB_FILE.exists())
@@ -194,7 +193,7 @@ public class samplerDatabase {
         // First release of database does not have COL_MOVED_GUARD so see
         // if we need to update
         Integer curVer = database.getVersion();
-        if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "setupDatabase() version was " + curVer);
+        if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "setupDatabase() version was " + curVer);
         if (curVer < 2) { // upgrade to 2
             database.execSQL("ALTER TABLE " + TABLE_SAMPLES +
                              " ADD COLUMN " + COL_MOVED_GUARD +
@@ -211,7 +210,7 @@ public class samplerDatabase {
                              " SET " + COL_RADIUS + "=-1.0;");
             database.setVersion(3);
         }
-        if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "setupDatabase() version is " + database.getVersion());
+        if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "setupDatabase() version is " + database.getVersion());
         publishSize();
     }
 
@@ -256,19 +255,19 @@ public class samplerDatabase {
             } else if (cursor.getCount() == 1) {
                 updateAP(new apInfo(cursor), sampleLoc );
             } else {
-                if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "Unexpected number of samples (" + cursor.getCount() + ") in db" );
+                if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "Unexpected number of samples (" + cursor.getCount() + ") in db" );
             }
             cursor.close();
         }
         database.setTransactionSuccessful();
         database.endTransaction();
         publishSize();
-        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG,"addSample time: "+(System.currentTimeMillis()-entryTime)+"ms");
+        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG,"addSample time: "+(System.currentTimeMillis()-entryTime)+"ms");
     }
 
     public void dropAP( String bssid ) {
         final String canonicalBSSID = bssid.replace(":","");
-        if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "Dropping " + canonicalBSSID + " from db" );
+        if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "Dropping " + canonicalBSSID + " from db" );
         sqlAPdrop.bindString(1, canonicalBSSID);
         long newID = sqlAPdrop.executeInsert();
         sqlAPdrop.clearBindings();
@@ -289,7 +288,7 @@ public class samplerDatabase {
         if (diff >= configuration.apMovedThreshold) {
             bestAP.reset(sampleLoc);
             bestAP.setMoved();
-            if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "Sample is " + diff + " from AP, assume AP " + bestAP.getBSSID() + " has moved.");
+            if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "Sample is " + diff + " from AP, assume AP " + bestAP.getBSSID() + " has moved.");
         } else {
             bestAP.decMoved();
             for (int i=0; i<3; i++) {
@@ -302,12 +301,12 @@ public class samplerDatabase {
                 }
             }
         }
-        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "Sample: " + bestAP.toString());
+        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "Sample: " + bestAP.toString());
         bestAP.update();
     }
 
     private synchronized void resetLocationCache() {
-        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG,"resetLocationCache");
+        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG,"resetLocationCache");
         queryResultCache = new LruCache<String, Location>(100);
         queryResultNegativeCache = new LruCache<String, Boolean>(100);
     }
@@ -318,12 +317,12 @@ public class samplerDatabase {
 
         Boolean negative = queryResultNegativeCache.get(canonicalBSSID);
         if (negative != null && negative.booleanValue()) {
-            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG,"ApLocation negative cache: "+(System.currentTimeMillis()-entryTime)+"ms");
+            if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG,"ApLocation negative cache: "+(System.currentTimeMillis()-entryTime)+"ms");
             return null;
         }
         Location cached = queryResultCache.get(canonicalBSSID);
         if (cached != null) {
-            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG,"ApLocation positive cache: "+(System.currentTimeMillis()-entryTime)+"ms");
+            if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG,"ApLocation positive cache: "+(System.currentTimeMillis()-entryTime)+"ms");
             return cached;
         }
 
@@ -351,14 +350,14 @@ public class samplerDatabase {
                     radius = configuration.apAssumedAccuracy;
                 result.setAccuracy(radius);
                 c.close();
-                if (DEBUG >= configuration.DEBUG_NORMAL) Log.d(TAG, bssid + " at " + result.toString());
-                if (DEBUG >= configuration.DEBUG_NORMAL) Log.d(TAG,"ApLocation time: "+(System.currentTimeMillis()-entryTime)+"ms");
+                if (configuration.debug >= configuration.DEBUG_NORMAL) Log.i(TAG, bssid + " at " + result.toString());
+                if (configuration.debug >= configuration.DEBUG_NORMAL) Log.i(TAG,"ApLocation time: "+(System.currentTimeMillis()-entryTime)+"ms");
                 queryResultCache.put(canonicalBSSID, result);
                 return result;
             }
             c.close();
         }
-        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "AP not found in database: " + bssid );
+        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "AP not found in database: " + bssid );
         queryResultNegativeCache.put(canonicalBSSID, true);
         return null;
     }
@@ -377,14 +376,14 @@ public class samplerDatabase {
         private apInfo() {};
 
         public apInfo(String bssid, Location s1) {
-            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "apInfo(" + bssid + ", " + s1 + ")" );
+            if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "apInfo(" + bssid + ", " + s1 + ")" );
             this.bssid = bssid.replace(":","");
             this.reset(s1);
             this.changed = true;
         }
 
         public apInfo(Cursor c) {
-            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "apInfo( Cursor c )" );
+            if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "apInfo( Cursor c )" );
             if (!c.isLast()) {
                 c.moveToNext();
                 bssid = c.getString(c.getColumnIndexOrThrow(COL_BSSID));
@@ -408,12 +407,12 @@ public class samplerDatabase {
                 distance[2] = c.getFloat(c.getColumnIndexOrThrow(COL_D31));
                 changed = false;
             } else {
-                if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "apInfo( Cursor c ) failed!" );
+                if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "apInfo( Cursor c ) failed!" );
             }
         }
 
         public apInfo(apInfo x) {
-            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "apInfo( apInfo x )" );
+            if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "apInfo( apInfo x )" );
             this.bssid = x.bssid;
             estimate = new Location(x.estimate);
             radius = x.radius;
@@ -469,13 +468,13 @@ public class samplerDatabase {
             float result = 0.0f;
             for (int i=0; i<3; i++) {
                 float thisRadius = estimate.distanceTo(sample[i]);
-                if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "apInfo.calcRadius("+bssid+"): sample[" + i + "] = " + thisRadius );
+                if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "apInfo.calcRadius("+bssid+"): sample[" + i + "] = " + thisRadius );
                 if (thisRadius > result) {
-                    if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "apInfo.calcRadius("+bssid+"): sample[" + i + "] = " + sample[i].toString() );
+                    if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "apInfo.calcRadius("+bssid+"): sample[" + i + "] = " + sample[i].toString() );
                     result = thisRadius;
                 }
             }
-            if (DEBUG >= configuration.DEBUG_NORMAL) Log.d(TAG, "apInfo.calcRadius(): " + result );
+            if (configuration.debug >= configuration.DEBUG_NORMAL) Log.i(TAG, "apInfo.calcRadius(): " + result );
             return result;
         }
 
@@ -506,7 +505,7 @@ public class samplerDatabase {
         }
 
         public void insert() {
-            if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "apInfo.insert(): adding " + bssid + " to database" );
+            if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "apInfo.insert(): adding " + bssid + " to database" );
             radius = calcRadius();
             sqlSampleInsert.bindString(1, bssid);
             sqlSampleInsert.bindString(2, String.valueOf(estimate.getLatitude()));
@@ -534,7 +533,7 @@ public class samplerDatabase {
                 changed = true;
             }
             if (changed) {
-                if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "apInfo.update(): updating " + bssid + " in database" );
+                if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "apInfo.update(): updating " + bssid + " in database" );
 
                 sqlSampleUpdate.bindString(1, String.valueOf(estimate.getLatitude()));
                 sqlSampleUpdate.bindString(2, String.valueOf(estimate.getLongitude()));

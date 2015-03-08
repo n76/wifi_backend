@@ -34,7 +34,7 @@ class configuration {
     public static final int DEBUG_SPARSE = 1;
     public static final int DEBUG_NORMAL = 2;
     public static final int DEBUG_VERBOSE = 3;
-    public static final int DEBUG = DEBUG_NONE;
+    public static int debug = DEBUG_NONE;
 
     // Location of database
     public static final String DB_NAME = "wifi.db";
@@ -88,12 +88,15 @@ class configuration {
         apMovedThreshold = Float.valueOf(sharedPrefs.getString("ap_moved_range_preference", "50.0"));
         apMovedGuardCount = Integer.valueOf(sharedPrefs.getString("ap_moved_guard_preference", "100"));
 
-        Log.d(TAG, "fillFromPrefs(): Min GPS accuracy: " + gpsMinAccuracy);
-        Log.d(TAG, "fillFromPrefs(): Min GPS time: " + gpsMinTime);
-        Log.d(TAG, "fillFromPrefs(): Min GPS distance: " + gpsMinDistance);
-        Log.d(TAG, "fillFromPrefs(): AP min range: " + apAssumedAccuracy);
-        Log.d(TAG, "fillFromPrefs(): AP moved threshold: " + apMovedThreshold);
-        Log.d(TAG, "fillFromPrefs(): AP moved guard count: " + apMovedGuardCount);
+        debug = Integer.valueOf(sharedPrefs.getString("debug_preference", "0.0"));
+
+        Log.i(TAG, "fillFromPrefs(): Min GPS accuracy: " + gpsMinAccuracy);
+        Log.i(TAG, "fillFromPrefs(): Min GPS time: " + gpsMinTime);
+        Log.i(TAG, "fillFromPrefs(): Min GPS distance: " + gpsMinDistance);
+        Log.i(TAG, "fillFromPrefs(): AP min range: " + apAssumedAccuracy);
+        Log.i(TAG, "fillFromPrefs(): AP moved threshold: " + apMovedThreshold);
+        Log.i(TAG, "fillFromPrefs(): AP moved guard count: " + apMovedGuardCount);
+        Log.i(TAG, "fillFromPrefs(): Debug log level: " + debug);
         if (mCallback != null)
             mCallback.updateSamplingConf(gpsMinTime, gpsMinDistance);
     }

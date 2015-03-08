@@ -46,7 +46,6 @@ import org.fitchfamily.android.wifi_backend.WifiReceiver.WifiReceivedCallback;
 
 public class BackendService extends LocationBackendService {
     private static final String TAG = configuration.TAG_PREFIX + "backend-service";
-    private final static int DEBUG = configuration.DEBUG;
 
     private static final int MIN_SIGNAL_LEVEL = -200;
 
@@ -57,7 +56,7 @@ public class BackendService extends LocationBackendService {
 
     @Override
     protected void onOpen() {
-        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "onOpen()");
+        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "onOpen()");
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
         configuration.fillFromPrefs(sharedPrefs);
@@ -72,13 +71,13 @@ public class BackendService extends LocationBackendService {
 
         bindService(new Intent(this, WiFiSamplerService.class), mConnection, Context.BIND_AUTO_CREATE);
         if (collectorService == null) {
-            if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "No collectorService?\n");
+            if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "No collectorService?\n");
         }
     }
 
     @Override
     protected void onClose() {
-        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "onClose()");
+        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "onClose()");
         unregisterReceiver(wifiReceiver);
         unbindService(mConnection);
 
@@ -89,13 +88,13 @@ public class BackendService extends LocationBackendService {
 
     @Override
     protected Location update() {
-        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "update()");
+        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "update()");
 
         if (wifiReceiver != null) {
-            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "update(): Starting scan for WiFi APs");
+            if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "update(): Starting scan for WiFi APs");
             wifiReceiver.startScan();
         } else {
-            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "update(): no wifiReceiver???");
+            if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "update(): no wifiReceiver???");
         }
         return null;
     }
@@ -121,7 +120,7 @@ public class BackendService extends LocationBackendService {
                 }
 
                 if (locations.isEmpty()) {
-                    if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "WifiDBResolver.process(): No APs with known locations");
+                    if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "WifiDBResolver.process(): No APs with known locations");
                     return;
                 }
 
@@ -130,7 +129,7 @@ public class BackendService extends LocationBackendService {
                 // information to get a good location.
                 locations = culledAPs(locations);
                 if (locations.size() < 2) {
-                    if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "WifiDBResolver.process(): Insufficient number of WiFi hotspots to resolve location");
+                    if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "WifiDBResolver.process(): Insufficient number of WiFi hotspots to resolve location");
                     return;
                 }
 
@@ -150,12 +149,12 @@ public class BackendService extends LocationBackendService {
     private ServiceConnection mConnection = new ServiceConnection() {
         public void onServiceConnected(ComponentName className,
                 IBinder binder) {
-            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "mConnection.ServiceConnection()");
+            if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "mConnection.onServiceConnected()");
             WiFiSamplerService.MyBinder b = (WiFiSamplerService.MyBinder) binder;
             collectorService = b.getService();
         }
         public void onServiceDisconnected(ComponentName className) {
-            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "mConnection.onServiceDisconnected()");
+            if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "mConnection.onServiceDisconnected()");
             collectorService = null;
         }
     };
@@ -168,8 +167,8 @@ public class BackendService extends LocationBackendService {
             double testDistance = (location.distanceTo(other) -
                                    location.getAccuracy() -
                                    other.getAccuracy());
-            if (DEBUG >= configuration.DEBUG_VERBOSE)
-                Log.d(TAG, "locationCompatibleWithGroup():"+
+            if (configuration.debug >= configuration.DEBUG_VERBOSE)
+                Log.i(TAG, "locationCompatibleWithGroup():"+
                            " To other=" + location.distanceTo(other) +
                            " this.acc=" + location.getAccuracy() +
                            " other.acc=" + other.getAccuracy() +
@@ -177,7 +176,7 @@ public class BackendService extends LocationBackendService {
             if (testDistance > accuracy)
                 result = false;
         }
-        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "locationCompatibleWithGroup(): accuracy=" + accuracy + " result=" + result);
+        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "locationCompatibleWithGroup(): accuracy=" + accuracy + " result=" + result);
         return result;
     }
 
@@ -193,7 +192,7 @@ public class BackendService extends LocationBackendService {
                 }
             }
             if (!used) {
-                if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "divideInGroups(): Creating new group");
+                if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "divideInGroups(): Creating new group");
                 Set<Location> locGroup = new HashSet<Location>();
                 locGroup.add(location);
                 bins.add(locGroup);
@@ -225,10 +224,10 @@ public class BackendService extends LocationBackendService {
             }
         });
 
-        if (DEBUG >= configuration.DEBUG_VERBOSE) {
+        if (configuration.debug >= configuration.DEBUG_VERBOSE) {
             int i = 1;
             for (Set<Location> set : clsList) {
-                Log.d(TAG, "culledAPs(): group[" + i + "] = "+set.size());
+                Log.i(TAG, "culledAPs(): group[" + i + "] = "+set.size());
                 i++;
             }
         }
@@ -276,7 +275,7 @@ public class BackendService extends LocationBackendService {
                 // each AP with closer APs being given higher weighting.
                 double estRng = estRange(value);
                 double wgt = 1/estRng;
-                if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG,
+                if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG,
                                 String.format("Using with weight=%f mac=%s signal=%d accuracy=%f " +
                                 "estRng=%f latitude=%f longitude=%f",
                                 wgt, bssid,
@@ -301,7 +300,7 @@ public class BackendService extends LocationBackendService {
 
         Bundle extras = new Bundle();
         extras.putInt("AVERAGED_OF", num);
-        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "Location est (lat="+ latitude + ", lng=" + longitude + ", acc=" + accuracy);
+        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "Location est (lat="+ latitude + ", lng=" + longitude + ", acc=" + accuracy);
         if (altitudeWeight > 0) {
             rslt = LocationHelper.create(source,
                           latitude,
@@ -319,7 +318,7 @@ public class BackendService extends LocationBackendService {
 
         rslt.setAccuracy(guessAccuracy( rslt, locations));
         rslt.setTime(System.currentTimeMillis());
-        if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, rslt.toString());
+        if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, rslt.toString());
         return rslt;
     }
 
@@ -336,7 +335,7 @@ public class BackendService extends LocationBackendService {
         double minX = -maxX;
         double maxY = maxX;
         double minY = -maxY;
-        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG,
+        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG,
                                                        String.format("guessAccuracy(): maxX=%f minX=%s maxY=%f minY=%f ",
                                                        maxX, minX, maxY, minY));
         for (Location value : locations) {
@@ -347,25 +346,25 @@ public class BackendService extends LocationBackendService {
             final double dy = Math.sin(rad) * rng;
             final double r = value.getAccuracy();
             if (r < rng) {
-                if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "guessAccuracy(): distance("+rng+") greater than coverage("+r+")");
+                if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "guessAccuracy(): distance("+rng+") greater than coverage("+r+")");
                 return rslt.getAccuracy();
             }
 
-            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG,
+            if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG,
                                                            String.format("guessAccuracy(): Bearing=%f Range=%s dx=%f dy=%f radius=%f",
                                                            brg, rng, dx, dy, r));
             maxX = Math.min(maxX, (dx+r));
             minX = Math.max(minX, (dx-r));
             maxY = Math.min(maxY, (dy+r));
             minY = Math.max(minY, (dy-r));
-            if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG,
+            if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG,
                                                            String.format("guessAccuracy(): maxX=%f minX=%s maxY=%f minY=%f ",
                                                            maxX, minX, maxY, minY));
         }
         double guess = Math.max(Math.abs(maxX),Math.abs(minX));
         guess = Math.max(guess,Math.abs(maxY));
         guess = Math.max(guess,Math.abs(minY));
-        if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "revised accuracy from " + rslt.getAccuracy() + " to " + guess);
+        if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "revised accuracy from " + rslt.getAccuracy() + " to " + guess);
         return (float)guess;
     }
 }

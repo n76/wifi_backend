@@ -49,7 +49,6 @@ import org.fitchfamily.android.wifi_backend.configuration.gpsSamplingCallback;
 
 public class WiFiSamplerService extends Service implements gpsSamplingCallback {
     private final static String TAG = configuration.TAG_PREFIX + "SamplerService";
-    private final static int DEBUG = configuration.DEBUG;
 
     private boolean scanStarted = false;
     private long servicestartedat;
@@ -96,7 +95,7 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
 
         super.onCreate();
 
-        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "service started");
+        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "service started");
 
         sDb = samplerDatabase.getInstance(this);
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -121,12 +120,12 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
         mReceiverWifi = null;
         configuration.setGpsSamplingCallback(null);
         locationManager.removeUpdates(mGpsLocationListener);
-        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "service destroyed");
+        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "service destroyed");
     }
 
     public void updateSamplingConf(long sampleTime, float sampleDistance) {
-        if (DEBUG >= configuration.DEBUG_SPARSE)
-            Log.d(TAG, "updateSamplingConf(" + sampleTime + ", " + sampleDistance + ")");
+        if (configuration.debug >= configuration.DEBUG_SPARSE)
+            Log.i(TAG, "updateSamplingConf(" + sampleTime + ", " + sampleDistance + ")");
         // We are in a call back so we can't change the sampling configuration
         // in the caller's thread context. Send a message to the main thread
         // for it to deal with the issue.
@@ -141,36 +140,42 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
         @Override
         public void onLocationChanged(Location location)
         {
-            if (DEBUG >= configuration.DEBUG_NORMAL) Log.d(TAG, "onLocationChanged(" + location + ")");
-            if (location.getProvider().equals("gps") &&
-                (location.getAccuracy() <= configuration.gpsMinAccuracy)) {
+            if (configuration.debug >= configuration.DEBUG_NORMAL) Log.i(TAG, "onLocationChanged(" + location + ")");
+            if (location.getProvider().equals("gps")) {
+                if  (location.getAccuracy() <= configuration.gpsMinAccuracy) {
+                    if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "Accurate GPS location.");
 
-                // since this callback is asynchronous, we just pass the
-                // message back to the handler thread, to avoid race conditions
+                    // since this callback is asynchronous, we just pass the
+                    // message back to the handler thread, to avoid race conditions
 
-                Message m = new Message();
-                m.what = GOTFIX;
-                m.obj = location;
-                handler.sendMessage(m);
+                    Message m = new Message();
+                    m.what = GOTFIX;
+                    m.obj = location;
+                    handler.sendMessage(m);
+                } else {
+                    if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "Ignoring inaccurate GPS location ("+location.getAccuracy()+" meters).");
+                }
+            } else {
+                if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "Ignoring position from \""+location.getProvider()+"\"");
             }
         }
 
         @Override
         public void onProviderDisabled(String arg0)
         {
-            if (DEBUG >= configuration.DEBUG_NORMAL) Log.d(TAG, ":(");
+            if (configuration.debug >= configuration.DEBUG_NORMAL) Log.i(TAG, "Provider Disabled.");
         }
 
         @Override
         public void onProviderEnabled(String arg0)
         {
-            if (DEBUG >= configuration.DEBUG_NORMAL) Log.d(TAG, ":)");
+            if (configuration.debug >= configuration.DEBUG_NORMAL) Log.i(TAG, "Provider Enabled.");
         }
 
         @Override
         public void onStatusChanged(String arg0, int arg1, Bundle arg2)
         {
-            if (DEBUG >= configuration.DEBUG_NORMAL) Log.d(TAG, ":/");
+            if (configuration.debug >= configuration.DEBUG_NORMAL) Log.i(TAG, "Status Changed.");
         }
     }
 
@@ -214,13 +219,13 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
                                      SSIDlower.contains("nsb_interakti"));
 
                     if (noMap) {
-                        if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "Ignoring AP '" + config.SSID + "' BSSID: " + canonicalBSSID);
+                        if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "Ignoring AP '" + config.SSID + "' BSSID: " + canonicalBSSID);
                         Message m = new Message();
                         m.what = DROP_AP;
                         m.obj = canonicalBSSID;
                         handler.sendMessage(m);
                     } else {
-                        if (DEBUG >= configuration.DEBUG_VERBOSE) Log.d(TAG, "Scan found: '" + config.SSID + "' BSSID: " + canonicalBSSID);
+                        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "Scan found: '" + config.SSID + "' BSSID: " + canonicalBSSID);
                         foundBssids.add(canonicalBSSID);
                     }
                 }
@@ -266,7 +271,7 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
                         mWifi.startScan();
                         setScanStarted(true);
                     } else {
-                        if (DEBUG >= configuration.DEBUG_SPARSE) Log.d(TAG, "Unable to start WiFi scan");
+                        if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "Unable to start WiFi scan");
                     }
                 break;
 
@@ -276,7 +281,7 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
                     for (String bssid : foundBssids) {
                         sDb.addSample( bssid, mLocation );
                     }
-                    if (DEBUG >= configuration.DEBUG_NORMAL) Log.d(TAG,"Scan process time: "+(System.currentTimeMillis()-entryTime)+"ms");
+                    if (configuration.debug >= configuration.DEBUG_NORMAL) Log.i(TAG,"Scan process time: "+(System.currentTimeMillis()-entryTime)+"ms");
                 break;
 
                 case DROP_AP:
@@ -289,8 +294,8 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
                         (mSampleDistance != configuration.gpsMinDistance)) {
                         mSampleTime = configuration.gpsMinTime;
                         mSampleDistance = configuration.gpsMinDistance;
-                        if (DEBUG >= configuration.DEBUG_SPARSE)
-                            Log.d(TAG,"Changing GPS sampling configuration: "+
+                        if (configuration.debug >= configuration.DEBUG_SPARSE)
+                            Log.i(TAG,"Changing GPS sampling configuration: "+
                                       mSampleTime+" ms, "+ mSampleDistance+" meters");
 
                         locationManager.removeUpdates(mGpsLocationListener);
