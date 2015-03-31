@@ -562,8 +562,8 @@ public class samplerDatabase {
                    "s2(" + sample[1].toString() + "), " +
                    "s3(" + sample[2].toString() + "), " +
                    "dist(" + distance[0] + ","+ distance[1] + ","+ distance[2] + ") " +
-                   "moved_guard" + moved_guard + ", " +
-                   "changed" + changed + "}";
+                   "moved_guard=" + moved_guard + ", " +
+                   "changed=" + changed + "}";
         }
     }
 }

@@ -213,9 +213,14 @@ public class BackendService extends LocationBackendService {
     // We do this by creating collections of APs where all the APs in a group
     // are within a plausible distance of one another. A single AP may end up
     // in multiple groups. When done, we return the largest group.
+    //
+    // If we are at the extreme limit of possible coverage (apMovedThreshold)
+    // from two APs then those APs could be a distance of 2*apMovedThreshold apart.
+    // So we will group the APs based on that large distance.
+    //
     public Set<Location> culledAPs(Collection<Location> locations) {
         Set<Set<Location>> locationGroups = divideInGroups(locations,
-                                                           configuration.apMovedThreshold);
+                                                           2*configuration.apMovedThreshold);
         List<Set<Location>> clsList = new ArrayList<Set<Location>>(locationGroups);
         Collections.sort(clsList, new Comparator<Set<Location>>() {
             @Override
