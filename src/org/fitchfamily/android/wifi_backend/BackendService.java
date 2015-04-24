@@ -105,6 +105,7 @@ public class BackendService extends LocationBackendService {
         public void process(List<Bundle> foundBssids) {
 
             if (foundBssids == null || foundBssids.isEmpty()) {
+                report(null);
                 return;
             }
             if (sDb != null) {
@@ -121,6 +122,7 @@ public class BackendService extends LocationBackendService {
 
                 if (locations.isEmpty()) {
                     if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "WifiDBResolver.process(): No APs with known locations");
+                    report(null);
                     return;
                 }
 
@@ -130,6 +132,7 @@ public class BackendService extends LocationBackendService {
                 locations = culledAPs(locations);
                 if (locations.size() < 2) {
                     if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "WifiDBResolver.process(): Insufficient number of WiFi hotspots to resolve location");
+                    report(null);
                     return;
                 }
 
@@ -137,6 +140,7 @@ public class BackendService extends LocationBackendService {
 
                 if (avgLoc == null) {
                     Log.e(TAG, "Averaging locations did not work.");
+                    report(null);
                     return;
                 }
                 report(avgLoc);
