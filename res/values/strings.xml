@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">WiFi Backend</string>
-    <string name="app_title">WiFi Backend</string>
+    <string name="app_name">WiFi Location Service</string>
+    <string name="app_title">WiFi Location Service</string>
+    <string name="summary">Locate using private on phone WiFi database</string>
 
     <!-- GMS prefernces -->
     <string name="gps_config">GPS Setup</string>
