@@ -325,7 +325,7 @@ public class BackendService extends LocationBackendService {
                           extras);
         }
 
-        rslt.setAccuracy(guessAccuracy( rslt, locations));
+//        rslt.setAccuracy(guessAccuracy( rslt, locations));
         rslt.setTime(System.currentTimeMillis());
         if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, rslt.toString());
         return rslt;
