@@ -268,8 +268,8 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
                         scanAlwaysAvailable = false;
                     }
                     if (mWifi.isWifiEnabled() || scanAlwaysAvailable) {
-                        mWifi.startScan();
                         setScanStarted(true);
+                        mWifi.startScan();
                     } else {
                         if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "Unable to start WiFi scan");
                     }
