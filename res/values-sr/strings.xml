@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Услуга локације помоћу бежичних</string>
+    <string name="app_title">Услуга локације помоћу бежичних</string>
+    <string name="summary">Лоцирање помоћу личне базе података бежичних мрежа на телефону</string>
+
+    <!-- GMS prefernces -->
+    <string name="gps_config">ГПС поставке</string>
+
+    <string name="gps_accuracy">Захтевана прецизност</string>
+    <string name="gps_accuracy_description">Грешка ГПС-а не сме бити већа од (метара).</string>
+
+    <string name="gps_min_distance">Размак узорака</string>
+    <string name="gps_min_distance_description">Најмања удаљеност између узорака ГПС локације (метара).</string>
+
+    <string name="gps_min_time">Интервал узорака</string>
+    <string name="gps_min_time_description">Време између узорака ГПС локације (секунди).</string>
+
+    <!-- AP preferences -->
+    <string name="ap_config">Претпоставке бежичних АП-а</string>
+
+    <string name="ap_min_range">Најмања удаљеност АП-а</string>
+    <string name="ap_min_range_description">Претпостављени најмањи домет АП-а (метара).</string>
+
+    <string name="ap_moved_range">Праг померања</string>
+    <string name="ap_moved_range_description">Претпостављени највећи домет АП-а (метара).</string>
+
+    <string name="ap_moved_guard">Чување померања</string>
+    <string name="ap_moved_guard_description">Број узорака на новој локацији пре него што се АП сматра поузданим.</string>
+
+    <string name="db_size_label">Број познатих АП-а</string>
+
+    <string name="dbg_level">Исправљање грешака</string>
+    <string name="dbg_level_description">Записивање у дневник (0=искључено, 1=ретко, 2=нормално 3=исцрпно).</string>
+
+    <!-- Generic suffix strings -->
+    <string name="meters">метара</string>
+    <string name="seconds">секунди</string>
+    <string name="samples">узорака</string>
+    <string name="records">АП-а</string>
+</resources>
