@@ -34,7 +34,7 @@ class configuration {
     public static final int DEBUG_SPARSE = 1;
     public static final int DEBUG_NORMAL = 2;
     public static final int DEBUG_VERBOSE = 3;
-    public static int debug = DEBUG_VERBOSE;
+    public static int debug = DEBUG_NONE;
 
     // Location of database
     public static final String DB_NAME = "wifi.db";
