@@ -21,8 +21,7 @@ Requirements on phone
 How to build and install
 ========================
 
-1. ant debug
-2. adb install bin/wifi_backend-debug.apk
+Using Android Studio, select Build->"Generate Signed APK..."
 
 Setup on phone
 ==============
@@ -30,10 +29,10 @@ In the NLP Controller app (interface for µg UnifiedNlp) select the "Personal Wi
 
 Settings
 --------
--	Required Accuracy: Sets the maximum error that a GPS location report can have for the sampler to trigger the collection of WiFi Access Point (AP) data.
--	Sample Distance: Sets the minimum distance change in a GPS location for the Android OS to give the sampler a new location.
+-	Required Accuracy: Sets the maximum error that a GPS location report can have for the sampler to trigger the collection of WiFi Access Point (AP) data. For example, if set to 10m then all GPS locations with accuracy greater than 10m will be ignored.
+-	Sample Distance: Sets the minimum distance change in a GPS location for the Android OS to give the sampler a new location. For example if set to 20m, then only GPS positions more than 20m apart will be make.
 -	Sample Interval: Sets the minimum time between GPS location reports from the Android OS. Smaller values may improve AP range detection but will cause higher processing loads.
--	Mimimun AP Range: Sets the minimum range (accuracy) value back end will report for an AP.
+-	Mimimum AP Range: Sets the minimum range (accuracy) value back end will report for an AP. This value should be set to the usual coverage radius of a WiFi AP. For current models this is about 100m.
 -	Moved Threshold: If a new GPS location sample for an AP is too far from our old estimate we assume the AP has been moved. This value sets the distance that will trigger the moved AP logic.
 -	Move Guard: Once an AP has been detected as moved we block its location from being used until we are sure it is stable. Stable is defined as having received a number of GPS location updates for the AP that are plausible. This value sets the number of samples required to clear the "moved" indication.
 
@@ -58,7 +57,7 @@ Changes
 License
 =======
 
-    Copyright (C) 2014 Tod Fitch
+    Copyright (C) 2014, 2015 Tod Fitch
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
