@@ -2,7 +2,7 @@ package org.fitchfamily.android.wifi_backend;
 
 /*
  *  WiFi Backend for Unified Network Location
- *  Copyright (C) 2014  Tod Fitch
+ *  Copyright (C) 2014,2015  Tod Fitch
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ class configuration {
     public static final int DEBUG_SPARSE = 1;
     public static final int DEBUG_NORMAL = 2;
     public static final int DEBUG_VERBOSE = 3;
-    public static int debug = DEBUG_NONE;
+    public static int debug = DEBUG_VERBOSE;
 
     // Location of database
     public static final String DB_NAME = "wifi.db";
@@ -60,12 +60,12 @@ class configuration {
     public static int apMovedGuardCount = 100;      // samples
 
     // For reporting our results to the network backend we will
-    // guess about the minimum accuracy (coverage radius) for an AP
-    public static float apAssumedAccuracy = 50.0f; // meters
+    // guess about the minimum accuracy for an individual AP
+    public static float apAssumedAccuracy = 100.0f; // meters
 
     // Not really a config item, but simply current status about database
     // so we can show it to the user in the settings
-    public static long dbRecords = 987654321;
+    public static long dbRecords = 0;
 
     // Identifiers for extra fields in Location records
     public static final String EXTRA_MAC_ADDRESS = "MAC_ADDRESS";

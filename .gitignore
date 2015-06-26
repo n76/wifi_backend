@@ -1,6 +1,12 @@
-bin/
-gen/
 tags
 .DS_Store
 local.properties
-ant.properties
+gen/
+.idea/
+out/
+*.iml
+build/
+*.apk
+.gradle/
+user.gradle
+local.properties

@@ -2,7 +2,7 @@ package org.fitchfamily.android.wifi_backend;
 
 /*
  *  WiFi Backend for Unified Network Location
- *  Copyright (C) 2014  Tod Fitch
+ *  Copyright (C) 2014,2015  Tod Fitch
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ import android.util.Log;
 import org.fitchfamily.android.wifi_backend.WifiReceiver.WifiReceivedCallback;
 
 public class BackendService extends LocationBackendService {
-    private static final String TAG = configuration.TAG_PREFIX + "backend-service";
+    private static final String TAG = configuration.TAG_PREFIX + "service";
 
     private static final int MIN_SIGNAL_LEVEL = -200;
 
@@ -53,6 +53,7 @@ public class BackendService extends LocationBackendService {
     private WifiReceiver wifiReceiver;
     private boolean networkAllowed;
     private WiFiSamplerService collectorService;
+    private boolean checkVar = false;
 
     @Override
     protected void onOpen() {
@@ -180,7 +181,7 @@ public class BackendService extends LocationBackendService {
             if (testDistance > accuracy)
                 result = false;
         }
-        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "locationCompatibleWithGroup(): accuracy=" + accuracy + " result=" + result);
+        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "locationCompatibleWithGroup(): coverage range=" + accuracy + " result=" + result);
         return result;
     }
 
@@ -262,6 +263,11 @@ public class BackendService extends LocationBackendService {
         return sigPercent * apRange;
     }
 
+    // Perform weighted average of the locations of the APs where the weight is
+    // inversely porportional to the estimated range. We also collect the weighted
+    // average of the range for a range estimate when the number of samples is
+    // less than 3. If we have 3 or more samples we estimate the position error
+    // based on the variance of our AP location averaging.
     public Location weightedAverage(String source, Collection<Location> locations) {
         Location rslt = null;
 
@@ -276,104 +282,68 @@ public class BackendService extends LocationBackendService {
         double altitudeWeight = 0;
         double altitude = 0;
 
+        // For variance calculation
+        double m2_lat = 0;
+        double m2_lon = 0;
+
+        int samples = 0;
+
         for (Location value : locations) {
             if (value != null) {
+                samples++;
                 String bssid = value.getExtras().getString(configuration.EXTRA_MAC_ADDRESS);
 
-                // We weight our average based on the estimated range to
-                // each AP with closer APs being given higher weighting.
-                double estRng = estRange(value);
-                double wgt = 1/estRng;
+                // We weight our average based on a linear value based on signal strength.
+                int dBm = value.getExtras().getInt(configuration.EXTRA_SIGNAL_LEVEL);
+                double wgt = WifiManager.calculateSignalLevel(dBm, 100)/100.0;
+
                 if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG,
-                                String.format("Using with weight=%f mac=%s signal=%d accuracy=%f " +
-                                "estRng=%f latitude=%f longitude=%f",
+                        String.format("Using with weight=%f mac=%s signal=%d accuracy=%f " +
+                                        "latitude=%f longitude=%f",
                                 wgt, bssid,
                                 value.getExtras().getInt(configuration.EXTRA_SIGNAL_LEVEL),
-                                value.getAccuracy(), estRng, value.getLatitude(),
+                                value.getAccuracy(), value.getLatitude(),
                                 value.getLongitude()));
 
-                latitude += (value.getLatitude() * wgt);
-                longitude += (value.getLongitude() * wgt);
-                accuracy += (value.getAccuracy() * wgt);
-                if (value.hasAltitude()) {
-                    altitude += value.getAltitude() * wgt;
-                    altitudeWeight += wgt;
+                double temp = totalWeight + wgt;
+                double delta = value.getLatitude() - latitude;
+                double rVal = delta * wgt / temp;
+                if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "lat: delta="+delta+", R="+rVal);
+                latitude += rVal;
+                m2_lat += totalWeight * delta * rVal;
+
+                delta = value.getLongitude() - longitude;
+                rVal = delta * wgt / temp;
+                if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "lon: delta="+delta+", R="+rVal);
+                longitude += rVal;
+                m2_lon += totalWeight * delta * rVal;
+
+//                delta = value.getAccuracy() - accuracy;
+//                rVal = delta * wgt / temp;
+//                if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "accuracy: delta="+delta+", R="+rVal);
+//                accuracy += rVal;
+                double thisAcc = value.getAccuracy();
+                accuracy += thisAcc * thisAcc;
+                if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "accuracy="+Math.sqrt(accuracy)/samples);
+
+                totalWeight = temp;
+                if (configuration.debug >= configuration.DEBUG_VERBOSE) {
+                    Log.i(TAG, "Location est (lat="+ latitude + ", m2="+m2_lat+"), " +
+                               "(lon="+ latitude + ", m2="+m2_lon+"), " +
+                               "(acc="+ accuracy + ")");
+                    Log.i(TAG, "wgt="+wgt+", totalWeight="+totalWeight);
                 }
-                totalWeight += wgt;
             }
         }
-        latitude = latitude / totalWeight;
-        longitude = longitude / totalWeight;
-        accuracy = accuracy / totalWeight;
-        altitude = altitude / totalWeight;
 
+        accuracy = Math.sqrt(accuracy)/samples;
         Bundle extras = new Bundle();
         extras.putInt("AVERAGED_OF", num);
-        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "Location est (lat="+ latitude + ", lng=" + longitude + ", acc=" + accuracy);
-        if (altitudeWeight > 0) {
-            rslt = LocationHelper.create(source,
-                          latitude,
-                          longitude ,
-                          altitude,
-                          (float)accuracy,
-                          extras);
-        } else {
-            rslt = LocationHelper.create(source,
-                          latitude,
-                          longitude,
-                          (float)accuracy,
-                          extras);
-        }
+        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "Final Location est (lat="+ latitude + ", lng=" + longitude + ", acc=" + accuracy+")");
+        rslt = LocationHelper.create(source, latitude, longitude, (float)accuracy, extras);
 
-//        rslt.setAccuracy(guessAccuracy( rslt, locations));
         rslt.setTime(System.currentTimeMillis());
         if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, rslt.toString());
         return rslt;
-    }
-
-    // The geometry of overlapping circles is hard to compute but overlapping
-    // boxes are easy. So we will see pretend each AP has a square coverage area
-    // and then find the smallest box covered by all the APs. That should bound
-    // our probable location.
-    //
-    // If our database is wrong about coverage radius values then we could end up
-    // with disjoint boxes. In that case we will bail out and simply return the
-    // weighted average accuracy measurement done when we computed the location.
-    public float guessAccuracy( Location rslt, Collection<Location> locations) {
-        double maxX = rslt.getAccuracy();
-        double minX = -maxX;
-        double maxY = maxX;
-        double minY = -maxY;
-        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG,
-                                                       String.format("guessAccuracy(): maxX=%f minX=%s maxY=%f minY=%f ",
-                                                       maxX, minX, maxY, minY));
-        for (Location value : locations) {
-            final double rng = rslt.distanceTo(value);
-            final double brg = rslt.bearingTo(value);
-            final double rad = Math.toRadians(brg);
-            final double dx = Math.cos(rad) * rng;
-            final double dy = Math.sin(rad) * rng;
-            final double r = value.getAccuracy();
-            if (r < rng) {
-                if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "guessAccuracy(): distance("+rng+") greater than coverage("+r+")");
-                return rslt.getAccuracy();
-            }
-
-            if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG,
-                                                           String.format("guessAccuracy(): Bearing=%f Range=%s dx=%f dy=%f radius=%f",
-                                                           brg, rng, dx, dy, r));
-            maxX = Math.min(maxX, (dx+r));
-            minX = Math.max(minX, (dx-r));
-            maxY = Math.min(maxY, (dy+r));
-            minY = Math.max(minY, (dy-r));
-            if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG,
-                                                           String.format("guessAccuracy(): maxX=%f minX=%s maxY=%f minY=%f ",
-                                                           maxX, minX, maxY, minY));
-        }
-        double guess = Math.max(Math.abs(maxX),Math.abs(minX));
-        guess = Math.max(guess,Math.abs(maxY));
-        guess = Math.max(guess,Math.abs(minY));
-        if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "revised accuracy from " + rslt.getAccuracy() + " to " + guess);
-        return (float)guess;
     }
 }

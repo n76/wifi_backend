@@ -2,7 +2,7 @@ package org.fitchfamily.android.wifi_backend;
 
 /*
  *  WiFi Backend for Unified Network Location
- *  Copyright (C) 2014  Tod Fitch
+ *  Copyright (C) 2014,2015  Tod Fitch
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -298,6 +298,7 @@ public class samplerDatabase {
                 if (guessPerimeter > bestPerimeter) {
                     bestAP = guess;
                     bestPerimeter = guessPerimeter;
+                    if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "Better perimeter point found on "+bestAP.getBSSID()+", i="+i);
                 }
             }
         }
@@ -313,7 +314,8 @@ public class samplerDatabase {
 
     public synchronized Location ApLocation( String bssid ) {
         final long entryTime = System.currentTimeMillis();
-        final String canonicalBSSID = bssid.replace(":","");
+        final String canonicalBSSID = bssid.replace(":", "");
+        final float maxRadius = 150;
 
         Boolean negative = queryResultNegativeCache.get(canonicalBSSID);
         if (negative != null && negative.booleanValue()) {
@@ -346,8 +348,23 @@ public class samplerDatabase {
                 result.setLatitude(c.getDouble(c.getColumnIndexOrThrow(COL_LATITUDE)));
                 result.setLongitude(c.getDouble(c.getColumnIndexOrThrow(COL_LONGITUDE)));
                 float radius = c.getFloat(c.getColumnIndexOrThrow(COL_RADIUS));
+
+                // radius is our observed coverage but it can be quite small, as little as
+                // zero if we have only one sample. We want to report an accuracy value that
+                // is likely to actually contain the AP's real location and no matter how
+                // many samples we have collected systemic/sampling errors will mean we dont
+                // know the actual coverage radius.
+                //
+                // Web search indicates that 40m coverage on older WiFi protocols and 100m
+                // coverage on newer APs (both ranges for outdoor conditions).
+                //
+                // So we will take the greater value (assumed max range) or actual measured
+                // range as our assumed accuracy.
+
                 if (radius < configuration.apAssumedAccuracy)
                     radius = configuration.apAssumedAccuracy;
+
+                // Now we have the reverse problem. Assume we
                 result.setAccuracy(radius);
                 c.close();
                 if (configuration.debug >= configuration.DEBUG_NORMAL) Log.i(TAG, bssid + " at " + result.toString());
