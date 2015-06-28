@@ -53,6 +53,7 @@ Changes
 
 -	0.1.0 - Initial version by n76
 -	0.6.0 - Configurable settings for data collection and use. Some improvements in performance
+-   0.6.1 - Fixup Android Studio/Gradle build environment
 
 License
 =======
