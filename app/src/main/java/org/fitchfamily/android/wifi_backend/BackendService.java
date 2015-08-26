@@ -54,6 +54,9 @@ public class BackendService extends LocationBackendService {
     private boolean networkAllowed;
     private WiFiSamplerService collectorService;
     private boolean checkVar = false;
+    private Location lastReportLocation = null;
+    private long lastReportTime = 0;
+    private float lastReportAcc = (float)100.0;
 
     @Override
     protected void onOpen() {
@@ -106,7 +109,7 @@ public class BackendService extends LocationBackendService {
         public void process(List<Bundle> foundBssids) {
 
             if (foundBssids == null || foundBssids.isEmpty()) {
-                report(null);
+                doReport(null);
                 return;
             }
             if (sDb != null) {
@@ -123,7 +126,7 @@ public class BackendService extends LocationBackendService {
 
                 if (locations.isEmpty()) {
                     if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "WifiDBResolver.process(): No APs with known locations");
-                    report(null);
+                    doReport(null);
                     return;
                 }
 
@@ -133,7 +136,7 @@ public class BackendService extends LocationBackendService {
                 locations = culledAPs(locations);
                 if (locations.size() < 2) {
                     if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "WifiDBResolver.process(): Insufficient number of WiFi hotspots to resolve location");
-                    report(null);
+                    doReport(null);
                     return;
                 }
 
@@ -141,10 +144,10 @@ public class BackendService extends LocationBackendService {
 
                 if (avgLoc == null) {
                     Log.e(TAG, "Averaging locations did not work.");
-                    report(null);
+                    doReport(null);
                     return;
                 }
-                report(avgLoc);
+                doReport(avgLoc);
             }
         }
     }
@@ -345,5 +348,30 @@ public class BackendService extends LocationBackendService {
         rslt.setTime(System.currentTimeMillis());
         if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, rslt.toString());
         return rslt;
+    }
+
+    //
+    // Report location to UnifiedNLP - If current report is null (location unknown) then
+    // take the last report and increase its positional error. Assumption is 100km/hr
+    // (reasonable driving speed) from point last seen.
+    // 100km/hr => 100,000 m/hr ==> ~28m/sec
+    //
+    private void doReport(Location locReport) {
+        if (locReport != null) {
+            lastReportLocation = locReport;
+            lastReportTime = System.currentTimeMillis();
+            lastReportAcc = locReport.getAccuracy();
+            report(locReport);
+        } else {
+            Location locGuess = lastReportLocation;
+            if (locGuess != null) {
+                long sec = (System.currentTimeMillis() - lastReportTime + 500)/1000;
+                locGuess.setAccuracy((float) (lastReportAcc + 28.0 * sec));
+                if (configuration.debug >= configuration.DEBUG_VERBOSE) {
+                    Log.i(TAG, "acc=" + lastReportAcc + ", sec=" + sec + ", scaled accuracy = " + (float) (lastReportAcc + 28.0*sec));
+                }
+            }
+            report(locGuess);
+        }
     }
 }

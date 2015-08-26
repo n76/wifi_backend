@@ -51,9 +51,12 @@ Public domain icon from https://en.wikipedia.org/wiki/File:Wireless-icon.png
 Changes
 =======
 
--	0.1.0 - Initial version by n76
--	0.6.0 - Configurable settings for data collection and use. Some improvements in performance
--   0.6.1 - Fixup Android Studio/Gradle build environment
+|Version|Date|Comment|
+|:-------|:----:|:-------|
+0.1.0| |Initial version by n76
+0.6.0| |Configurable settings for data collection and use. Some improvements in performance
+0.6.1| |Fixup Android Studio/Gradle build environment
+0.17.0|21Aug2015|Increase location uncertainty if no position found.
 
 License
 =======
