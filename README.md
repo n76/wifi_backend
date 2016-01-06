@@ -46,7 +46,7 @@ Libraries Used
 
 Other IP used
 =============
-Public domain icon from https://en.wikipedia.org/wiki/File:Wireless-icon.png
+Icon created with the [Android Asset Studio](https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html#foreground.type=clipart&foreground.space.trim=1&foreground.space.pad=0.15&foreground.clipart=res%2Fclipart%2Ficons%2Fdevice_signal_wifi_3_bar.svg&foreColor=fff%2C0&crop=0&backgroundShape=circle&backColor=4caf50%2C100&effects=none) (Creative Commons Attribution 3.0 Unported License).
 
 Changes
 =======
