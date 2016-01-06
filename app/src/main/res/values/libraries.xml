@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="UnusedResources,MissingTranslation">
+    <string name="define_androidsupportlibrary"></string>
+    <!-- Author section -->
+    <string name="library_androidsupportlibrary_author">The Android Open Source Project</string>
+    <string name="library_androidsupportlibrary_authorWebsite"></string>
+    <!-- Library section -->
+    <string name="library_androidsupportlibrary_libraryName">Android Support Library</string>
+    <string name="library_androidsupportlibrary_libraryDescription">The Android Support Library
+        package is a set of code libraries that provide backward-compatible versions of Android
+        framework APIs as well as features that are only available through the library APIs.
+    </string>
+    <string name="library_androidsupportlibrary_libraryWebsite">
+        https://developer.android.com/tools/support-library/index.html#overview
+    </string>
+    <string name="library_androidsupportlibrary_libraryVersion">23.0.0</string>
+    <!-- OpenSource section -->
+    <string name="library_androidsupportlibrary_isOpenSource">true</string>
+    <string name="library_androidsupportlibrary_repositoryLink">
+        https://android.googlesource.com/platform/frameworks/support
+    </string>
+    <!-- ClassPath for autoDetect section -->
+    <string name="library_androidsupportlibrary_classPath">android.support</string>
+    <!-- License section -->
+    <string name="library_androidsupportlibrary_licenseId">apache_2_0</string>
+    <!-- Custom variables section -->
+
+    <string name="define_guava"></string>
+    <!-- Author section -->
+    <string name="library_guava_author">Google</string>
+    <string name="library_guava_authorWebsite"></string>
+    <!-- Library section -->
+    <string name="library_guava_libraryName">Guava</string>
+    <string name="library_guava_libraryDescription">The Guava project contains several of Google\'s core libraries that we rely on in our Java-based projects: collections, caching, primitives support, concurrency libraries, common annotations, string processing, I/O, and so forth.</string>
+    <string name="library_guava_libraryWebsite">https://github.com/google/guava/blob/master/README.md</string>
+    <string name="library_guava_libraryVersion">19.0</string>
+    <!-- OpenSource section -->
+    <string name="library_guava_isOpenSource">true</string>
+    <string name="library_guava_repositoryLink">https://github.com/google/guava</string>
+    <!-- ClassPath for autoDetect section -->
+    <string name="library_guava_classPath">com.google.common</string>
+    <!-- License section -->
+    <string name="library_guava_licenseId">apache_2_0</string>
+    <!-- Custom variables section -->
+</resources>

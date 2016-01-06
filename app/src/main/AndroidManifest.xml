@@ -11,7 +11,7 @@
     <uses-sdk android:minSdkVersion="17"
               android:targetSdkVersion="18"/>
 
-    <application android:label="@string/app_name" android:icon="@mipmap/ic_launcher">
+    <application android:theme="@style/AppTheme" android:label="@string/app_name" android:icon="@mipmap/ic_launcher">
 
         <service
             android:name=".backend.BackendService_"
@@ -22,13 +22,13 @@
             </intent-filter>
             <meta-data
                 android:name="org.microg.nlp.BACKEND_SETTINGS_ACTIVITY"
-                android:value="org.fitchfamily.android.wifi_backend.settings" />
+                android:value="org.fitchfamily.android.wifi_backend.ui.MainActivity_" />
             <meta-data
                 android:name="org.microg.nlp.BACKEND_SUMMARY"
                 android:value="@string/summary" />
         </service>
 
-        <activity android:name="org.fitchfamily.android.wifi_backend.settings"
+        <activity android:name=".ui.MainActivity_"
                   android:label="@string/app_name"
                   android:screenOrientation="portrait"
                   >

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="view_margin">8dp</dimen>
+    <dimen name="activity_margin">16dp</dimen>
+    <dimen name="toolbar_elevation">4dp</dimen>
+</resources>

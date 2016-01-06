@@ -183,11 +183,11 @@ public class Database extends SQLiteOpenHelper {
         onAccessPointCountChanged();
     }
 
-    public long getAccessPointCount() {
+    public int getAccessPointCount() {
         Cursor cursor= getReadableDatabase().rawQuery("SELECT COUNT(*) FROM " + TABLE_SAMPLES + ";", null);
         try {
             if(cursor.moveToFirst()) {
-                return cursor.getLong(0);
+                return (int) cursor.getLong(0);
             } else {
                 return 0;
             }
