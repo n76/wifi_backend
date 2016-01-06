@@ -26,7 +26,7 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Environment;
 import android.util.Log;
 
-class configuration {
+public class configuration {
 
     // Logging related values
     public static final String TAG_PREFIX = "wifi-backend-";
@@ -35,9 +35,6 @@ class configuration {
     public static final int DEBUG_NORMAL = 2;
     public static final int DEBUG_VERBOSE = 3;
     public static int debug = DEBUG_NONE;
-
-    // Location of database
-    public static final String DB_NAME = "wifi.db";
 
     // How accurate should our GPS position be to bother recording WiFi signals?
     public static float gpsMinAccuracy = 15.0f; // meters
@@ -65,6 +62,12 @@ class configuration {
 
     // Not really a config item, but simply current status about database
     // so we can show it to the user in the settings
+
+    /**
+     * Not updated anymore.
+     * Use getAccessPointCount() from Database instead.
+     */
+    @Deprecated
     public static long dbRecords = 0;
 
     // Identifiers for extra fields in Location records

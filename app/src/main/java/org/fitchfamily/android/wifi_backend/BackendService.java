@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.fitchfamily.android.wifi_backend.database.EstimateLocation;
+import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
 import org.microg.nlp.api.LocationBackendService;
 import org.microg.nlp.api.LocationHelper;
 
@@ -49,7 +51,7 @@ public class BackendService extends LocationBackendService {
 
     private static final int MIN_SIGNAL_LEVEL = -200;
 
-    private samplerDatabase sDb;
+    private SamplerDatabase sDb;
     private WifiReceiver wifiReceiver;
     private boolean networkAllowed;
     private WiFiSamplerService collectorService;
@@ -66,7 +68,7 @@ public class BackendService extends LocationBackendService {
         configuration.fillFromPrefs(sharedPrefs);
         sharedPrefs.registerOnSharedPreferenceChangeListener(configuration.listener);
 
-        sDb = samplerDatabase.getInstance(this);
+        sDb = SamplerDatabase.getInstance(this);
 
         if (wifiReceiver == null) {
             wifiReceiver = new WifiReceiver(this, new WifiDBResolver());
@@ -117,10 +119,12 @@ public class BackendService extends LocationBackendService {
                 Set<Location> locations = new HashSet<Location>(foundBssids.size());
 
                 for (Bundle extras : foundBssids) {
-                    Location result = sDb.ApLocation(extras.getString(configuration.EXTRA_MAC_ADDRESS));
+                    EstimateLocation result = sDb.getLocation(extras.getString(configuration.EXTRA_MAC_ADDRESS));
+
                     if (result != null) {
-                        result.setExtras(extras);
-                        locations.add(result);
+                        Location location = result.toAndroidLocation();
+                        location.setExtras(extras);
+                        locations.add(location);
                     }
                 }
 

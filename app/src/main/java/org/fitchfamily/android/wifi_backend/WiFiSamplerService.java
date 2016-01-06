@@ -18,10 +18,6 @@ package org.fitchfamily.android.wifi_backend;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -40,12 +36,12 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
 
 import org.fitchfamily.android.wifi_backend.configuration.gpsSamplingCallback;
+import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
 
 public class WiFiSamplerService extends Service implements gpsSamplingCallback {
     private final static String TAG = configuration.TAG_PREFIX + "SamplerService";
@@ -73,7 +69,7 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
 
     private Location mLocation;
 
-    private samplerDatabase sDb;
+    private SamplerDatabase sDb;
 
     private long mSampleTime;
     private float mSampleDistance;
@@ -97,7 +93,7 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
 
         if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "service started");
 
-        sDb = samplerDatabase.getInstance(this);
+        sDb = SamplerDatabase.getInstance(this);
         locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         mSampleTime = configuration.gpsMinTime;
         mSampleDistance = configuration.gpsMinDistance;
@@ -279,14 +275,14 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback {
                     long entryTime = System.currentTimeMillis();
                     List<String> foundBssids = (List<String>) msg.obj;
                     for (String bssid : foundBssids) {
-                        sDb.addSample( bssid, mLocation );
+                        sDb.addSample(bssid, org.fitchfamily.android.wifi_backend.database.Location.fromAndroidLocation(mLocation));
                     }
                     if (configuration.debug >= configuration.DEBUG_NORMAL) Log.i(TAG,"Scan process time: "+(System.currentTimeMillis()-entryTime)+"ms");
                 break;
 
                 case DROP_AP:
                     String bssid = (String) msg.obj;
-                    sDb.dropAP(bssid);
+                    sDb.dropAccessPoint(bssid);
                 break;
 
                 case CHANGE_SAMPLING:
