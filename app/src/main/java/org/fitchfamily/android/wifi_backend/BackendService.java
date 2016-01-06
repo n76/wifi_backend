@@ -28,6 +28,8 @@ import java.util.Set;
 
 import org.fitchfamily.android.wifi_backend.database.EstimateLocation;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
+import org.fitchfamily.android.wifi_backend.sampler.WiFiSamplerService;
+import org.fitchfamily.android.wifi_backend.sampler.WiFiSamplerService_;
 import org.microg.nlp.api.LocationBackendService;
 import org.microg.nlp.api.LocationHelper;
 
@@ -75,7 +77,7 @@ public class BackendService extends LocationBackendService {
         }
         registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
-        bindService(new Intent(this, WiFiSamplerService.class), mConnection, Context.BIND_AUTO_CREATE);
+        bindService(new Intent(this, WiFiSamplerService_.class), mConnection, Context.BIND_AUTO_CREATE);
         if (collectorService == null) {
             if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "No collectorService?\n");
         }

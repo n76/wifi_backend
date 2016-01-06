@@ -37,6 +37,6 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".WiFiSamplerService" />
+        <service android:name=".sampler.WiFiSamplerService_" />
     </application>
 </manifest>
