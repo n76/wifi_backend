@@ -30,17 +30,22 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 
-import org.fitchfamily.android.wifi_backend.configuration;
+import org.fitchfamily.android.wifi_backend.BuildConfig;
+import org.fitchfamily.android.wifi_backend.Configuration;
 
 public class WifiReceiver extends BroadcastReceiver {
+    private static final String TAG = "WiFiReceiver";
+    private static final boolean DEBUG = BuildConfig.DEBUG;
 
     private boolean scanStarted = false;
     private WifiManager wifi;
-    private String TAG = configuration.TAG_PREFIX+"WiFiReceiver";
     private WifiReceivedCallback callback;
 
     public WifiReceiver(Context ctx, WifiReceivedCallback aCallback) {
-        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "WifiReceiver() constructor");
+        if (DEBUG) {
+            Log.i(TAG, "WifiReceiver() constructor");
+        }
+
         wifi = (WifiManager) ctx.getSystemService(Context.WIFI_SERVICE);
         callback = aCallback;
     }
@@ -51,7 +56,9 @@ public class WifiReceiver extends BroadcastReceiver {
         setScanStarted(false);
         List<ScanResult> configs = wifi.getScanResults();
 
-        if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "Got " + configs.size() + " wifi access points");
+        if (DEBUG) {
+            Log.i(TAG, "Got " + configs.size() + " wifi access points");
+        }
 
         if (configs.size() > 0) {
 
@@ -62,11 +69,13 @@ public class WifiReceiver extends BroadcastReceiver {
                 final String canonicalBSSID = config.BSSID.toUpperCase(Locale.US).replace(".",":");
                 // ignore APs that have _nomap suffix on SSID
                 if (config.SSID.endsWith("_nomap")) {
-                    if (configuration.debug >= configuration.DEBUG_SPARSE) Log.i(TAG, "Ignoring AP '" + config.SSID + "' BSSID: " + canonicalBSSID);
+                    if (DEBUG) {
+                        Log.i(TAG, "Ignoring AP '" + config.SSID + "' BSSID: " + canonicalBSSID);
+                    }
                 } else {
                     Bundle extras = new Bundle();
-                    extras.putString(configuration.EXTRA_MAC_ADDRESS, canonicalBSSID);
-                    extras.putInt(configuration.EXTRA_SIGNAL_LEVEL, config.level);
+                    extras.putString(Configuration.EXTRA_MAC_ADDRESS, canonicalBSSID);
+                    extras.putInt(Configuration.EXTRA_SIGNAL_LEVEL, config.level);
                     foundBssids.add(extras);
                 }
             }

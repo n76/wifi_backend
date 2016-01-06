@@ -18,13 +18,14 @@ package org.fitchfamily.android.wifi_backend.backend;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import android.content.Context;
 import android.location.Location;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 
 import org.fitchfamily.android.wifi_backend.BuildConfig;
-import org.fitchfamily.android.wifi_backend.configuration;
+import org.fitchfamily.android.wifi_backend.Configuration;
 import org.microg.nlp.api.LocationHelper;
 
 import java.util.ArrayList;
@@ -60,9 +61,9 @@ public abstract class LocationUtil {
     // from two APs then those APs could be a distance of 2*apMovedThreshold apart.
     // So we will group the APs based on that large distance.
     //
-    static Set<Location> culledAPs(Collection<Location> locations) {
+    static Set<Location> culledAPs(Collection<Location> locations, Context context) {
         Set<Set<Location>> locationGroups = divideInGroups(locations,
-                2 * configuration.apMovedThreshold);
+                2 * Configuration.with(context).accessPointMoveThresholdInMeters());
 
         List<Set<Location>> clsList = new ArrayList<Set<Location>>(locationGroups);
         Collections.sort(clsList, new Comparator<Set<Location>>() {
@@ -143,10 +144,10 @@ public abstract class LocationUtil {
         for (Location value : locations) {
             if (value != null) {
                 samples++;
-                String bssid = value.getExtras().getString(configuration.EXTRA_MAC_ADDRESS);
+                String bssid = value.getExtras().getString(Configuration.EXTRA_MAC_ADDRESS);
 
                 // We weight our average based on a linear value based on signal strength.
-                int dBm = value.getExtras().getInt(configuration.EXTRA_SIGNAL_LEVEL);
+                int dBm = value.getExtras().getInt(Configuration.EXTRA_SIGNAL_LEVEL);
                 double wgt = WifiManager.calculateSignalLevel(dBm, 100)/100.0;
 
                 if (DEBUG) {
@@ -154,7 +155,7 @@ public abstract class LocationUtil {
                             String.format("Using with weight=%f mac=%s signal=%d accuracy=%f " +
                                             "latitude=%f longitude=%f",
                                     wgt, bssid,
-                                    value.getExtras().getInt(configuration.EXTRA_SIGNAL_LEVEL),
+                                    value.getExtras().getInt(Configuration.EXTRA_SIGNAL_LEVEL),
                                     value.getAccuracy(), value.getLatitude(),
                                     value.getLongitude()));
                 }
@@ -186,7 +187,10 @@ public abstract class LocationUtil {
 //                accuracy += rVal;
                 double thisAcc = value.getAccuracy();
                 accuracy += thisAcc * thisAcc;
-                if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "accuracy="+Math.sqrt(accuracy)/samples);
+
+                if (DEBUG) {
+                    Log.i(TAG, "accuracy="+Math.sqrt(accuracy)/samples);
+                }
 
                 totalWeight = temp;
 

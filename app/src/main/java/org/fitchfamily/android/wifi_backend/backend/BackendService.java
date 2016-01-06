@@ -25,7 +25,7 @@ import java.util.Set;
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.EService;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
-import org.fitchfamily.android.wifi_backend.configuration;
+import org.fitchfamily.android.wifi_backend.Configuration;
 import org.fitchfamily.android.wifi_backend.database.EstimateLocation;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
 import org.fitchfamily.android.wifi_backend.sampler.WiFiSamplerService;
@@ -72,8 +72,6 @@ public class BackendService extends LocationBackendService {
         }
 
         SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        configuration.fillFromPrefs(sharedPrefs);
-        sharedPrefs.registerOnSharedPreferenceChangeListener(configuration.listener);
 
         registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
@@ -95,8 +93,6 @@ public class BackendService extends LocationBackendService {
         unregisterReceiver(wifiReceiver);
         unbindService(mConnection);
 
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-        sharedPrefs.unregisterOnSharedPreferenceChangeListener(configuration.listener);
         wifiReceiver = null;
     }
 
@@ -133,7 +129,7 @@ public class BackendService extends LocationBackendService {
                 Set<Location> locations = new HashSet<Location>(foundBssids.size());
 
                 for (Bundle extras : foundBssids) {
-                    EstimateLocation result = database.getLocation(extras.getString(configuration.EXTRA_MAC_ADDRESS));
+                    EstimateLocation result = database.getLocation(extras.getString(Configuration.EXTRA_MAC_ADDRESS));
 
                     if (result != null) {
                         Location location = result.toAndroidLocation();
@@ -153,7 +149,7 @@ public class BackendService extends LocationBackendService {
                 // Find largest group of AP locations. If we don't have at
                 // least two near each other then we don't have enough
                 // information to get a good location.
-                locations = LocationUtil.culledAPs(locations);
+                locations = LocationUtil.culledAPs(locations, BackendService.this);
 
                 if (locations.size() < 2) {
                     if (DEBUG) {
@@ -218,7 +214,7 @@ public class BackendService extends LocationBackendService {
                 long sec = (System.currentTimeMillis() - lastReportTime + 500)/1000;
                 locGuess.setAccuracy((float) (lastReportAcc + 28.0 * sec));
 
-                if (configuration.debug >= configuration.DEBUG_VERBOSE) {
+                if (DEBUG) {
                     Log.i(TAG, "acc=" + lastReportAcc + ", sec=" + sec + ", scaled accuracy = " + (float) (lastReportAcc + 28.0*sec));
                 }
             }

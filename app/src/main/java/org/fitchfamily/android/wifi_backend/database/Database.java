@@ -30,7 +30,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import org.fitchfamily.android.wifi_backend.BuildConfig;
-import org.fitchfamily.android.wifi_backend.configuration;
+import org.fitchfamily.android.wifi_backend.Configuration;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -72,6 +72,7 @@ public class Database extends SQLiteOpenHelper {
     private SQLiteStatement sqlSampleUpdate;
     private SQLiteStatement sqlAPdrop;
     private final LocalBroadcastManager localBroadcastManager;
+    private final Context context;
 
     public Database(Context context) {
         super(new ContextWrapper(context) {
@@ -81,6 +82,7 @@ public class Database extends SQLiteOpenHelper {
             }
         }, NAME, null, VERSION);
 
+        this.context = context;
         localBroadcastManager = LocalBroadcastManager.getInstance(context.getApplicationContext());
     }
 
@@ -230,7 +232,7 @@ public class Database extends SQLiteOpenHelper {
                 EstimateLocation result = EstimateLocation.builder()
                         .latitude(c.getDouble(0))
                         .longitude(c.getDouble(1))
-                        .radius(Math.max(configuration.apAssumedAccuracy, c.getFloat(2)))
+                        .radius(Math.max(Configuration.with(context).accessPointAssumedAccuracy(), c.getFloat(2)))
                         .build();
 
                 if (DEBUG) {

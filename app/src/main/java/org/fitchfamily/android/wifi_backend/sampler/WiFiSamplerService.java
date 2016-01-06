@@ -26,6 +26,7 @@ import java.util.concurrent.Executors;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -34,6 +35,7 @@ import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.androidannotations.annotations.AfterInject;
@@ -41,12 +43,13 @@ import org.androidannotations.annotations.EService;
 import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.SystemService;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
-import org.fitchfamily.android.wifi_backend.configuration;
-import org.fitchfamily.android.wifi_backend.configuration.gpsSamplingCallback;
+import org.fitchfamily.android.wifi_backend.Configuration;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
 
 @EService
-public class WiFiSamplerService extends Service implements gpsSamplingCallback, LocationListener {
+public class WiFiSamplerService extends Service implements LocationListener,
+        SharedPreferences.OnSharedPreferenceChangeListener {
+
     private final static String TAG = "WiFiSamplerService";
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
@@ -85,21 +88,21 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback, 
         }
 
         database = SamplerDatabase.getInstance(this);
-        sampleTime = configuration.gpsMinTime;
-        sampleDistance = configuration.gpsMinDistance;
+        sampleTime = Configuration.with(this).minimumGpsTimeInMilliseconds();
+        sampleDistance = Configuration.with(this).minimumGpsDistanceInMeters();
         locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
                 sampleTime,
                 sampleDistance,
                 WiFiSamplerService.this);
 
-        configuration.setGpsSamplingCallback(this);
+        Configuration.with(this).register(this);
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
 
-        configuration.setGpsSamplingCallback(null);
+        Configuration.with(this).unregister(this);
         locationManager.removeUpdates(WiFiSamplerService.this);
 
         if (DEBUG) {
@@ -107,7 +110,19 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback, 
         }
     }
 
-    public void updateSamplingConf(long sampleTime, float sampleDistance) {
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if(TextUtils.equals(key, Configuration.PREF_MIN_GPS_TIME) ||
+                TextUtils.equals(key, Configuration.PREF_MIN_GPS_DISTANCE)) {
+
+            updateSamplingConf(
+                    Configuration.with(WiFiSamplerService.this).minimumGpsTimeInMilliseconds(),
+                    Configuration.with(WiFiSamplerService.this).minimumGpsDistanceInMeters()
+            );
+        }
+    }
+
+    private void updateSamplingConf(final long sampleTime, final float sampleDistance) {
         if (DEBUG) {
             Log.i(TAG, "updateSamplingConf(" + sampleTime + ", " + sampleDistance + ")");
         }
@@ -118,14 +133,16 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback, 
         executor.submit(new Runnable() {
             @Override
             public void run() {
-                if ((WiFiSamplerService.this.sampleTime != configuration.gpsMinTime) ||
-                        (WiFiSamplerService.this.sampleDistance != configuration.gpsMinDistance)) {
+                if ((WiFiSamplerService.this.sampleTime != sampleTime) ||
+                        (WiFiSamplerService.this.sampleDistance != sampleDistance)) {
 
-                    WiFiSamplerService.this.sampleTime = configuration.gpsMinTime;
-                    WiFiSamplerService.this.sampleDistance = configuration.gpsMinDistance;
-                    if (configuration.debug >= configuration.DEBUG_SPARSE)
+                    WiFiSamplerService.this.sampleTime = sampleTime;
+                    WiFiSamplerService.this.sampleDistance = sampleDistance;
+
+                    if (DEBUG) {
                         Log.i(TAG, "Changing GPS sampling configuration: " +
                                 WiFiSamplerService.this.sampleTime + " ms, " + WiFiSamplerService.this.sampleDistance + " meters");
+                    }
 
                     locationManager.removeUpdates(WiFiSamplerService.this);
                     locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
@@ -212,8 +229,10 @@ public class WiFiSamplerService extends Service implements gpsSamplingCallback, 
         }
 
         if (location.getProvider().equals("gps")) {
-            if (location.getAccuracy() <= configuration.gpsMinAccuracy) {
-                if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "Accurate GPS location.");
+            if (location.getAccuracy() <= Configuration.with(this).minimumGpsAccuracyInMeters()) {
+                if (DEBUG) {
+                    Log.i(TAG, "Accurate GPS location.");
+                }
 
                 // since this callback is asynchronous, we just pass the
                 // message back to the processing thread, to avoid race conditions

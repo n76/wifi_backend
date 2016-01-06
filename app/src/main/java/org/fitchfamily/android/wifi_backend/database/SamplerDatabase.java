@@ -22,7 +22,7 @@ import android.content.Context;
 import android.util.Log;
 
 import org.fitchfamily.android.wifi_backend.BuildConfig;
-import org.fitchfamily.android.wifi_backend.configuration;
+import org.fitchfamily.android.wifi_backend.Configuration;
 
 /*
  * We estimate the AP location by keeping three samples that form a triangle.
@@ -50,9 +50,12 @@ public class SamplerDatabase extends Database {
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
     private static SamplerDatabase mInstance;
+    private final Context context;
 
     private SamplerDatabase(Context context) {
         super(context);
+
+        this.context = context;
 
         if (DEBUG) {
             Log.i(TAG, "samplerDatabase.samplerDatabase()");
@@ -80,11 +83,11 @@ public class SamplerDatabase extends Database {
 
             float diff = accessPoint.estimateLocation().distanceTo(sampleLocation);
 
-            if (diff >= configuration.apMovedThreshold) {
+            if (diff >= Configuration.with(context).accessPointMoveThresholdInMeters()) {
                 accessPoint = accessPoint.buildUpon()
                         .clearSamples()
                         .addSample(sampleLocation)
-                        .moved(configuration.apMovedGuardCount)
+                        .moved(Configuration.with(context).accessPointMoveGuardSampleCount())
                         .build();
 
                 if (DEBUG) {
