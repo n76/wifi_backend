@@ -14,7 +14,7 @@
     <application android:label="@string/app_name" android:icon="@mipmap/ic_launcher">
 
         <service
-            android:name=".BackendService"
+            android:name=".backend.BackendService_"
             android:label="@string/app_name"
             android:permission="android.permission.ACCESS_COARSE_LOCATION">
             <intent-filter>

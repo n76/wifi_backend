@@ -1,4 +1,4 @@
-package org.fitchfamily.android.wifi_backend;
+package org.fitchfamily.android.wifi_backend.backend;
 
 /*
  *  WiFi Backend for Unified Network Location
@@ -29,6 +29,8 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
+
+import org.fitchfamily.android.wifi_backend.configuration;
 
 public class WifiReceiver extends BroadcastReceiver {
 
