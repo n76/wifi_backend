@@ -90,10 +90,16 @@ public class WiFiSamplerService extends Service implements LocationListener,
         database = SamplerDatabase.getInstance(this);
         sampleTime = Configuration.with(this).minimumGpsTimeInMilliseconds();
         sampleDistance = Configuration.with(this).minimumGpsDistanceInMeters();
-        locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
-                sampleTime,
-                sampleDistance,
-                WiFiSamplerService.this);
+        try {
+            locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
+                    sampleTime,
+                    sampleDistance,
+                    WiFiSamplerService.this);
+        } catch (SecurityException ex) {
+            if(DEBUG) {
+                Log.w(TAG, "init()", ex);
+            }
+        }
 
         Configuration.with(this).register(this);
     }
@@ -103,7 +109,11 @@ public class WiFiSamplerService extends Service implements LocationListener,
         super.onDestroy();
 
         Configuration.with(this).unregister(this);
-        locationManager.removeUpdates(WiFiSamplerService.this);
+        try {
+            locationManager.removeUpdates(WiFiSamplerService.this);
+        } catch (SecurityException ex) {
+            // ignore
+        }
 
         if (DEBUG) {
             Log.i(TAG, "service destroyed");
@@ -144,11 +154,17 @@ public class WiFiSamplerService extends Service implements LocationListener,
                                 WiFiSamplerService.this.sampleTime + " ms, " + WiFiSamplerService.this.sampleDistance + " meters");
                     }
 
-                    locationManager.removeUpdates(WiFiSamplerService.this);
-                    locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
-                            WiFiSamplerService.this.sampleTime,
-                            WiFiSamplerService.this.sampleDistance,
-                            WiFiSamplerService.this);
+                    try {
+                        locationManager.removeUpdates(WiFiSamplerService.this);
+                        locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
+                                WiFiSamplerService.this.sampleTime,
+                                WiFiSamplerService.this.sampleDistance,
+                                WiFiSamplerService.this);
+                    } catch (SecurityException ex) {
+                        if(DEBUG) {
+                            Log.w(TAG, "updateSamplingConf()", ex);
+                        }
+                    }
                 }
             }
         });

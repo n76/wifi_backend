@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <Preference
+        android:key="grant_permission"
+        android:title="@string/preference_grant_permission" />
+
+    <Preference
         android:key="db_size_preference"
         android:title="@string/db_size_label" />
 </PreferenceScreen>

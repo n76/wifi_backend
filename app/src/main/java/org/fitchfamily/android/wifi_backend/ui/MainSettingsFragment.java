@@ -18,15 +18,20 @@ package org.fitchfamily.android.wifi_backend.ui;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import android.Manifest;
 import android.app.LoaderManager;
 import android.content.Loader;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 
 import org.androidannotations.annotations.AfterPreferences;
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.PreferenceScreen;
+import org.fitchfamily.android.wifi_backend.Configuration;
 import org.fitchfamily.android.wifi_backend.R;
 import org.fitchfamily.android.wifi_backend.ui.statistic.DatabaseStatistic;
 import org.fitchfamily.android.wifi_backend.ui.statistic.DatabaseStatisticLoader;
@@ -35,10 +40,20 @@ import org.fitchfamily.android.wifi_backend.ui.statistic.DatabaseStatisticLoader
 @PreferenceScreen(R.xml.main)
 public class MainSettingsFragment extends PreferenceFragment {
     private Preference statistic;
+    private Preference permission;
 
     @AfterPreferences
     protected void init() {
         statistic = findPreference("db_size_preference");
+        permission = findPreference("grant_permission");
+
+        permission.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                requestPermission();
+                return false;
+            }
+        });
 
         getLoaderManager().initLoader(0, null, new LoaderManager.LoaderCallbacks<DatabaseStatistic>() {
             @Override
@@ -56,9 +71,30 @@ public class MainSettingsFragment extends PreferenceFragment {
                 setRecords(0);
             }
         });
+
+        checkPermission();
     }
 
     private void setRecords(int number) {
         statistic.setSummary(getResources().getString(R.string.statistic_records, number));
+    }
+
+    private void requestPermission() {
+        if(!Configuration.with(getActivity()).hasLocationAccess()) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 0);
+        }
+    }
+
+    private void checkPermission() {
+        if(Configuration.with(getActivity()).hasLocationAccess()) {
+            getPreferenceScreen().removePreference(permission);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            checkPermission();
+        }
     }
 }

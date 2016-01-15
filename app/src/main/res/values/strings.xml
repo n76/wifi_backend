@@ -46,4 +46,7 @@
     <string name="drawer_advanced">Advanced</string>
     <string name="drawer_libraries">External libraries</string>
     <string name="drawer_website">Website</string>
+
+    <string name="notification_permission">Tap to grant the necessary location permission</string>
+    <string name="preference_grant_permission">@string/notification_permission</string>
 </resources>

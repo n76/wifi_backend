@@ -18,11 +18,14 @@ package org.fitchfamily.android.wifi_backend;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 public class Configuration {
@@ -59,10 +62,12 @@ public class Configuration {
 
     private SharedPreferences preferences;
     private Resources resources;
+    private Context context;
 
     private Configuration(Context context) {
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
         resources = context.getResources();
+        this.context = context;
     }
 
     // How accurate should our GPS position be to bother recording WiFi signals?
@@ -113,6 +118,10 @@ public class Configuration {
         preferences.unregisterOnSharedPreferenceChangeListener(listener);
 
         return this;
+    }
+
+    public boolean hasLocationAccess() {
+        return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
     private float parseFloat(String preferenceKey, int defaultResource) {

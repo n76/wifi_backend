@@ -24,25 +24,36 @@ import java.util.Set;
 
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.EService;
+import org.androidannotations.annotations.SystemService;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.Configuration;
+import org.fitchfamily.android.wifi_backend.R;
 import org.fitchfamily.android.wifi_backend.database.EstimateLocation;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
 import org.fitchfamily.android.wifi_backend.sampler.WiFiSamplerService;
 import org.fitchfamily.android.wifi_backend.sampler.WiFiSamplerService_;
+import org.fitchfamily.android.wifi_backend.ui.MainActivity;
+import org.fitchfamily.android.wifi_backend.ui.MainActivity_;
 import org.microg.nlp.api.LocationBackendService;
 
+import android.Manifest;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import org.fitchfamily.android.wifi_backend.backend.WifiReceiver.WifiReceivedCallback;
@@ -52,12 +63,18 @@ public class BackendService extends LocationBackendService {
     private static final String TAG = "BackendService";
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
+    private static final int NOTIFICATION = 42;
+
     private SamplerDatabase database;
     private WifiReceiver wifiReceiver;
-    private WiFiSamplerService collectorService;
     private Location lastReportLocation = null;
     private long lastReportTime = 0;
     private float lastReportAcc = (float) 100.0;
+    private boolean wifiSamplerServiceRunning = false;
+    private boolean permissionNotificationShown = false;
+
+    @SystemService
+    protected NotificationManager notificationManager;
 
     @AfterInject
     protected void init() {
@@ -71,16 +88,10 @@ public class BackendService extends LocationBackendService {
             Log.i(TAG, "onOpen()");
         }
 
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this);
-
         registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
-        bindService(new Intent(this, WiFiSamplerService_.class), mConnection, Context.BIND_AUTO_CREATE);
-
-        if (collectorService == null) {
-            if (DEBUG) {
-                Log.i(TAG, "No collectorService?\n");
-            }
+        if(Configuration.with(this).hasLocationAccess()) {
+            setWifiSamplerServiceRunning(true);
         }
     }
 
@@ -91,7 +102,8 @@ public class BackendService extends LocationBackendService {
         }
 
         unregisterReceiver(wifiReceiver);
-        unbindService(mConnection);
+        setWifiSamplerServiceRunning(false);
+        setShowPermissionNotification(false);
 
         wifiReceiver = null;
     }
@@ -102,7 +114,17 @@ public class BackendService extends LocationBackendService {
             Log.i(TAG, "update()");
         }
 
-        if (wifiReceiver != null) {
+        if(!Configuration.with(this).hasLocationAccess()) {
+            if (DEBUG) {
+                Log.i(TAG, "update(): Permission missing");
+            }
+
+            setWifiSamplerServiceRunning(false);
+            setShowPermissionNotification(true);
+        } else if (wifiReceiver != null) {
+            setWifiSamplerServiceRunning(true);
+            setShowPermissionNotification(false);
+
             if (DEBUG) {
                 Log.i(TAG, "update(): Starting scan for WiFi APs");
             }
@@ -182,16 +204,12 @@ public class BackendService extends LocationBackendService {
             if (DEBUG) {
                 Log.i(TAG, "mConnection.onServiceConnected()");
             }
-
-            WiFiSamplerService.MyBinder b = (WiFiSamplerService.MyBinder) binder;
-            collectorService = b.getService();
         }
+
         public void onServiceDisconnected(ComponentName className) {
             if (DEBUG) {
                 Log.i(TAG, "mConnection.onServiceDisconnected()");
             }
-
-            collectorService = null;
         }
     };
 
@@ -220,6 +238,57 @@ public class BackendService extends LocationBackendService {
             }
 
             report(locGuess);
+        }
+    }
+
+    private void setWifiSamplerServiceRunning(boolean enable) {
+        if(enable != wifiSamplerServiceRunning) {
+            if (enable) {
+                bindService(new Intent(this, WiFiSamplerService_.class), mConnection, Context.BIND_AUTO_CREATE);
+            } else {
+                unbindService(mConnection);
+            }
+
+            wifiSamplerServiceRunning = enable;
+        }
+    }
+
+    private void setShowPermissionNotification(boolean visible) {
+        if(visible != permissionNotificationShown) {
+            if(visible) {
+                if(DEBUG) {
+                    Log.i(TAG, "setShowPermissionNotification(true)");
+                }
+
+                notificationManager.notify(
+                        NOTIFICATION,
+                        new NotificationCompat.Builder(this)
+                                .setWhen(0)
+                                .setShowWhen(false)
+                                .setAutoCancel(false)
+                                .setOngoing(true)
+                                .setContentIntent(
+                                        PendingIntent.getActivity(
+                                                this,
+                                                0,
+                                                MainActivity_.intent(this).action(MainActivity.Action.request_permission).get(),
+                                                PendingIntent.FLAG_UPDATE_CURRENT
+                                        )
+                                )
+                                .setContentTitle(getString(R.string.app_title))
+                                .setContentText(getString(R.string.notification_permission))
+                                .setSmallIcon(R.drawable.ic_stat_no_location)
+                                .build()
+                );
+            } else {
+                if(DEBUG) {
+                    Log.i(TAG, "setShowPermissionNotification(false)");
+                }
+
+                notificationManager.cancel(NOTIFICATION);
+            }
+
+            permissionNotificationShown = visible;
         }
     }
 }

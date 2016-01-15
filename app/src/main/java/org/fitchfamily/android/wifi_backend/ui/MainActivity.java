@@ -37,6 +37,7 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.InstanceState;
 import org.androidannotations.annotations.ViewById;
 import org.fitchfamily.android.wifi_backend.Constants;
@@ -48,6 +49,9 @@ public class MainActivity extends Activity {
     private static final int ADVANCED = 2;
     private static final int LIBRARIES = 3;
     private static final int WEBSITE = 4;
+
+    @Extra
+    protected Action action;
 
     @ViewById
     protected Toolbar toolbar;
@@ -116,6 +120,10 @@ public class MainActivity extends Activity {
                 .build();
 
         updateTitle();
+
+        if(action == Action.request_permission) {
+            drawer.setSelection(SETTINGS);
+        }
     }
 
     @Override
@@ -149,5 +157,9 @@ public class MainActivity extends Activity {
         } else {
             super.onBackPressed();
         }
+    }
+
+    public enum Action {
+        request_permission
     }
 }
