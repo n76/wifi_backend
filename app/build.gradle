@@ -66,6 +66,7 @@ dependencies {
     compile "com.android.support:recyclerview-v7:$ASVersion"
     compile 'com.google.code.gson:gson:2.5'
     compile 'com.octo.android.robospice:robospice:1.4.14'
+    compile 'com.github.machinarius:preferencefragment:0.1.1'
 }
 
 apt {

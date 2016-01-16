@@ -18,11 +18,11 @@ package org.fitchfamily.android.wifi_backend.ui.statistic;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import android.content.AsyncTaskLoader;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.LocalBroadcastManager;
 
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;

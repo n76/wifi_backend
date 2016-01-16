@@ -18,11 +18,10 @@ package org.fitchfamily.android.wifi_backend.ui;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import android.app.Activity;
-import android.app.Fragment;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -44,7 +43,7 @@ import org.fitchfamily.android.wifi_backend.Constants;
 import org.fitchfamily.android.wifi_backend.R;
 
 @EActivity(R.layout.activity_main)
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
     private static final int SETTINGS = 1;
     private static final int ADVANCED = 2;
     private static final int LIBRARIES = 3;
@@ -133,7 +132,7 @@ public class MainActivity extends Activity {
     }
 
     private void setFragment(Fragment fragment) {
-        getFragmentManager().beginTransaction()
+        getSupportFragmentManager().beginTransaction()
                 .replace(R.id.container, fragment)
                 .commit();
 

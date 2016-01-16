@@ -18,7 +18,7 @@ package org.fitchfamily.android.wifi_backend.ui;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import android.app.DialogFragment;
+import android.support.v4.app.DialogFragment;
 
 import com.octo.android.robospice.SpiceManager;
 

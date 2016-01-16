@@ -17,19 +17,11 @@ package org.fitchfamily.android.wifi_backend.ui;
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import com.github.machinarius.preferencefragment.PreferenceFragment;
 
-import android.app.LoaderManager;
-import android.content.Loader;
-import android.os.Bundle;
-import android.preference.Preference;
-import android.preference.PreferenceFragment;
-
-import org.androidannotations.annotations.AfterPreferences;
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.PreferenceScreen;
 import org.fitchfamily.android.wifi_backend.R;
-import org.fitchfamily.android.wifi_backend.ui.statistic.DatabaseStatistic;
-import org.fitchfamily.android.wifi_backend.ui.statistic.DatabaseStatisticLoader;
 
 @EFragment
 @PreferenceScreen(R.xml.advanced)
