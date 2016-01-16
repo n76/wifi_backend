@@ -18,9 +18,20 @@ package org.fitchfamily.android.wifi_backend.backend;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.location.Location;
+import android.net.wifi.WifiManager;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.v4.app.NotificationCompat;
+import android.util.Log;
 
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.EService;
@@ -35,23 +46,12 @@ import org.fitchfamily.android.wifi_backend.ui.MainActivity;
 import org.fitchfamily.android.wifi_backend.ui.MainActivity_;
 import org.fitchfamily.android.wifi_backend.wifi.WifiAccessPoint;
 import org.fitchfamily.android.wifi_backend.wifi.WifiReceiver;
+import org.fitchfamily.android.wifi_backend.wifi.WifiReceiver.WifiReceivedCallback;
 import org.microg.nlp.api.LocationBackendService;
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.ServiceConnection;
-import android.location.Location;
-import android.net.wifi.WifiManager;
-import android.os.IBinder;
-import android.support.annotation.NonNull;
-import android.support.v4.app.NotificationCompat;
-import android.util.Log;
-
-import org.fitchfamily.android.wifi_backend.wifi.WifiReceiver.WifiReceivedCallback;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @EService
 public class BackendService extends LocationBackendService implements WifiReceivedCallback {
@@ -148,7 +148,12 @@ public class BackendService extends LocationBackendService implements WifiReceiv
                 EstimateLocation result = database.getLocation(accessPoint.bssid());
 
                 if (result != null) {
-                    locations.add(result.toAndroidLocation());
+                    Bundle extras = new Bundle();
+                    extras.putInt(Configuration.EXTRA_SIGNAL_LEVEL, accessPoint.level());
+
+                    Location location = result.toAndroidLocation();
+                    location.setExtras(extras);
+                    locations.add(location);
                 }
             }
 
