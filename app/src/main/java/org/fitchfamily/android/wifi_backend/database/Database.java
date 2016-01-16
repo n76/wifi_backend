@@ -42,7 +42,7 @@ public class Database extends SQLiteOpenHelper {
     private static final String TAG = "Database";
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
-    private static final int VERSION = 3;
+    private static final int VERSION = 4;
     private static final String NAME = "wifi.db";
 
     private static final String TABLE_SAMPLES = "APs";
@@ -66,7 +66,7 @@ public class Database extends SQLiteOpenHelper {
     @Deprecated
     private static final String COL_D31 = "d31";
     private static final String COL_MOVED_GUARD = "move_guard";
-
+    private static final String COL_SSID = "ssid";
 
     private SQLiteStatement sqlSampleInsert;
     private SQLiteStatement sqlSampleUpdate;
@@ -128,6 +128,10 @@ public class Database extends SQLiteOpenHelper {
             sqLiteDatabase.execSQL("UPDATE " + TABLE_SAMPLES +
                     " SET " + COL_RADIUS + "=-1.0;");
         }
+
+        if(oldVersion < 4) {  // upgrade to 4
+            sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_SAMPLES + " ADD COLUMN " + COL_SSID + " TEXT;");
+        }
     }
 
     @Override
@@ -146,8 +150,9 @@ public class Database extends SQLiteOpenHelper {
                 COL_LON2 + ", " +
                 COL_LAT3 + ", " +
                 COL_LON3 + ", " +
-                COL_MOVED_GUARD + ") " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+                COL_MOVED_GUARD + ", " +
+                COL_SSID + ") " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 
         sqlSampleUpdate = db.compileStatement("UPDATE " +
                 TABLE_SAMPLES + " SET "+
@@ -160,7 +165,8 @@ public class Database extends SQLiteOpenHelper {
                 COL_LON2 + "=?, " +
                 COL_LAT3 + "=?, " +
                 COL_LON3 + "=?, " +
-                COL_MOVED_GUARD + "=? " +
+                COL_MOVED_GUARD + "=?, " +
+                COL_SSID + "=? " +
                 "WHERE " + COL_BSSID + "=?;");
 
         sqlAPdrop = db.compileStatement("DELETE FROM " +
@@ -184,7 +190,8 @@ public class Database extends SQLiteOpenHelper {
     }
 
     public int getAccessPointCount() {
-        Cursor cursor= getReadableDatabase().rawQuery("SELECT COUNT(*) FROM " + TABLE_SAMPLES + ";", null);
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT COUNT(*) FROM " + TABLE_SAMPLES + ";", null);
+
         try {
             if(cursor.moveToFirst()) {
                 return (int) cursor.getLong(0);
@@ -267,7 +274,8 @@ public class Database extends SQLiteOpenHelper {
                         COL_LON2,
                         COL_LAT3,
                         COL_LON3,
-                        COL_MOVED_GUARD
+                        COL_MOVED_GUARD,
+                        COL_SSID
                 },
                 COL_BSSID + "=?",
                 new String[]{AccessPoint.bssid(bssid)},
@@ -284,6 +292,7 @@ public class Database extends SQLiteOpenHelper {
                 addLocation(cursor, 8, samples);
 
                 return AccessPoint.builder()
+                        .ssid(cursor.getString(11))
                         .bssid(AccessPoint.bssid(bssid))
                         .samples(samples)
                         .moveGuard(cursor.getInt(10))
@@ -301,7 +310,8 @@ public class Database extends SQLiteOpenHelper {
     protected void update(AccessPoint accessPoint) {
         synchronized (sqlSampleUpdate) {
             bind(sqlSampleUpdate, accessPoint, 1);
-            sqlSampleUpdate.bindString(11, accessPoint.bssid());
+            sqlSampleUpdate.bindString(11, accessPoint.ssid());
+            sqlSampleUpdate.bindString(12, accessPoint.bssid());
             sqlSampleUpdate.executeInsert();
             sqlSampleUpdate.clearBindings();
         }
@@ -313,6 +323,7 @@ public class Database extends SQLiteOpenHelper {
         synchronized (sqlSampleInsert) {
             sqlSampleInsert.bindString(1, accessPoint.bssid());
             bind(sqlSampleInsert, accessPoint, 2);
+            sqlSampleInsert.bindString(12, accessPoint.ssid());
             sqlSampleInsert.executeInsert();
             sqlSampleInsert.clearBindings();
         }

@@ -183,7 +183,7 @@ public class WifiSamplerService extends Service implements LocationListener,
                     if(WifiBlacklist.ignore(accessPoint.ssid())) {
                         database.dropAccessPoint(accessPoint.bssid());
                     } else {
-                        database.addSample(accessPoint.bssid(), org.fitchfamily.android.wifi_backend.database.Location.fromAndroidLocation(location));
+                        database.addSample(accessPoint.ssid(), accessPoint.bssid(), org.fitchfamily.android.wifi_backend.database.Location.fromAndroidLocation(location));
                     }
                 }
 

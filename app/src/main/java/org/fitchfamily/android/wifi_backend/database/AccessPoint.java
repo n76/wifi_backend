@@ -18,6 +18,7 @@ package org.fitchfamily.android.wifi_backend.database;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.google.auto.value.AutoValue;
@@ -47,6 +48,8 @@ public abstract class AccessPoint {
     }
 
     public abstract String bssid();
+    @Nullable
+    public abstract String ssid();
     public abstract ImmutableList<Location> samples();
     public abstract int moveGuard();
 
@@ -122,6 +125,7 @@ public abstract class AccessPoint {
     @AutoValue.Builder
     public abstract static class Builder {
         public abstract Builder bssid(String bssid);
+        public abstract Builder ssid(String ssid);
         public abstract Builder samples(List<Location> samples);
         public abstract Builder moveGuard(int moveGuard);
         public abstract AccessPoint build();

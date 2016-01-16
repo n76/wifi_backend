@@ -70,7 +70,7 @@ public class SamplerDatabase extends Database {
         return mInstance;
     }
 
-    public void addSample(String bssid, Location sampleLocation) {
+    public void addSample(String ssid, String bssid, Location sampleLocation) {
         final long entryTime = System.currentTimeMillis();
 
         AccessPoint accessPoint = query(bssid);
@@ -85,6 +85,7 @@ public class SamplerDatabase extends Database {
 
             if (diff >= Configuration.with(context).accessPointMoveThresholdInMeters()) {
                 accessPoint = accessPoint.buildUpon()
+                        .ssid(ssid)
                         .clearSamples()
                         .addSample(sampleLocation)
                         .moved(Configuration.with(context).accessPointMoveGuardSampleCount())
@@ -95,6 +96,7 @@ public class SamplerDatabase extends Database {
                 }
             } else {
                 accessPoint = accessPoint.buildUpon()
+                        .ssid(ssid)
                         .decMoved()
                         .addSample(sampleLocation)
                         .build();
@@ -108,6 +110,7 @@ public class SamplerDatabase extends Database {
         } else {
             insert(
                     AccessPoint.builder()
+                            .ssid(ssid)
                             .bssid(AccessPoint.bssid(bssid))
                             .moveGuard(0)
                             .addSample(sampleLocation)
