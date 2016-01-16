@@ -8,15 +8,10 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
 
-    <uses-sdk android:minSdkVersion="17"
-              android:targetSdkVersion="18"/>
-
-    <application android:label="@string/app_name" android:icon="@drawable/icon">
-        android:icon="@drawable/icon"
-        android:label="@string/app_name">
+    <application android:theme="@style/AppTheme" android:label="@string/app_name" android:icon="@mipmap/ic_launcher">
 
         <service
-            android:name=".BackendService"
+            android:name=".backend.BackendService_"
             android:label="@string/app_name"
             android:permission="android.permission.ACCESS_COARSE_LOCATION">
             <intent-filter>
@@ -24,21 +19,39 @@
             </intent-filter>
             <meta-data
                 android:name="org.microg.nlp.BACKEND_SETTINGS_ACTIVITY"
-                android:value="org.fitchfamily.android.wifi_backend.settings" />
+                android:value="org.fitchfamily.android.wifi_backend.ui.MainActivity_" />
             <meta-data
                 android:name="org.microg.nlp.BACKEND_SUMMARY"
                 android:value="@string/summary" />
         </service>
 
-        <activity android:name="org.fitchfamily.android.wifi_backend.settings"
+        <activity android:name=".ui.MainActivity_"
                   android:label="@string/app_name"
-                  android:screenOrientation="portrait"
                   >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
             </intent-filter>
         </activity>
 
-        <service android:name=".WiFiSamplerService" />
+        <service android:name=".sampler.WifiSamplerService_" />
+
+        <activity
+            android:name=".ui.data.WifiListActivity_"
+            android:label="@string/title_wifi_list"
+            android:parentActivityName=".ui.MainActivity_">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.fitchfamily.android.wifi_backend.ui.MainActivity_"/>
+        </activity>
+        <activity
+            android:name=".ui.data.WifiDetailActivity_"
+            android:label="@string/title_wifi_detail"
+            android:parentActivityName=".ui.data.WifiListActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.data.WifiListActivity"/>
+        </activity>
+
+        <service android:name=".SpiceService" android:exported="false" />
     </application>
 </manifest>

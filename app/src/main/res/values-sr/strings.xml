@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:xliff="http://schemas.android.com/tools">
     <string name="app_name">Услуга локације помоћу бежичних</string>
     <string name="app_title">Услуга локације помоћу бежичних</string>
     <string name="summary">Лоцирање помоћу личне базе података бежичних мрежа на телефону</string>
@@ -30,12 +30,10 @@
 
     <string name="db_size_label">Број познатих АП-а</string>
 
-    <string name="dbg_level">Исправљање грешака</string>
-    <string name="dbg_level_description">Записивање у дневник (0=искључено, 1=ретко, 2=нормално 3=исцрпно).</string>
-
     <!-- Generic suffix strings -->
-    <string name="meters">метара</string>
-    <string name="seconds">секунди</string>
-    <string name="samples">узорака</string>
-    <string name="records">АП-а</string>
+    <string name="pref_meters"><xliff:g id="number of meters" exmaple="42">%s</xliff:g> метара</string>
+    <string name="pref_seconds"><xliff:g id="number of seconds" exmaple="42">%s</xliff:g> секунди</string>
+    <string name="pref_samples"><xliff:g id="number of samples" exmaple="42">%s</xliff:g> узорака</string>
+    <string name="statistic_records"><xliff:g id="number of APs" example="12">%1$d</xliff:g> АП-а</string>
+
 </resources>

@@ -1,26 +1,29 @@
 <PreferenceScreen
         xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <PreferenceCategory
+        <PreferenceCategory
             android:title="@string/gps_config">
-        <EditTextPreference
+        <org.fitchfamily.android.wifi_backend.ui.EditTextPreference
                 android:key="gps_accuracy_preference"
                 android:title="@string/gps_accuracy"
+                android:summary="@string/pref_meters"
                 android:dialogTitle="@string/gps_accuracy_description"
                 android:defaultValue="@string/gps_accuracy_default"
                 android:inputType="number"
                 />
-        <EditTextPreference
+        <org.fitchfamily.android.wifi_backend.ui.EditTextPreference
                 android:key="gps_min_distance_preference"
                 android:title="@string/gps_min_distance"
+                android:summary="@string/pref_meters"
                 android:dialogTitle="@string/gps_min_distance_description"
                 android:defaultValue="@string/gps_min_distance_default"
                 android:inputType="numberDecimal"
                 android:digits="0123456789"
                 />
-        <EditTextPreference
+        <org.fitchfamily.android.wifi_backend.ui.EditTextPreference
                 android:key="gps_min_time_preference"
                 android:title="@string/gps_min_time"
+                android:summary="@string/pref_seconds"
                 android:dialogTitle="@string/gps_min_time_description"
                 android:defaultValue="@string/gps_min_time_default"
                 android:inputType="numberDecimal"
@@ -30,25 +33,28 @@
 
     <PreferenceCategory
             android:title="@string/ap_config">
-        <EditTextPreference
+        <org.fitchfamily.android.wifi_backend.ui.EditTextPreference
                 android:key="ap_min_range_preference"
                 android:title="@string/ap_min_range"
+                android:summary="@string/pref_meters"
                 android:dialogTitle="@string/ap_min_range_description"
                 android:defaultValue="@string/ap_min_range_default"
                 android:inputType="numberDecimal"
                 android:digits="0123456789"
                 />
-        <EditTextPreference
+        <org.fitchfamily.android.wifi_backend.ui.EditTextPreference
                 android:key="ap_moved_range_preference"
                 android:title="@string/ap_moved_range"
+                android:summary="@string/pref_meters"
                 android:dialogTitle="@string/ap_moved_range_description"
                 android:defaultValue="@string/ap_moved_range_default"
                 android:inputType="numberDecimal"
                 android:digits="0123456789"
                 />
-        <EditTextPreference
+        <org.fitchfamily.android.wifi_backend.ui.EditTextPreference
                 android:key="ap_moved_guard_preference"
                 android:title="@string/ap_moved_guard"
+                android:summary="@string/pref_samples"
                 android:dialogTitle="@string/ap_moved_guard_description"
                 android:defaultValue="@string/ap_moved_guard_default"
                 android:inputType="numberDecimal"
@@ -56,21 +62,4 @@
                 />
     </PreferenceCategory>
 
-    <EditTextPreference
-            android:key="db_size_preference"
-            android:title="@string/db_size_label"
-            android:dialogTitle="not used"
-            android:defaultValue=""
-            android:inputType="numberDecimal"
-            android:enabled="false"
-            />
-
-    <EditTextPreference
-            android:key="debug_preference"
-            android:title="@string/dbg_level"
-            android:dialogTitle="@string/dbg_level_description"
-            android:defaultValue="@string/dbg_level_default"
-            android:inputType="numberDecimal"
-            android:digits="0123456789"
-            />
 </PreferenceScreen>
