@@ -58,4 +58,7 @@
 
     <string name="data_export">Export data</string>
     <string name="data_export_error">Couldn\'t export data</string>
+
+    <string name="data_import">Import data</string>
+    <string name="data_import_error">Couldn\'t import data</string>
 </resources>

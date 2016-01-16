@@ -1,4 +1,4 @@
-package org.fitchfamily.android.wifi_backend.ui.data.export;
+package org.fitchfamily.android.wifi_backend.ui.data.transfer;
 
 /*
  *  WiFi Backend for Unified Network Location

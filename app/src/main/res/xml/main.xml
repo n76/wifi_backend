@@ -10,6 +10,12 @@
 
     <Preference
         android:enabled="@bool/is_kitkat_or_later"
+        android:key="db_import"
+        android:title="@string/data_import" />
+
+    <Preference
+        android:enabled="@bool/is_kitkat_or_later"
         android:key="db_export"
         android:title="@string/data_export" />
+
 </PreferenceScreen>

@@ -38,7 +38,8 @@ import org.androidannotations.annotations.PreferenceScreen;
 import org.fitchfamily.android.wifi_backend.Configuration;
 import org.fitchfamily.android.wifi_backend.R;
 import org.fitchfamily.android.wifi_backend.ui.data.WifiListActivity_;
-import org.fitchfamily.android.wifi_backend.ui.data.export.ExportProgressDialog_;
+import org.fitchfamily.android.wifi_backend.ui.data.transfer.ExportProgressDialog_;
+import org.fitchfamily.android.wifi_backend.ui.data.transfer.ImportProgressDialog_;
 import org.fitchfamily.android.wifi_backend.ui.statistic.DatabaseStatistic;
 import org.fitchfamily.android.wifi_backend.ui.statistic.DatabaseStatisticLoader;
 
@@ -46,6 +47,7 @@ import org.fitchfamily.android.wifi_backend.ui.statistic.DatabaseStatisticLoader
 @PreferenceScreen(R.xml.main)
 public class MainSettingsFragment extends PreferenceFragment {
     private static final int EXPORT_REQUEST_CODE = 1;
+    private static final int IMPORT_REQUEST_CODE = 2;
 
     private Preference statistic;
     private Preference permission;
@@ -55,6 +57,7 @@ public class MainSettingsFragment extends PreferenceFragment {
         statistic = findPreference("db_size_preference");
         permission = findPreference("grant_permission");
         final Preference export = findPreference("db_export");
+        final Preference importPref = findPreference("db_import");
 
         permission.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -89,6 +92,22 @@ public class MainSettingsFragment extends PreferenceFragment {
             }
         });
 
+        importPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    startActivityForResult(
+                            new Intent(Intent.ACTION_OPEN_DOCUMENT)
+                                    .setType("text/json")
+                                    .addCategory(Intent.CATEGORY_OPENABLE),
+                            IMPORT_REQUEST_CODE
+                    );
+                }
+
+                return true;
+            }
+        });
+
         getLoaderManager().initLoader(0, null, new LoaderManager.LoaderCallbacks<DatabaseStatistic>() {
             @Override
             public Loader<DatabaseStatistic> onCreateLoader(int i, Bundle bundle) {
@@ -113,6 +132,16 @@ public class MainSettingsFragment extends PreferenceFragment {
     protected void export(int resultCode, Intent intent) {
         if(resultCode == Activity.RESULT_OK) {
             ExportProgressDialog_.builder()
+                    .uri(intent.getData())
+                    .build()
+                    .show(getFragmentManager());
+        }
+    }
+
+    @OnActivityResult(IMPORT_REQUEST_CODE)
+    protected void importResult(int resultCode, Intent intent) {
+        if(resultCode == Activity.RESULT_OK) {
+            ImportProgressDialog_.builder()
                     .uri(intent.getData())
                     .build()
                     .show(getFragmentManager());

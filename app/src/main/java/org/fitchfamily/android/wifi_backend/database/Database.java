@@ -307,7 +307,7 @@ public class Database extends SQLiteOpenHelper {
         }
     }
 
-    protected void update(AccessPoint accessPoint) {
+    public void update(AccessPoint accessPoint) {
         synchronized (sqlSampleUpdate) {
             bind(sqlSampleUpdate, accessPoint, 1);
             sqlSampleUpdate.bindString(11, accessPoint.ssid());
@@ -319,7 +319,7 @@ public class Database extends SQLiteOpenHelper {
         onAccessPointDataChanged();
     }
 
-    protected void insert(AccessPoint accessPoint) {
+    public void insert(AccessPoint accessPoint) {
         synchronized (sqlSampleInsert) {
             sqlSampleInsert.bindString(1, accessPoint.bssid());
             bind(sqlSampleInsert, accessPoint, 2);
