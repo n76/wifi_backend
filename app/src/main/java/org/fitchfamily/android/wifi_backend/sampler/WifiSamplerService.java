@@ -18,9 +18,7 @@ package org.fitchfamily.android.wifi_backend.sampler;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -31,7 +29,6 @@ import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Bundle;
@@ -42,18 +39,16 @@ import android.util.Log;
 
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.EService;
-import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.SystemService;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.Configuration;
-import org.fitchfamily.android.wifi_backend.database.AccessPoint;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
 import org.fitchfamily.android.wifi_backend.wifi.WifiAccessPoint;
 import org.fitchfamily.android.wifi_backend.wifi.WifiCompat;
 import org.fitchfamily.android.wifi_backend.wifi.WifiReceiver;
 
 @EService
-public class WiFiSamplerService extends Service implements LocationListener,
+public class WifiSamplerService extends Service implements LocationListener,
         SharedPreferences.OnSharedPreferenceChangeListener, WifiReceiver.WifiReceivedCallback {
 
     private final static String TAG = "WiFiSamplerService";
@@ -95,7 +90,7 @@ public class WiFiSamplerService extends Service implements LocationListener,
             locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
                     sampleTime,
                     sampleDistance,
-                    WiFiSamplerService.this);
+                    WifiSamplerService.this);
         } catch (SecurityException ex) {
             if(DEBUG) {
                 Log.w(TAG, "init()", ex);
@@ -115,7 +110,7 @@ public class WiFiSamplerService extends Service implements LocationListener,
         Configuration.with(this).unregister(this);
 
         try {
-            locationManager.removeUpdates(WiFiSamplerService.this);
+            locationManager.removeUpdates(WifiSamplerService.this);
         } catch (SecurityException ex) {
             // ignore
         }
@@ -133,8 +128,8 @@ public class WiFiSamplerService extends Service implements LocationListener,
                 TextUtils.equals(key, Configuration.PREF_MIN_GPS_DISTANCE)) {
 
             updateSamplingConf(
-                    Configuration.with(WiFiSamplerService.this).minimumGpsTimeInMilliseconds(),
-                    Configuration.with(WiFiSamplerService.this).minimumGpsDistanceInMeters()
+                    Configuration.with(WifiSamplerService.this).minimumGpsTimeInMilliseconds(),
+                    Configuration.with(WifiSamplerService.this).minimumGpsDistanceInMeters()
             );
         }
     }
@@ -150,23 +145,23 @@ public class WiFiSamplerService extends Service implements LocationListener,
         executor.submit(new Runnable() {
             @Override
             public void run() {
-                if ((WiFiSamplerService.this.sampleTime != sampleTime) ||
-                        (WiFiSamplerService.this.sampleDistance != sampleDistance)) {
+                if ((WifiSamplerService.this.sampleTime != sampleTime) ||
+                        (WifiSamplerService.this.sampleDistance != sampleDistance)) {
 
-                    WiFiSamplerService.this.sampleTime = sampleTime;
-                    WiFiSamplerService.this.sampleDistance = sampleDistance;
+                    WifiSamplerService.this.sampleTime = sampleTime;
+                    WifiSamplerService.this.sampleDistance = sampleDistance;
 
                     if (DEBUG) {
                         Log.i(TAG, "Changing GPS sampling configuration: " +
-                                WiFiSamplerService.this.sampleTime + " ms, " + WiFiSamplerService.this.sampleDistance + " meters");
+                                WifiSamplerService.this.sampleTime + " ms, " + WifiSamplerService.this.sampleDistance + " meters");
                     }
 
                     try {
-                        locationManager.removeUpdates(WiFiSamplerService.this);
+                        locationManager.removeUpdates(WifiSamplerService.this);
                         locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
-                                WiFiSamplerService.this.sampleTime,
-                                WiFiSamplerService.this.sampleDistance,
-                                WiFiSamplerService.this);
+                                WifiSamplerService.this.sampleTime,
+                                WifiSamplerService.this.sampleDistance,
+                                WifiSamplerService.this);
                     } catch (SecurityException ex) {
                         if(DEBUG) {
                             Log.w(TAG, "updateSamplingConf()", ex);
@@ -185,7 +180,7 @@ public class WiFiSamplerService extends Service implements LocationListener,
                 long entryTime = System.currentTimeMillis();
 
                 for (WifiAccessPoint accessPoint : accessPoints) {
-                    if(WiFiBlacklist.ignore(accessPoint.bssid())) {
+                    if(WifiBlacklist.ignore(accessPoint.bssid())) {
                         database.dropAccessPoint(accessPoint.bssid());
                     } else {
                         database.addSample(accessPoint.bssid(), org.fitchfamily.android.wifi_backend.database.Location.fromAndroidLocation(location));
@@ -222,7 +217,7 @@ public class WiFiSamplerService extends Service implements LocationListener,
                 executor.submit(new Runnable() {
                     @Override
                     public void run() {
-                        WiFiSamplerService.this.location = location;
+                        WifiSamplerService.this.location = location;
 
                         // If WiFi scanning is possible, kick off a scan
                         if (wifi.isWifiEnabled() || WifiCompat.isScanAlwaysAvailable(wifi)) {

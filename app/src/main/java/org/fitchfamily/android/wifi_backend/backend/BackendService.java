@@ -30,7 +30,7 @@ import org.fitchfamily.android.wifi_backend.Configuration;
 import org.fitchfamily.android.wifi_backend.R;
 import org.fitchfamily.android.wifi_backend.database.EstimateLocation;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
-import org.fitchfamily.android.wifi_backend.sampler.WiFiSamplerService_;
+import org.fitchfamily.android.wifi_backend.sampler.WifiSamplerService_;
 import org.fitchfamily.android.wifi_backend.ui.MainActivity;
 import org.fitchfamily.android.wifi_backend.ui.MainActivity_;
 import org.fitchfamily.android.wifi_backend.wifi.WifiAccessPoint;
@@ -46,7 +46,6 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.location.Location;
 import android.net.wifi.WifiManager;
-import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
@@ -237,7 +236,7 @@ public class BackendService extends LocationBackendService implements WifiReceiv
     private void setWifiSamplerServiceRunning(boolean enable) {
         if(enable != wifiSamplerServiceRunning) {
             if (enable) {
-                bindService(new Intent(this, WiFiSamplerService_.class), mConnection, Context.BIND_AUTO_CREATE);
+                bindService(new Intent(this, WifiSamplerService_.class), mConnection, Context.BIND_AUTO_CREATE);
             } else {
                 unbindService(mConnection);
             }

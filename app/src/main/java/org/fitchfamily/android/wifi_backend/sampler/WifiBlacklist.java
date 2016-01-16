@@ -20,8 +20,8 @@ package org.fitchfamily.android.wifi_backend.sampler;
 
 import java.util.Locale;
 
-public abstract class WiFiBlacklist {
-    private WiFiBlacklist() {
+public abstract class WifiBlacklist {
+    private WifiBlacklist() {
 
     }
 
