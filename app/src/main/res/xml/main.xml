@@ -7,4 +7,9 @@
     <Preference
         android:key="db_size_preference"
         android:title="@string/db_size_label" />
+
+    <Preference
+        android:enabled="@bool/is_kitkat_or_later"
+        android:key="db_export"
+        android:title="@string/data_export" />
 </PreferenceScreen>

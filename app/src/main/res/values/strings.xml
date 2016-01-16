@@ -55,4 +55,7 @@
 
     <string name="wifi_detail_accuracy">Accuracy: %s</string>
     <string name="wifi_show_map">Show on map</string>
+
+    <string name="data_export">Export data</string>
+    <string name="data_export_error">Couldn\'t export data</string>
 </resources>

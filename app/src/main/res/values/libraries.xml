@@ -42,4 +42,45 @@
     <!-- License section -->
     <string name="library_guava_licenseId">apache_2_0</string>
     <!-- Custom variables section -->
+
+    <string name="define_robospice"></string>
+    <!-- Author section -->
+    <string name="library_robospice_author">Stéphane Nicolas</string>
+    <string name="library_robospice_authorWebsite">https://github.com/stephanenicolas</string>
+    <!-- Library section -->
+    <string name="library_robospice_libraryName">RoboSpice</string>
+    <string name="library_robospice_libraryDescription">RoboSpice is a modular android library that
+        makes writing asynchronous network requests easy!
+    </string>
+    <string name="library_robospice_libraryWebsite">
+        https://github.com/stephanenicolas/robospice/blob/release/README.md
+    </string>
+    <string name="library_robospice_libraryVersion">1.4.14</string>
+    <!-- OpenSource section -->
+    <string name="library_robospice_isOpenSource">true</string>
+    <string name="library_robospice_repositoryLink">https://github.com/stephanenicolas/robospice
+    </string>
+    <!-- ClassPath for autoDetect section -->
+    <string name="library_robospice_classPath">com.octo.android.robospice</string>
+    <!-- License section -->
+    <string name="library_robospice_licenseId">apache_2_0</string>
+    <!-- Custom variables section -->
+
+    <string name="define_gson"></string>
+    <!-- Author section -->
+    <string name="library_gson_author">Google Inc.</string>
+    <string name="library_gson_authorWebsite"></string>
+    <!-- Library section -->
+    <string name="library_gson_libraryName">Gson</string>
+    <string name="library_gson_libraryDescription">Gson is a Java library that can be used to convert Java Objects into their JSON representation. It can also be used to convert a JSON string to an equivalent Java object. Gson can work with arbitrary Java objects including pre-existing objects that you do not have source-code of.</string>
+    <string name="library_gson_libraryWebsite">https://github.com/google/gson/blob/master/README.md</string>
+    <string name="library_gson_libraryVersion">2.5</string>
+    <!-- OpenSource section -->
+    <string name="library_gson_isOpenSource">true</string>
+    <string name="library_gson_repositoryLink">https://github.com/google/gson</string>
+    <!-- ClassPath for autoDetect section -->
+    <string name="library_gson_classPath">com.google.gson</string>
+    <!-- License section -->
+    <string name="library_gson_licenseId">apache_2_0</string>
+    <!-- Custom variables section -->
 </resources>

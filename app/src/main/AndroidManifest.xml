@@ -55,5 +55,7 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".ui.data.WifiListActivity"/>
         </activity>
+
+        <service android:name=".SpiceService" android:exported="false" />
     </application>
 </manifest>

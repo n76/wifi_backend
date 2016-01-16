@@ -30,6 +30,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE.txt'
+    }
 }
 
 repositories {
@@ -59,6 +64,8 @@ dependencies {
     compile 'com.mikepenz:google-material-typeface:2.1.0.1.original@aar'
     compile "com.android.support:support-v4:$ASVersion"
     compile "com.android.support:recyclerview-v7:$ASVersion"
+    compile 'com.google.code.gson:gson:2.5'
+    compile 'com.octo.android.robospice:robospice:1.4.14'
 }
 
 apt {

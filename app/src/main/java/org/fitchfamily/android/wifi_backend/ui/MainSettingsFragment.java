@@ -19,9 +19,12 @@ package org.fitchfamily.android.wifi_backend.ui;
  */
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.Intent;
 import android.content.Loader;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
@@ -29,16 +32,20 @@ import android.support.annotation.NonNull;
 
 import org.androidannotations.annotations.AfterPreferences;
 import org.androidannotations.annotations.EFragment;
+import org.androidannotations.annotations.OnActivityResult;
 import org.androidannotations.annotations.PreferenceScreen;
 import org.fitchfamily.android.wifi_backend.Configuration;
 import org.fitchfamily.android.wifi_backend.R;
 import org.fitchfamily.android.wifi_backend.ui.data.WifiListActivity_;
+import org.fitchfamily.android.wifi_backend.ui.data.export.ExportProgressDialog_;
 import org.fitchfamily.android.wifi_backend.ui.statistic.DatabaseStatistic;
 import org.fitchfamily.android.wifi_backend.ui.statistic.DatabaseStatisticLoader;
 
 @EFragment
 @PreferenceScreen(R.xml.main)
 public class MainSettingsFragment extends PreferenceFragment {
+    private static final int EXPORT_REQUEST_CODE = 1;
+
     private Preference statistic;
     private Preference permission;
 
@@ -46,6 +53,7 @@ public class MainSettingsFragment extends PreferenceFragment {
     protected void init() {
         statistic = findPreference("db_size_preference");
         permission = findPreference("grant_permission");
+        final Preference export = findPreference("db_export");
 
         permission.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -59,6 +67,23 @@ public class MainSettingsFragment extends PreferenceFragment {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 WifiListActivity_.intent(getActivity()).start();
+                return true;
+            }
+        });
+
+        export.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    startActivityForResult(
+                            new Intent(Intent.ACTION_CREATE_DOCUMENT)
+                                    .setType("text/json")
+                                    .addCategory(Intent.CATEGORY_OPENABLE)
+                                    .putExtra(Intent.EXTRA_TITLE, "wifi.json"),
+                            EXPORT_REQUEST_CODE
+                    );
+                }
+
                 return true;
             }
         });
@@ -81,6 +106,16 @@ public class MainSettingsFragment extends PreferenceFragment {
         });
 
         checkPermission();
+    }
+
+    @OnActivityResult(EXPORT_REQUEST_CODE)
+    protected void export(int resultCode, Intent intent) {
+        if(resultCode == Activity.RESULT_OK) {
+            ExportProgressDialog_.builder()
+                    .uri(intent.getData())
+                    .build()
+                    .show(getFragmentManager());
+        }
     }
 
     private void setRecords(int number) {
