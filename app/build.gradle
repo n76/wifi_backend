@@ -44,19 +44,21 @@ def AAVersion = '3.3.2'
 def ASVersion = '23.0.0'
 
 dependencies {
-    compile 'org.microg:unifiednlp-api:1.3.2'
     compile "com.android.support:support-v4:$ASVersion"
     provided 'com.google.auto.value:auto-value:1.2-SNAPSHOT'
-    compile 'com.google.guava:guava:19.0'
     apt "org.androidannotations:androidannotations:$AAVersion"
     compile "org.androidannotations:androidannotations-api:$AAVersion"
     compile('com.mikepenz:materialdrawer:4.6.3@aar') {
         transitive = true
     }
-    compile 'com.mikepenz:google-material-typeface:2.1.0.1.original@aar'
     compile('com.mikepenz:aboutlibraries:5.3.7@aar') {
         transitive = true
     }
+    compile 'org.microg:unifiednlp-api:1.3.2'
+    compile 'com.google.guava:guava:19.0'
+    compile 'com.mikepenz:google-material-typeface:2.1.0.1.original@aar'
+    compile "com.android.support:support-v4:$ASVersion"
+    compile "com.android.support:recyclerview-v7:$ASVersion"
 }
 
 apt {

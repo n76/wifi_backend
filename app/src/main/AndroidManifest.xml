@@ -38,5 +38,22 @@
         </activity>
 
         <service android:name=".sampler.WifiSamplerService_" />
+
+        <activity
+            android:name=".ui.data.WifiListActivity_"
+            android:label="@string/title_wifi_list"
+            android:parentActivityName=".ui.MainActivity_">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="org.fitchfamily.android.wifi_backend.ui.MainActivity_"/>
+        </activity>
+        <activity
+            android:name=".ui.data.WifiDetailActivity_"
+            android:label="@string/title_wifi_detail"
+            android:parentActivityName=".ui.data.WifiListActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".ui.data.WifiListActivity"/>
+        </activity>
     </application>
 </manifest>

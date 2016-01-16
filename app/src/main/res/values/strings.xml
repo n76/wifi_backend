@@ -49,4 +49,10 @@
 
     <string name="notification_permission">Tap to grant the necessary location permission</string>
     <string name="preference_grant_permission">@string/notification_permission</string>
+
+    <string name="title_wifi_list">WiFis</string>
+    <string name="title_wifi_detail">WiFi Detail</string>
+
+    <string name="wifi_detail_accuracy">Accuracy: %s</string>
+    <string name="wifi_show_map">Show on map</string>
 </resources>

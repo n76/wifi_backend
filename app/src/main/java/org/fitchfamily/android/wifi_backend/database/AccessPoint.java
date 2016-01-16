@@ -43,6 +43,10 @@ public abstract class AccessPoint {
         return bssid.replace(":", "");
     }
 
+    public static String readableBssid(String bssid) {
+        return bssid(bssid).replaceAll(".(?!$).(?!$)", "$0:");
+    }
+
     public static Builder builder() {
         return new AutoValue_AccessPoint.Builder();
     }

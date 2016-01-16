@@ -26,13 +26,13 @@ import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 
 import org.androidannotations.annotations.AfterPreferences;
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.PreferenceScreen;
 import org.fitchfamily.android.wifi_backend.Configuration;
 import org.fitchfamily.android.wifi_backend.R;
+import org.fitchfamily.android.wifi_backend.ui.data.WifiListActivity_;
 import org.fitchfamily.android.wifi_backend.ui.statistic.DatabaseStatistic;
 import org.fitchfamily.android.wifi_backend.ui.statistic.DatabaseStatisticLoader;
 
@@ -52,6 +52,14 @@ public class MainSettingsFragment extends PreferenceFragment {
             public boolean onPreferenceClick(Preference preference) {
                 requestPermission();
                 return false;
+            }
+        });
+
+        statistic.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                WifiListActivity_.intent(getActivity()).start();
+                return true;
             }
         });
 

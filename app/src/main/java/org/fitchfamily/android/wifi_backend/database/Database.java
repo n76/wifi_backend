@@ -45,17 +45,17 @@ public class Database extends SQLiteOpenHelper {
     private static final int VERSION = 4;
     private static final String NAME = "wifi.db";
 
-    private static final String TABLE_SAMPLES = "APs";
-    private static final String COL_BSSID = "bssid";
-    private static final String COL_LATITUDE = "latitude";
-    private static final String COL_LONGITUDE = "longitude";
-    private static final String COL_RADIUS = "radius";
-    private static final String COL_LAT1 = "lat1";
-    private static final String COL_LON1 = "lon1";
-    private static final String COL_LAT2 = "lat2";
-    private static final String COL_LON2 = "lon2";
-    private static final String COL_LAT3 = "lat3";
-    private static final String COL_LON3 = "lon3";
+    public static final String TABLE_SAMPLES = "APs";
+    public static final String COL_BSSID = "bssid";
+    public static final String COL_LATITUDE = "latitude";
+    public static final String COL_LONGITUDE = "longitude";
+    public static final String COL_RADIUS = "radius";
+    public static final String COL_LAT1 = "lat1";
+    public static final String COL_LON1 = "lon1";
+    public static final String COL_LAT2 = "lat2";
+    public static final String COL_LON2 = "lon2";
+    public static final String COL_LAT3 = "lat3";
+    public static final String COL_LON3 = "lon3";
     // not used anymore
     @Deprecated
     private static final String COL_D12 = "d12";
@@ -65,8 +65,8 @@ public class Database extends SQLiteOpenHelper {
     // not used anymore
     @Deprecated
     private static final String COL_D31 = "d31";
-    private static final String COL_MOVED_GUARD = "move_guard";
-    private static final String COL_SSID = "ssid";
+    public static final String COL_MOVED_GUARD = "move_guard";
+    public static final String COL_SSID = "ssid";
 
     private SQLiteStatement sqlSampleInsert;
     private SQLiteStatement sqlSampleUpdate;
