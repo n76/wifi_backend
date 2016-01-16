@@ -76,15 +76,9 @@ public class WiFiSamplerService extends Service implements LocationListener,
 
     private WifiReceiver wifiReceiver;
 
-    public class MyBinder extends Binder {
-        public WiFiSamplerService getService() {
-            return WiFiSamplerService.this;
-        }
-    }
-
     @Override
     public IBinder onBind(Intent intent) {
-        return new MyBinder();
+        return new Binder();
     }
 
     @AfterInject
