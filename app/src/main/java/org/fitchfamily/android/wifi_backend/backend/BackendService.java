@@ -30,13 +30,13 @@ import org.fitchfamily.android.wifi_backend.Configuration;
 import org.fitchfamily.android.wifi_backend.R;
 import org.fitchfamily.android.wifi_backend.database.EstimateLocation;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
-import org.fitchfamily.android.wifi_backend.sampler.WiFiSamplerService;
 import org.fitchfamily.android.wifi_backend.sampler.WiFiSamplerService_;
 import org.fitchfamily.android.wifi_backend.ui.MainActivity;
 import org.fitchfamily.android.wifi_backend.ui.MainActivity_;
+import org.fitchfamily.android.wifi_backend.wifi.WifiAccessPoint;
+import org.fitchfamily.android.wifi_backend.wifi.WifiReceiver;
 import org.microg.nlp.api.LocationBackendService;
 
-import android.Manifest;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -44,22 +44,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
-import org.fitchfamily.android.wifi_backend.backend.WifiReceiver.WifiReceivedCallback;
+import org.fitchfamily.android.wifi_backend.wifi.WifiReceiver.WifiReceivedCallback;
 
 @EService
-public class BackendService extends LocationBackendService {
+public class BackendService extends LocationBackendService implements WifiReceivedCallback {
     private static final String TAG = "BackendService";
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
@@ -76,10 +72,13 @@ public class BackendService extends LocationBackendService {
     @SystemService
     protected NotificationManager notificationManager;
 
+    @SystemService
+    protected WifiManager wifiManager;
+
     @AfterInject
     protected void init() {
         database = SamplerDatabase.getInstance(this);
-        wifiReceiver = new WifiReceiver(this, new WifiDBResolver());
+        wifiReceiver = new WifiReceiver(wifiManager, this);
     }
 
     @Override
@@ -139,58 +138,52 @@ public class BackendService extends LocationBackendService {
         return null;
     }
 
-    private class WifiDBResolver implements WifiReceivedCallback {
-        @Override
-        public void process(List<Bundle> foundBssids) {
-            if (foundBssids == null || foundBssids.isEmpty()) {
-                doReport(null);
-                return;
+    @Override
+    public void process(@NonNull List<WifiAccessPoint> accessPoints) {
+        if (accessPoints.isEmpty()) {
+            doReport(null);
+        } else {
+            Set<Location> locations = new HashSet<>(accessPoints.size());
+
+            for (WifiAccessPoint accessPoint : accessPoints) {
+                EstimateLocation result = database.getLocation(accessPoint.bssid());
+
+                if (result != null) {
+                    locations.add(result.toAndroidLocation());
+                }
             }
 
-            if (database != null) {
-                Set<Location> locations = new HashSet<Location>(foundBssids.size());
-
-                for (Bundle extras : foundBssids) {
-                    EstimateLocation result = database.getLocation(extras.getString(Configuration.EXTRA_MAC_ADDRESS));
-
-                    if (result != null) {
-                        Location location = result.toAndroidLocation();
-                        location.setExtras(extras);
-                        locations.add(location);
-                    }
+            if (locations.isEmpty()) {
+                if (DEBUG) {
+                    Log.i(TAG, "WifiDBResolver.process(): No APs with known locations");
                 }
 
-                if (locations.isEmpty()) {
-                    if (DEBUG) {
-                        Log.i(TAG, "WifiDBResolver.process(): No APs with known locations");
-                    }
-                    doReport(null);
-                    return;
-                }
-
+                doReport(null);
+            } else {
                 // Find largest group of AP locations. If we don't have at
                 // least two near each other then we don't have enough
                 // information to get a good location.
                 locations = LocationUtil.culledAPs(locations, BackendService.this);
 
-                if (locations.size() < 2) {
+                if (locations == null || locations.size() < 2) {
                     if (DEBUG) {
                         Log.i(TAG, "WifiDBResolver.process(): Insufficient number of WiFi hotspots to resolve location");
                     }
 
                     doReport(null);
-                    return;
+                } else {
+                    Location avgLoc = LocationUtil.weightedAverage("wifi", locations);
+
+                    if (avgLoc == null) {
+                        if (DEBUG) {
+                            Log.e(TAG, "Averaging locations did not work.");
+                        }
+
+                        doReport(null);
+                    } else {
+                        doReport(avgLoc);
+                    }
                 }
-
-                Location avgLoc = LocationUtil.weightedAverage("wifi", locations);
-
-                if (avgLoc == null) {
-                    Log.e(TAG, "Averaging locations did not work.");
-                    doReport(null);
-                    return;
-                }
-
-                doReport(avgLoc);
             }
         }
     }

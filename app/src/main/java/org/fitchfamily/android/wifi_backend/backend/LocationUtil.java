@@ -144,7 +144,6 @@ public abstract class LocationUtil {
         for (Location value : locations) {
             if (value != null) {
                 samples++;
-                String bssid = value.getExtras().getString(Configuration.EXTRA_MAC_ADDRESS);
 
                 // We weight our average based on a linear value based on signal strength.
                 int dBm = value.getExtras().getInt(Configuration.EXTRA_SIGNAL_LEVEL);
@@ -152,9 +151,9 @@ public abstract class LocationUtil {
 
                 if (DEBUG) {
                     Log.i(TAG,
-                            String.format("Using with weight=%f mac=%s signal=%d accuracy=%f " +
+                            String.format("Using with weight=%f signal=%d accuracy=%f " +
                                             "latitude=%f longitude=%f",
-                                    wgt, bssid,
+                                    wgt,
                                     value.getExtras().getInt(Configuration.EXTRA_SIGNAL_LEVEL),
                                     value.getAccuracy(), value.getLatitude(),
                                     value.getLongitude()));
