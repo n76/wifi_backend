@@ -18,10 +18,6 @@ package org.fitchfamily.android.wifi_backend.sampler;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -46,6 +42,10 @@ import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
 import org.fitchfamily.android.wifi_backend.wifi.WifiAccessPoint;
 import org.fitchfamily.android.wifi_backend.wifi.WifiCompat;
 import org.fitchfamily.android.wifi_backend.wifi.WifiReceiver;
+
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @EService
 public class WifiSamplerService extends Service implements LocationListener,
@@ -180,7 +180,7 @@ public class WifiSamplerService extends Service implements LocationListener,
                 long entryTime = System.currentTimeMillis();
 
                 for (WifiAccessPoint accessPoint : accessPoints) {
-                    if(WifiBlacklist.ignore(accessPoint.bssid())) {
+                    if(WifiBlacklist.ignore(accessPoint.ssid())) {
                         database.dropAccessPoint(accessPoint.bssid());
                     } else {
                         database.addSample(accessPoint.bssid(), org.fitchfamily.android.wifi_backend.database.Location.fromAndroidLocation(location));
