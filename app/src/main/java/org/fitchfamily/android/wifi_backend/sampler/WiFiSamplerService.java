@@ -26,6 +26,7 @@ import java.util.concurrent.Executors;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.location.LocationListener;
@@ -35,6 +36,7 @@ import android.net.wifi.WifiManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -44,16 +46,18 @@ import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.SystemService;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.Configuration;
+import org.fitchfamily.android.wifi_backend.database.AccessPoint;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
+import org.fitchfamily.android.wifi_backend.wifi.WifiAccessPoint;
+import org.fitchfamily.android.wifi_backend.wifi.WifiCompat;
+import org.fitchfamily.android.wifi_backend.wifi.WifiReceiver;
 
 @EService
 public class WiFiSamplerService extends Service implements LocationListener,
-        SharedPreferences.OnSharedPreferenceChangeListener {
+        SharedPreferences.OnSharedPreferenceChangeListener, WifiReceiver.WifiReceivedCallback {
 
     private final static String TAG = "WiFiSamplerService";
     private static final boolean DEBUG = BuildConfig.DEBUG;
-
-    private boolean scanStarted = false;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -69,6 +73,8 @@ public class WiFiSamplerService extends Service implements LocationListener,
 
     private long sampleTime;
     private float sampleDistance;
+
+    private WifiReceiver wifiReceiver;
 
     public class MyBinder extends Binder {
         public WiFiSamplerService getService() {
@@ -90,6 +96,7 @@ public class WiFiSamplerService extends Service implements LocationListener,
         database = SamplerDatabase.getInstance(this);
         sampleTime = Configuration.with(this).minimumGpsTimeInMilliseconds();
         sampleDistance = Configuration.with(this).minimumGpsDistanceInMeters();
+
         try {
             locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
                     sampleTime,
@@ -102,6 +109,9 @@ public class WiFiSamplerService extends Service implements LocationListener,
         }
 
         Configuration.with(this).register(this);
+
+        wifiReceiver = new WifiReceiver(wifi, this);
+        registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
     }
 
     @Override
@@ -109,11 +119,14 @@ public class WiFiSamplerService extends Service implements LocationListener,
         super.onDestroy();
 
         Configuration.with(this).unregister(this);
+
         try {
             locationManager.removeUpdates(WiFiSamplerService.this);
         } catch (SecurityException ex) {
             // ignore
         }
+
+        unregisterReceiver(wifiReceiver);
 
         if (DEBUG) {
             Log.i(TAG, "service destroyed");
@@ -170,67 +183,26 @@ public class WiFiSamplerService extends Service implements LocationListener,
         });
     }
 
-    // This method call when number of wifi connections changed
-    @Receiver(actions = WifiManager.SCAN_RESULTS_AVAILABLE_ACTION, registerAt = Receiver.RegisterAt.OnCreateOnDestroy)
-    public void onWifiNetworksChanged(Intent intent) {
-        if (!isScanStarted()) {
-            return;
-        }
+    @Override
+    public void process(@NonNull final List<WifiAccessPoint> accessPoints) {
+        executor.submit(new Runnable() {
+            @Override
+            public void run() {
+                long entryTime = System.currentTimeMillis();
 
-        setScanStarted(false);
-        List<ScanResult> configs = wifi.getScanResults();
-
-        if (!configs.isEmpty()) {
-            final List<String> foundBssids = new ArrayList<String>(configs.size());
-
-            for (final ScanResult config : configs) {
-                // some strange devices use a dot instead of :
-                final String canonicalBSSID = config.BSSID.toUpperCase(Locale.US).replace(".", ":");
-
-                if (WiFiBlacklist.ignore(config.SSID)) {
-                    // ignore APs that are likely to be moving around.
-                    if (DEBUG) {
-                        Log.i(TAG, "Ignoring AP '" + config.SSID + "' BSSID: " + canonicalBSSID);
+                for (WifiAccessPoint accessPoint : accessPoints) {
+                    if(WiFiBlacklist.ignore(accessPoint.bssid())) {
+                        database.dropAccessPoint(accessPoint.bssid());
+                    } else {
+                        database.addSample(accessPoint.bssid(), org.fitchfamily.android.wifi_backend.database.Location.fromAndroidLocation(location));
                     }
+                }
 
-                    executor.submit(new Runnable() {
-                        @Override
-                        public void run() {
-                            database.dropAccessPoint(canonicalBSSID);
-                        }
-                    });
-                } else {
-                    if (DEBUG) {
-                        Log.i(TAG, "Scan found: '" + config.SSID + "' BSSID: " + canonicalBSSID);
-                    }
-
-                    foundBssids.add(canonicalBSSID);
+                if (DEBUG) {
+                    Log.i(TAG,"Scan process time: " + (System.currentTimeMillis() - entryTime) + " ms");
                 }
             }
-
-            executor.submit(new Runnable() {
-                @Override
-                public void run() {
-                    long entryTime = System.currentTimeMillis();
-
-                    for (String bssid : foundBssids) {
-                        database.addSample(bssid, org.fitchfamily.android.wifi_backend.database.Location.fromAndroidLocation(location));
-                    }
-
-                    if (DEBUG) {
-                        Log.i(TAG,"Scan process time: " + (System.currentTimeMillis() - entryTime) + " ms");
-                    }
-                }
-            });
-        }
-    }
-
-    public boolean isScanStarted() {
-        return scanStarted;
-    }
-
-    public void setScanStarted(boolean scanStarted) {
-        this.scanStarted = scanStarted;
+        });
     }
 
     @Override
@@ -259,8 +231,8 @@ public class WiFiSamplerService extends Service implements LocationListener,
                         WiFiSamplerService.this.location = location;
 
                         // If WiFi scanning is possible, kick off a scan
-                        if (wifi.isWifiEnabled() || isScanAlwaysAvailable()) {
-                            setScanStarted(true);
+                        if (wifi.isWifiEnabled() || WifiCompat.isScanAlwaysAvailable(wifi)) {
+                            wifiReceiver.setScanStarted(true);
                             wifi.startScan();
                         } else {
                             if (DEBUG) {
@@ -299,14 +271,6 @@ public class WiFiSamplerService extends Service implements LocationListener,
     public void onStatusChanged(String arg0, int arg1, Bundle arg2) {
         if (DEBUG) {
             Log.i(TAG, "Status Changed.");
-        }
-    }
-
-    private boolean isScanAlwaysAvailable() {
-        try {
-            return wifi.isScanAlwaysAvailable();
-        } catch (NoSuchMethodError ex) {
-            return false;
         }
     }
 }
