@@ -46,6 +46,9 @@ public abstract class WifiBlacklist {
                 SSIDLower.contains("guest@ms ") ||         // WLAN network on Hurtigruten ships
                 SSIDLower.contains("admin@ms ") ||         // WLAN network on Hurtigruten ships
                 SSIDLower.contains("telekom_ice") ||       // WLAN network on DB trains
-                SSIDLower.contains("nsb_interakti"));
+                SSIDLower.contains("nsb_interakti") ||
+                SSIDLower.contentEquals("amtrackconnect") ||    // WLAN network on USA Amtrak trains
+                SSIDLower.contentEquals("megabus")              // MegaBus on board of bus
+        );
     }
 }

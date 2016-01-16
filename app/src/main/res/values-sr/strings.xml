@@ -36,4 +36,23 @@
     <string name="pref_samples"><xliff:g id="number of samples" exmaple="42">%s</xliff:g> узорака</string>
     <string name="statistic_records"><xliff:g id="number of APs" example="12">%1$d</xliff:g> АП-а</string>
 
+    <string name="drawer_settings">Settings</string>
+    <string name="drawer_advanced">Advanced</string>
+    <string name="drawer_libraries">External libraries</string>
+    <string name="drawer_website">Website</string>
+
+    <string name="notification_permission">Tap to grant the necessary location permission</string>
+    <string name="preference_grant_permission">@string/notification_permission</string>
+
+    <string name="title_wifi_list">WiFis</string>
+    <string name="title_wifi_detail">WiFi Detail</string>
+
+    <string name="wifi_detail_accuracy">Accuracy: %s</string>
+    <string name="wifi_show_map">Show on map</string>
+
+    <string name="data_export">Export data</string>
+    <string name="data_export_error">Couldn\'t export data</string>
+
+    <string name="data_import">Import data</string>
+    <string name="data_import_error">Couldn\'t import data</string>
 </resources>
