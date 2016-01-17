@@ -26,6 +26,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.fitchfamily.android.wifi_backend.BuildConfig;
@@ -303,7 +304,9 @@ public class Database extends SQLiteOpenHelper {
     public void update(AccessPoint accessPoint) {
         synchronized (sqlSampleUpdate) {
             bind(sqlSampleUpdate, accessPoint, 1);
-            sqlSampleUpdate.bindString(11, accessPoint.ssid());
+            if(!TextUtils.isEmpty(accessPoint.ssid())) {
+                sqlSampleUpdate.bindString(11, accessPoint.ssid());
+            }
             sqlSampleUpdate.bindString(12, accessPoint.bssid());
             sqlSampleUpdate.executeInsert();
             sqlSampleUpdate.clearBindings();
@@ -316,7 +319,9 @@ public class Database extends SQLiteOpenHelper {
         synchronized (sqlSampleInsert) {
             sqlSampleInsert.bindString(1, accessPoint.bssid());
             bind(sqlSampleInsert, accessPoint, 2);
-            sqlSampleInsert.bindString(12, accessPoint.ssid());
+            if(!TextUtils.isEmpty(accessPoint.ssid())) {
+                sqlSampleInsert.bindString(12, accessPoint.ssid());
+            }
             sqlSampleInsert.executeInsert();
             sqlSampleInsert.clearBindings();
         }
