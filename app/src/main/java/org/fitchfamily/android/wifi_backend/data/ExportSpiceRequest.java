@@ -73,9 +73,9 @@ public class ExportSpiceRequest extends SpiceRequest<ExportSpiceRequest.Result> 
                         AccessPointAdapter.instance.write(writer, accessPoint);
                     } while (cursor.moveToNext());
                 }
-            } finally {
-                writer.endArray().flush();
 
+                writer.endArray().flush();
+            } finally {
                 if (cursor != null) {
                     cursor.close();
                 }
