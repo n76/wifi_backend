@@ -70,7 +70,10 @@ public class ExportSpiceRequest extends SpiceRequest<ExportSpiceRequest.Result> 
                 if (cursor != null && cursor.moveToFirst()) {
                     do {
                         AccessPoint accessPoint = SamplerDatabase.getInstance(context).query(cursor.getString(0));
-                        AccessPointAdapter.instance.write(writer, accessPoint);
+
+                        if(accessPoint != null) {
+                            AccessPointAdapter.instance.write(writer, accessPoint);
+                        }
                     } while (cursor.moveToNext());
                 }
 
