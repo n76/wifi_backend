@@ -24,6 +24,8 @@ import android.util.Log;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.Configuration;
 
+import java.io.File;
+
 /*
  * We estimate the AP location by keeping three samples that form a triangle.
  * Our best guess for the AP location is then the average of the lat/lon values
@@ -64,6 +66,14 @@ public class SamplerDatabase extends Database {
 
     public synchronized static SamplerDatabase getInstance(Context context) {
         if (mInstance == null) {
+            final File oldFile = new File(context.getFilesDir(), "wifi.db");
+            final File newFile = context.getDatabasePath("wifi.db");
+
+            if(oldFile.exists()) {
+                newFile.delete();
+                oldFile.renameTo(newFile);
+            }
+
             mInstance = new SamplerDatabase(context);
         }
 
