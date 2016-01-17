@@ -19,7 +19,6 @@ package org.fitchfamily.android.wifi_backend.database;
  */
 
 import android.content.Context;
-import android.content.ContextWrapper;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -32,7 +31,6 @@ import android.util.Log;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.Configuration;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -75,12 +73,7 @@ public class Database extends SQLiteOpenHelper {
     private final Context context;
 
     public Database(Context context) {
-        super(new ContextWrapper(context) {
-            @Override
-            public File getDatabasePath(String name) {
-                return getFilesDir();
-            }
-        }, NAME, null, VERSION);
+        super(context, NAME, null, VERSION);
 
         this.context = context;
         localBroadcastManager = LocalBroadcastManager.getInstance(context.getApplicationContext());
