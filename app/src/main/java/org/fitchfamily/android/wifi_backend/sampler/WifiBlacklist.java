@@ -48,7 +48,7 @@ public abstract class WifiBlacklist {
                 SSIDLower.contains("telekom_ice") ||       // WLAN network on DB trains
                 SSIDLower.contains("nsb_interakti") ||
                 SSIDLower.contentEquals("amtrackconnect") ||    // WLAN network on USA Amtrak trains
-                SSIDLower.contentEquals("megabus")              // MegaBus on board of bus
+                SSIDLower.contentEquals("megabus")              // WLAN network on MegaBus US bus
         );
     }
 }
