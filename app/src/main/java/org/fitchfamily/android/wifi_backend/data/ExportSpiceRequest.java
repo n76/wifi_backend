@@ -35,6 +35,7 @@ import java.io.OutputStreamWriter;
 
 public class ExportSpiceRequest extends SpiceRequest<ExportSpiceRequest.Result> {
     public static final String TAG = "ExportSpiceRequest";
+    public static final int MAX_PROGRESS = 1000;
 
     private final Context context;
     private final Uri uri;
@@ -74,6 +75,8 @@ public class ExportSpiceRequest extends SpiceRequest<ExportSpiceRequest.Result> 
                         if(accessPoint != null) {
                             AccessPointAdapter.instance.write(writer, accessPoint);
                         }
+
+                        publishProgress(cursor.getPosition() * MAX_PROGRESS / cursor.getCount());
                     } while (cursor.moveToNext());
                 }
 

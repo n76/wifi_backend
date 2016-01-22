@@ -47,6 +47,11 @@ public class ExportProgressDialog extends OperationProgressDialog<ExportSpiceReq
     }
 
     @Override
+    protected int getMaxProgress() {
+        return ExportSpiceRequest.MAX_PROGRESS;
+    }
+
+    @Override
     protected SpiceRequest<ExportSpiceRequest.Result> getRequest() {
         return new ExportSpiceRequest(getContext(), uri);
     }
