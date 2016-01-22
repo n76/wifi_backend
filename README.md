@@ -59,6 +59,7 @@ Changes
 0.6.0| |Configurable settings for data collection and use. Some improvements in performance
 0.6.1| |Fixup Android Studio/Gradle build environment
 0.17.0|21Aug2015|Increase location uncertainty if no position found.
+0.9.9|16Jan2016|Thanks to @UnknownUntilNow, new UI, refactored code, import and export of WiFi AP location information, support for Marshmallow
 
 License
 =======
