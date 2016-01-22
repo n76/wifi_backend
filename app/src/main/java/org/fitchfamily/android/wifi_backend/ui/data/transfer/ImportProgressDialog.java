@@ -18,27 +18,18 @@ package org.fitchfamily.android.wifi_backend.ui.data.transfer;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.net.Uri;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
-import android.widget.Toast;
 
-import com.octo.android.robospice.persistence.DurationInMillis;
-import com.octo.android.robospice.persistence.exception.SpiceException;
-import com.octo.android.robospice.request.listener.RequestListener;
+import com.octo.android.robospice.request.SpiceRequest;
 
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.FragmentArg;
 import org.fitchfamily.android.wifi_backend.R;
 import org.fitchfamily.android.wifi_backend.data.ImportSpiceRequest;
-import org.fitchfamily.android.wifi_backend.ui.BaseDialogFragment;
 
 @EFragment
-public class ImportProgressDialog extends BaseDialogFragment implements
-        RequestListener<ImportSpiceRequest.Result> {
+public class ImportProgressDialog extends OperationProgressDialog<ImportSpiceRequest.Result> {
 
     private static final String TAG = "ImportDialog";
 
@@ -50,29 +41,22 @@ public class ImportProgressDialog extends BaseDialogFragment implements
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        getSpiceManager().execute(new ImportSpiceRequest(getActivity(), uri), ImportSpiceRequest.TAG, DurationInMillis.ALWAYS_EXPIRED, this);
-    }
-
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        ProgressDialog dialog = new ProgressDialog(getActivity());
-        dialog.setCancelable(false);
-        dialog.setIndeterminate(true);
-        dialog.setMessage(getString(R.string.data_import));
-        return dialog;
+    protected String getMessage() {
+        return getString(R.string.data_import);
     }
 
     @Override
-    public void onRequestSuccess(ImportSpiceRequest.Result result) {
-        dismissAllowingStateLoss();
+    protected String getFailureMessage() {
+        return getString(R.string.data_import_error);
     }
 
     @Override
-    public void onRequestFailure(SpiceException exception) {
-        Toast.makeText(getActivity(), R.string.data_import_error, Toast.LENGTH_LONG).show();
-        dismissAllowingStateLoss();
+    protected SpiceRequest<ImportSpiceRequest.Result> getRequest() {
+        return new ImportSpiceRequest(getActivity(), uri);
+    }
+
+    @Override
+    protected Object getCacheKey() {
+        return uri.toString();
     }
 }

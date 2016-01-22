@@ -18,61 +18,45 @@ package org.fitchfamily.android.wifi_backend.ui.data.transfer;
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.net.Uri;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
-import android.widget.Toast;
 
-import com.octo.android.robospice.persistence.DurationInMillis;
-import com.octo.android.robospice.persistence.exception.SpiceException;
-import com.octo.android.robospice.request.listener.RequestListener;
+import com.octo.android.robospice.request.SpiceRequest;
 
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.FragmentArg;
 import org.fitchfamily.android.wifi_backend.R;
 import org.fitchfamily.android.wifi_backend.data.ExportSpiceRequest;
-import org.fitchfamily.android.wifi_backend.ui.BaseDialogFragment;
 
 @EFragment
-public class ExportProgressDialog extends BaseDialogFragment implements
-        RequestListener<ExportSpiceRequest.Result> {
+public class ExportProgressDialog extends OperationProgressDialog<ExportSpiceRequest.Result> {
 
     private static final String TAG = "ExportDialog";
 
     @FragmentArg
     protected Uri uri;
 
+    @Override
+    protected String getMessage() {
+        return getString(R.string.data_export);
+    }
+
+    @Override
+    protected String getFailureMessage() {
+        return getString(R.string.data_export_error);
+    }
+
+    @Override
+    protected SpiceRequest<ExportSpiceRequest.Result> getRequest() {
+        return new ExportSpiceRequest(getContext(), uri);
+    }
+
+    @Override
+    protected Object getCacheKey() {
+        return uri.toString();
+    }
+
     public void show(FragmentManager fragmentManager) {
         show(fragmentManager, TAG);
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        getSpiceManager().execute(new ExportSpiceRequest(getActivity(), uri), ExportSpiceRequest.TAG, DurationInMillis.ALWAYS_EXPIRED, this);
-    }
-
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        ProgressDialog dialog = new ProgressDialog(getActivity());
-        dialog.setCancelable(false);
-        dialog.setIndeterminate(true);
-        dialog.setMessage(getString(R.string.data_export));
-        return dialog;
-    }
-
-    @Override
-    public void onRequestSuccess(ExportSpiceRequest.Result result) {
-        dismissAllowingStateLoss();
-    }
-
-    @Override
-    public void onRequestFailure(SpiceException exception) {
-        Toast.makeText(getActivity(), R.string.data_export_error, Toast.LENGTH_LONG).show();
-        dismissAllowingStateLoss();
     }
 }
