@@ -29,6 +29,16 @@
                 android:inputType="numberDecimal"
                 android:digits="0123456789"
                 />
+
+        <org.fitchfamily.android.wifi_backend.ui.EditTextPreference
+                android:key="gps_valid_time_preference"
+                android:title="@string/gps_valid_time"
+                android:summary="@string/pref_seconds"
+                android:dialogTitle="@string/gps_valid_time_description"
+                android:defaultValue="@string/gps_valid_time_default"
+                android:inputType="numberDecimal"
+                android:digits="0123456789"
+                />
     </PreferenceCategory>
 
     <PreferenceCategory

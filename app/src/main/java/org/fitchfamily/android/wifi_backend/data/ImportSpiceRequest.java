@@ -19,11 +19,14 @@ package org.fitchfamily.android.wifi_backend.data;
  */
 
 import android.content.Context;
+import android.database.Cursor;
 import android.net.Uri;
+import android.provider.OpenableColumns;
 
 import com.google.gson.stream.JsonReader;
 import com.octo.android.robospice.request.SpiceRequest;
 
+import org.fitchfamily.android.wifi_backend.data.util.CountingInputStream;
 import org.fitchfamily.android.wifi_backend.database.AccessPoint;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
 
@@ -33,6 +36,7 @@ import java.io.InputStreamReader;
 
 public class ImportSpiceRequest extends SpiceRequest<ImportSpiceRequest.Result> {
     public static final String TAG = "ImportSpiceRequest";
+    public static final int MAX_PROGRESS = 1000;
 
     private final Context context;
     private final Uri uri;
@@ -49,14 +53,18 @@ public class ImportSpiceRequest extends SpiceRequest<ImportSpiceRequest.Result> 
 
     @Override
     public Result loadDataFromNetwork() throws Exception {
+        final long size = getFileSize(uri, context);
+
         InputStream inputStream = context.getContentResolver().openInputStream(uri);
 
         if(inputStream == null) {
             throw new IOException();
         }
 
+        CountingInputStream countingInputStream = new CountingInputStream(inputStream);
+
         try {
-            JsonReader reader = new JsonReader(new InputStreamReader(inputStream, "UTF-8"));
+            JsonReader reader = new JsonReader(new InputStreamReader(countingInputStream, "UTF-8"));
             reader.beginArray();
 
             while (reader.hasNext()) {
@@ -72,6 +80,10 @@ public class ImportSpiceRequest extends SpiceRequest<ImportSpiceRequest.Result> 
                         SamplerDatabase.getInstance(context).update(newAccessPoint);
                     }
                 }
+
+                if(size != 0) {
+                    publishProgress(countingInputStream.getBytesRead() * MAX_PROGRESS / size);
+                }
             }
 
             reader.endArray();
@@ -80,5 +92,21 @@ public class ImportSpiceRequest extends SpiceRequest<ImportSpiceRequest.Result> 
         }
 
         return null;
+    }
+
+    private static int getFileSize(Uri uri, Context context) {
+        Cursor cursor = context.getContentResolver().query(uri, new String[]{OpenableColumns.SIZE}, null, null, null);
+
+        try {
+            if(cursor != null && cursor.moveToFirst() && !cursor.isNull(0)) {
+                return cursor.getInt(0);
+            }
+        } finally {
+            if(cursor != null) {
+                cursor.close();
+            }
+        }
+
+        return 0;
     }
 }

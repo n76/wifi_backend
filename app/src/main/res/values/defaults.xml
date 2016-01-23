@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- GPS -->
+    <string name="gps_accuracy_default" translatable="false">10</string>
+    <string name="gps_min_distance_default" translatable="false">0</string>
+    <string name="gps_min_time_default" translatable="false">5</string>
+    <string name="gps_valid_time_default" translatable="false">3</string>
+
+    <!-- AP -->
+    <string name="ap_min_range_default" translatable="false">50</string>
+    <string name="ap_moved_range_default" translatable="false">1250</string>
+    <string name="ap_moved_guard_default" translatable="false">50</string>
+
+</resources>

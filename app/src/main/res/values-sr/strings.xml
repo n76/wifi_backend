@@ -4,7 +4,7 @@
     <string name="app_title">Услуга локације помоћу бежичних</string>
     <string name="summary">Лоцирање помоћу личне базе података бежичних мрежа на телефону</string>
 
-    <!-- GMS prefernces -->
+    <!-- GPS preferences -->
     <string name="gps_config">ГПС поставке</string>
 
     <string name="gps_accuracy">Захтевана прецизност</string>

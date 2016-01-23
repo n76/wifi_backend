@@ -21,12 +21,10 @@ package org.fitchfamily.android.wifi_backend;
 import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.preference.PreferenceManager;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 
 public class Configuration {
     // Identifiers for extra fields in Location records
@@ -40,6 +38,8 @@ public class Configuration {
     public static final String PREF_AP_ACCURACY = "ap_min_range_preference";
     public static final String PREF_MOVE_GUARD = "ap_moved_guard_preference";
     public static final String PREF_MOVE_RANGE = "ap_moved_range_preference";
+
+    public static final String PREF_GPS_VALID_TIME = "gps_valid_time";
 
     private static final Object lock = new Object();
     private static Configuration instance;
@@ -106,6 +106,10 @@ public class Configuration {
     // guess about the minimum accuracy for an individual AP
     public float accessPointAssumedAccuracy() {
         return parseFloat(PREF_AP_ACCURACY, R.string.ap_min_range_default);
+    }
+
+    public long validGpsTimeInMilliseconds() {
+        return parseLong(PREF_GPS_VALID_TIME, R.string.gps_valid_time_default) * 1000;
     }
 
     public Configuration register(SharedPreferences.OnSharedPreferenceChangeListener listener) {

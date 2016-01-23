@@ -22,7 +22,6 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.net.wifi.WifiManager;
@@ -38,7 +37,9 @@ import org.androidannotations.annotations.EService;
 import org.androidannotations.annotations.SystemService;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.Configuration;
+import org.fitchfamily.android.wifi_backend.database.Location;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
+import org.fitchfamily.android.wifi_backend.sampler.util.AgeValue;
 import org.fitchfamily.android.wifi_backend.wifi.WifiAccessPoint;
 import org.fitchfamily.android.wifi_backend.wifi.WifiCompat;
 import org.fitchfamily.android.wifi_backend.wifi.WifiReceiver;
@@ -62,7 +63,7 @@ public class WifiSamplerService extends Service implements LocationListener,
     @SystemService
     protected WifiManager wifi;
 
-    private Location location;
+    private AgeValue<Location> location = AgeValue.create();
 
     private SamplerDatabase database;
 
@@ -177,18 +178,30 @@ public class WifiSamplerService extends Service implements LocationListener,
         executor.submit(new Runnable() {
             @Override
             public void run() {
-                long entryTime = System.currentTimeMillis();
+                long locationAge = location.age();
 
-                for (WifiAccessPoint accessPoint : accessPoints) {
-                    if(WifiBlacklist.ignore(accessPoint.ssid())) {
-                        database.dropAccessPoint(accessPoint.bssid());
-                    } else {
-                        database.addSample(accessPoint.ssid(), accessPoint.bssid(), org.fitchfamily.android.wifi_backend.database.Location.fromAndroidLocation(location));
+                // always accept value which are not more than 500 milliseconds old because
+                // scanning wifis (after receiving GPS) can take a short amount of time
+
+                if(locationAge < 500 ||
+                        (locationAge < Configuration.with(WifiSamplerService.this).validGpsTimeInMilliseconds())) {
+
+                    wifiReceiver.setScanStarted(true);  // call this again if there is new data
+                    final Location location = WifiSamplerService.this.location.value();
+
+                    long entryTime = System.currentTimeMillis();
+
+                    for (WifiAccessPoint accessPoint : accessPoints) {
+                        if (WifiBlacklist.ignore(accessPoint.ssid())) {
+                            database.dropAccessPoint(accessPoint.bssid());
+                        } else {
+                            database.addSample(accessPoint.ssid(), accessPoint.bssid(), location);
+                        }
                     }
-                }
 
-                if (DEBUG) {
-                    Log.i(TAG,"Scan process time: " + (System.currentTimeMillis() - entryTime) + " ms");
+                    if (DEBUG) {
+                        Log.i(TAG, "Scan process time: " + (System.currentTimeMillis() - entryTime) + " ms");
+                    }
                 }
             }
         });
@@ -200,7 +213,7 @@ public class WifiSamplerService extends Service implements LocationListener,
     }
 
     @Override
-    public void onLocationChanged(final Location location) {
+    public void onLocationChanged(final android.location.Location location) {
         if (DEBUG) {
             Log.i(TAG, "onLocationChanged(" + location + ")");
         }
@@ -217,7 +230,7 @@ public class WifiSamplerService extends Service implements LocationListener,
                 executor.submit(new Runnable() {
                     @Override
                     public void run() {
-                        WifiSamplerService.this.location = location;
+                        WifiSamplerService.this.location.value(Location.fromAndroidLocation(location));
 
                         // If WiFi scanning is possible, kick off a scan
                         if (wifi.isWifiEnabled() || WifiCompat.isScanAlwaysAvailable(wifi)) {
