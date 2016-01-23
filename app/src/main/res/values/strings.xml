@@ -4,7 +4,7 @@
     <string name="app_title">WiFi Location Service</string>
     <string name="summary">Locate using private on phone WiFi database</string>
 
-    <!-- GMS prefernces -->
+    <!-- GPS preferences -->
     <string name="gps_config">GPS Setup</string>
 
     <string name="gps_accuracy">Required Accuracy</string>
