@@ -9,34 +9,27 @@
 
     <string name="gps_accuracy">Required Accuracy</string>
     <string name="gps_accuracy_description">GPS error must be no more than (meters).</string>
-    <string name="gps_accuracy_default" translatable="false">10</string>
 
     <string name="gps_min_distance">Sample distance</string>
     <string name="gps_min_distance_description">Minimum distance between GPS location samples (meters).</string>
-    <string name="gps_min_distance_default" translatable="false">0</string>
 
     <string name="gps_min_time">Sample interval</string>
     <string name="gps_min_time_description">Time between GPS location samples (seconds).</string>
-    <string name="gps_min_time_default" translatable="false">5</string>
 
     <string name="gps_valid_time">GPS valid time</string>
     <string name="gps_valid_time_description">The time in which the last GPS signal is valid (seconds).</string>
-    <string name="gps_valid_time_default" translatable="false">3</string>
 
     <!-- AP preferences -->
     <string name="ap_config">WiFi AP Assumptions</string>
 
     <string name="ap_min_range">Minimum AP range</string>
     <string name="ap_min_range_description">Minimum assumed range of an AP (meters).</string>
-    <string name="ap_min_range_default" translatable="false">50</string>
 
     <string name="ap_moved_range">Moved threshold</string>
     <string name="ap_moved_range_description">Maximum assumed range of an AP (meters).</string>
-    <string name="ap_moved_range_default" translatable="false">1250</string>
 
     <string name="ap_moved_guard">Move guard</string>
     <string name="ap_moved_guard_description">Samples at new location before a moved AP is trusted.</string>
-    <string name="ap_moved_guard_default" translatable="false">50</string>
 
     <string name="db_size_label">Number of known APs</string>
 
