@@ -273,7 +273,7 @@ public class BackendService extends LocationBackendService implements WifiReceiv
                                         )
                                 )
                                 .setContentTitle(getString(R.string.app_title))
-                                .setContentText(getString(R.string.notification_permission))
+                                .setContentText(getString(R.string.preference_grant_permission))
                                 .setSmallIcon(R.drawable.ic_stat_no_location)
                                 .build()
                 );

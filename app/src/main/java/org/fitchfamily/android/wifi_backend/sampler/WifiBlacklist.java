@@ -29,7 +29,8 @@ public abstract class WifiBlacklist {
         String SSIDLower = SSID.toLowerCase(Locale.US);
 
         return (SSIDLower.endsWith("_nomap") ||            // Google unsubscibe option
-                SSID.startsWith("Audi") ||          // some cars seem to have this AP on-board
+                SSID.startsWith("Audi") ||                        // some cars seem to have this AP on-board
+                SSID.startsWith("Samsung Galaxy") ||       // mobile AP
                 SSIDLower.contains("iphone") ||            // mobile AP
                 SSIDLower.contains("ipad") ||              // mobile AP
                 SSIDLower.contains("android") ||           // mobile AP

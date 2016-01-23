@@ -44,7 +44,7 @@
     <string name="drawer_libraries">Externe Bibliotheken</string>
     <string name="drawer_website">Website</string>
 
-    <string name="notification_permission">Berühren um erforderlichen Standortzugriff zu erlauben</string>
+    <string name="preference_grant_permission">Berühren um erforderlichen Standortzugriff zu erlauben</string>
 
     <string name="title_wifi_list">WLANs</string>
     <string name="title_wifi_detail">WLAN Details</string>
