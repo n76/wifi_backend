@@ -19,6 +19,10 @@
     <string name="gps_min_time_description">Time between GPS location samples (seconds).</string>
     <string name="gps_min_time_default" translatable="false">5</string>
 
+    <string name="gps_valid_time">GPS valid time</string>
+    <string name="gps_valid_time_description">The time in which the last GPS signal is valid (seconds).</string>
+    <string name="gps_valid_time_default" translatable="false">3</string>
+
     <!-- AP preferences -->
     <string name="ap_config">WiFi AP Assumptions</string>
 
