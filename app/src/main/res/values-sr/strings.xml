@@ -16,8 +16,8 @@
     <string name="gps_min_time">Интервал узорака</string>
     <string name="gps_min_time_description">Време између узорака ГПС локације (секунди).</string>
 
-    <string name="gps_valid_time">GPS valid time</string>
-    <string name="gps_valid_time_description">The time in which the last GPS signal is valid (seconds).</string>
+    <string name="gps_valid_time">Време важења ГПС-а</string>
+    <string name="gps_valid_time_description">Време за које је последњи ГПС сигнал важећи (секунди).</string>
 
     <!-- AP preferences -->
     <string name="ap_config">Претпоставке бежичних АП-а</string>
@@ -39,22 +39,22 @@
     <string name="pref_samples"><xliff:g id="number of samples" exmaple="42">%s</xliff:g> узорака</string>
     <string name="statistic_records"><xliff:g id="number of APs" example="12">%1$d</xliff:g> АП-а</string>
 
-    <string name="drawer_settings">Settings</string>
-    <string name="drawer_advanced">Advanced</string>
-    <string name="drawer_libraries">External libraries</string>
-    <string name="drawer_website">Website</string>
+    <string name="drawer_settings">Поставке</string>
+    <string name="drawer_advanced">Напредно</string>
+    <string name="drawer_libraries">Спољашње библиотеке</string>
+    <string name="drawer_website">Вебсајт</string>
 
-    <string name="preference_grant_permission">Tap to grant the necessary location permission</string>
+    <string name="preference_grant_permission">Тапните да одобрите потребне дозволе за локацију</string>
 
-    <string name="title_wifi_list">WiFis</string>
-    <string name="title_wifi_detail">WiFi Detail</string>
+    <string name="title_wifi_list">Бежични</string>
+    <string name="title_wifi_detail">Детаљи бежичног</string>
 
-    <string name="wifi_detail_accuracy">Accuracy: %s</string>
-    <string name="wifi_show_map">Show on map</string>
+    <string name="wifi_detail_accuracy">Прецизност: %s</string>
+    <string name="wifi_show_map">Прикажи на мапи</string>
 
-    <string name="data_export">Export data</string>
-    <string name="data_export_error">Couldn\'t export data</string>
+    <string name="data_export">Извоз података</string>
+    <string name="data_export_error">Не могох да извезем податке</string>
 
-    <string name="data_import">Import data</string>
-    <string name="data_import_error">Couldn\'t import data</string>
+    <string name="data_import">Увоз података</string>
+    <string name="data_import_error">Не могох да увезем податке</string>
 </resources>
