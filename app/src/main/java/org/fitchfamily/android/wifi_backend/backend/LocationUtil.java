@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Set;
 
 public abstract class LocationUtil {
-    private static final String TAG = "LocationUtil";
+    private static final String TAG = "WiFiBackendLocationUtil";
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
     private LocationUtil() {
@@ -180,10 +180,6 @@ public abstract class LocationUtil {
                 longitude += rVal;
                 m2_lon += totalWeight * delta * rVal;
 
-//                delta = value.getAccuracy() - accuracy;
-//                rVal = delta * wgt / temp;
-//                if (configuration.debug >= configuration.DEBUG_VERBOSE) Log.i(TAG, "accuracy: delta="+delta+", R="+rVal);
-//                accuracy += rVal;
                 double thisAcc = value.getAccuracy();
                 accuracy += thisAcc * thisAcc;
 

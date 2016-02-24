@@ -25,6 +25,7 @@ import android.net.Uri;
 import com.google.gson.stream.JsonWriter;
 import com.octo.android.robospice.request.SpiceRequest;
 
+import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.database.AccessPoint;
 import org.fitchfamily.android.wifi_backend.database.Database;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
@@ -34,7 +35,9 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
 public class ExportSpiceRequest extends SpiceRequest<ExportSpiceRequest.Result> {
-    public static final String TAG = "ExportSpiceRequest";
+    public static final String TAG = "WiFiBackendExportSpiceRequest";
+    private static final boolean DEBUG = BuildConfig.DEBUG;
+
     public static final int MAX_PROGRESS = 1000;
 
     private final Context context;

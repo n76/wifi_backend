@@ -32,7 +32,7 @@ import java.util.List;
 @AutoValue
 public abstract class AccessPoint {
     private static final int MIN_SAMPLES = 3;
-    private static final String TAG = "AccessPoint";
+    private static final String TAG = "WiFiBackendAccessPoint";
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
     AccessPoint() {

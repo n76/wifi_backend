@@ -26,6 +26,7 @@ import android.provider.OpenableColumns;
 import com.google.gson.stream.JsonReader;
 import com.octo.android.robospice.request.SpiceRequest;
 
+import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.data.util.CountingInputStream;
 import org.fitchfamily.android.wifi_backend.database.AccessPoint;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
@@ -35,7 +36,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class ImportSpiceRequest extends SpiceRequest<ImportSpiceRequest.Result> {
-    public static final String TAG = "ImportSpiceRequest";
+    public static final String TAG = "WiFiBackendImportSpiceRequest";
+    private static final boolean DEBUG = BuildConfig.DEBUG;
     public static final int MAX_PROGRESS = 1000;
 
     private final Context context;

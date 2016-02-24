@@ -31,7 +31,7 @@ import org.fitchfamily.android.wifi_backend.data.ExportSpiceRequest;
 @EFragment
 public class ExportProgressDialog extends OperationProgressDialog<ExportSpiceRequest.Result> {
 
-    private static final String TAG = "ExportDialog";
+    private static final String TAG = "WiFiBackendExportDialog";
 
     @FragmentArg
     protected Uri uri;
