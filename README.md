@@ -8,6 +8,8 @@ The other part is the actual location provider which uses the database to estima
 
 This backend performs no network data. All data acquired by the phone stays on the phone and no queries are made to a centralized AP location provider.
 
+[![Get it on F-Droid](get_it_on_f-droid.png?raw=true)](https://f-droid.org/repository/browse/?fdid=org.fitchfamily.android.wifi_backend)
+
 Requirement for building
 ========================
 
