@@ -63,6 +63,7 @@ Changes
 0.17.0|21Aug2015|Increase location uncertainty if no position found.
 0.9.9|16Jan2016|Thanks to @UnknownUntilNow, new UI, refactored code, import and export of WiFi AP location information, support for Marshmallow
 1.0.0|6Jan2016|Thanks to @pejakm, update Serbian translation
+1.0.2|23Mar2016|Update for revised UnifiedNlp with aging of reports.
 
 License
 =======

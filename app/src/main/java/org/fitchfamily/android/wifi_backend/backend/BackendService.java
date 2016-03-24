@@ -62,9 +62,6 @@ public class BackendService extends LocationBackendService implements WifiReceiv
 
     private SamplerDatabase database;
     private WifiReceiver wifiReceiver;
-    private Location lastReportLocation = null;
-    private long lastReportTime = 0;
-    private float lastReportAcc = (float) 100.0;
     private boolean wifiSamplerServiceRunning = false;
     private boolean permissionNotificationShown = false;
 
@@ -140,7 +137,7 @@ public class BackendService extends LocationBackendService implements WifiReceiv
     @Override
     public void process(@NonNull List<WifiAccessPoint> accessPoints) {
         if (accessPoints.isEmpty()) {
-            doReport(null);
+            report(null);
         } else {
             Set<Location> locations = new HashSet<>(accessPoints.size());
 
@@ -162,7 +159,7 @@ public class BackendService extends LocationBackendService implements WifiReceiv
                     Log.i(TAG, "WifiDBResolver.process(): No APs with known locations");
                 }
 
-                doReport(null);
+                report(null);
             } else {
                 // Find largest group of AP locations. If we don't have at
                 // least two near each other then we don't have enough
@@ -174,7 +171,7 @@ public class BackendService extends LocationBackendService implements WifiReceiv
                         Log.i(TAG, "WifiDBResolver.process(): Insufficient number of WiFi hotspots to resolve location");
                     }
 
-                    doReport(null);
+                    report(null);
                 } else {
                     Location avgLoc = LocationUtil.weightedAverage("wifi", locations);
 
@@ -183,9 +180,10 @@ public class BackendService extends LocationBackendService implements WifiReceiv
                             Log.e(TAG, "Averaging locations did not work.");
                         }
 
-                        doReport(null);
+                        report(null);
                     } else {
-                        doReport(avgLoc);
+                        avgLoc.setTime(System.currentTimeMillis());
+                        report(avgLoc);
                     }
                 }
             }
@@ -209,34 +207,6 @@ public class BackendService extends LocationBackendService implements WifiReceiv
             }
         }
     };
-
-    //
-    // Report location to UnifiedNLP - If current report is null (location unknown) then
-    // take the last report and increase its positional error. Assumption is 100km/hr
-    // (reasonable driving speed) from point last seen.
-    // 100km/hr => 100,000 m/hr ==> ~28m/sec
-    //
-    private void doReport(Location locReport) {
-        if (locReport != null) {
-            lastReportLocation = locReport;
-            lastReportTime = System.currentTimeMillis();
-            lastReportAcc = locReport.getAccuracy();
-            report(locReport);
-        } else {
-            Location locGuess = lastReportLocation;
-
-            if (locGuess != null) {
-                long sec = (System.currentTimeMillis() - lastReportTime + 500)/1000;
-                locGuess.setAccuracy((float) (lastReportAcc + 28.0 * sec));
-
-                if (DEBUG) {
-                    Log.i(TAG, "acc=" + lastReportAcc + ", sec=" + sec + ", scaled accuracy = " + (float) (lastReportAcc + 28.0*sec));
-                }
-            }
-
-            report(locGuess);
-        }
-    }
 
     private void setWifiSamplerServiceRunning(boolean enable) {
         if(enable != wifiSamplerServiceRunning) {
