@@ -2,7 +2,9 @@
 <resources xmlns:xliff="http://schemas.android.com/tools">
     <string name="app_name">Услуга локације помоћу бежичних</string>
     <string name="app_title">Услуга локације помоћу бежичних</string>
+    <!--
     <string name="summary">Лоцирање помоћу личне базе података бежичних мрежа на телефону</string>
+    -->
 
     <!-- GPS preferences -->
     <string name="gps_config">ГПС поставке</string>

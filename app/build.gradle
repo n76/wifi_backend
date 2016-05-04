@@ -5,7 +5,7 @@ buildscript {
 
     dependencies {
         // replace with the current version of the Android plugin
-        classpath 'com.android.tools.build:gradle:1.5.0'
+        classpath 'com.android.tools.build:gradle:2.1.0'
         // replace with the current version of the android-apt plugin
         classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
     }
@@ -50,7 +50,7 @@ def ASVersion = '23.0.0'
 
 dependencies {
     compile "com.android.support:support-v4:$ASVersion"
-    provided 'com.google.auto.value:auto-value:1.2-SNAPSHOT'
+    provided 'com.google.auto.value:auto-value:1.2-rc1'
     apt "org.androidannotations:androidannotations:$AAVersion"
     compile "org.androidannotations:androidannotations-api:$AAVersion"
     compile('com.mikepenz:materialdrawer:4.6.3@aar') {

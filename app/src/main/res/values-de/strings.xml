@@ -2,7 +2,9 @@
 <resources xmlns:xliff="http://schemas.android.com/tools">
     <string name="app_name">WLAN Standortdienst</string>
     <string name="app_title">WLAN Standortdienst</string>
+    <!--
     <string name="summary">Standortermittlung mittels WLAN-Datenbank auf dem Telefon</string>
+    -->
 
     <!-- GPS preferences -->
     <string name="gps_config">GPS Einstellungen</string>
