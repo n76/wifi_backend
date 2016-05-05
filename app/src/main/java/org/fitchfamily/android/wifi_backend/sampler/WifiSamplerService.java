@@ -191,6 +191,7 @@ public class WifiSamplerService extends Service implements LocationListener,
 
                     long entryTime = System.currentTimeMillis();
 
+                    database.beginTransaction();
                     for (WifiAccessPoint accessPoint : accessPoints) {
                         if (WifiBlacklist.ignore(accessPoint.ssid())) {
                             database.dropAccessPoint(accessPoint.bssid());
@@ -198,6 +199,7 @@ public class WifiSamplerService extends Service implements LocationListener,
                             database.addSample(accessPoint.ssid(), accessPoint.bssid(), location);
                         }
                     }
+                    database.commitTransaction();
 
                     if (DEBUG) {
                         Log.i(TAG, "Scan process time: " + (System.currentTimeMillis() - entryTime) + " ms");

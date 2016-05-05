@@ -99,6 +99,8 @@ public class ImportSpiceRequest extends SpiceRequest<ImportSpiceRequest.Result> 
             }
             String[] nextLine;
 
+            int recCount = 0;
+            database.beginTransaction();
             while ((nextLine = reader.readNext()) != null) {
                 String bssid = nextLine[bssidIndex];
                 String latString = nextLine[latIndex];
@@ -108,6 +110,12 @@ public class ImportSpiceRequest extends SpiceRequest<ImportSpiceRequest.Result> 
                     ssid = nextLine[ssidIndex];
 
                 database.addSample(ssid, bssid, Location.fromLatLon(latString,lonString));
+                recCount++;
+                if ((recCount % 100) == 0) {
+                    // Log.i(TAG, "recCount="+recCount+", committing transaction.");
+                    database.commitTransaction();
+                    database.beginTransaction();
+                }
 
                 if(size != 0) {
                     publishProgress(countingInputStream.getBytesRead() * MAX_PROGRESS / size);
@@ -116,6 +124,7 @@ public class ImportSpiceRequest extends SpiceRequest<ImportSpiceRequest.Result> 
 
         } finally {
             inputStream.close();
+            database.commitTransaction();
         }
 
         return null;

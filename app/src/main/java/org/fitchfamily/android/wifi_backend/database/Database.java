@@ -70,6 +70,7 @@ public class Database extends SQLiteOpenHelper {
     private SQLiteStatement sqlSampleInsert;
     private SQLiteStatement sqlSampleUpdate;
     private SQLiteStatement sqlAPdrop;
+    private SQLiteDatabase db = null;
     private final LocalBroadcastManager localBroadcastManager;
     private final Context context;
 
@@ -132,6 +133,7 @@ public class Database extends SQLiteOpenHelper {
     public void onOpen(SQLiteDatabase db) {
         super.onOpen(db);
 
+        this.db = db;
         sqlSampleInsert = db.compileStatement("INSERT INTO " +
                 TABLE_SAMPLES + "("+
                 COL_BSSID + ", " +
@@ -167,7 +169,6 @@ public class Database extends SQLiteOpenHelper {
                 TABLE_SAMPLES +
                 " WHERE " + COL_BSSID + "=?;");
     }
-
 
     public void dropAP(String bssid) {
         final String canonicalBSSID = AccessPoint.bssid(bssid);
@@ -377,5 +378,29 @@ public class Database extends SQLiteOpenHelper {
 
     private void dataChanged() {
         localBroadcastManager.sendBroadcast(new Intent(ACTION_DATA_CHANGED));
+    }
+
+    public void beginTransaction() {
+        ensureOpened();
+
+        db.beginTransaction();
+
+        return;
+    }
+    public void commitTransaction() {
+        ensureOpened();
+
+        db.setTransactionSuccessful();
+        db.endTransaction();
+
+    }
+
+    /**
+     * @throws UnsupportedOperationException if the database isn't opened
+     */
+    private void ensureOpened() {
+        if(db == null) {
+            throw new UnsupportedOperationException("Database is not opened");
+        }
     }
 }
