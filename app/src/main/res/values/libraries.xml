@@ -1,113 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="UnusedResources,MissingTranslation">
-    <string name="define_androidsupportlibrary"></string>
+    <string name="define_androidsupportlibrary" translatable="false"></string>
     <!-- Author section -->
-    <string name="library_androidsupportlibrary_author">The Android Open Source Project</string>
-    <string name="library_androidsupportlibrary_authorWebsite"></string>
+    <string name="library_androidsupportlibrary_author" translatable="false">The Android Open Source Project</string>
+    <string name="library_androidsupportlibrary_authorWebsite" translatable="false"></string>
     <!-- Library section -->
-    <string name="library_androidsupportlibrary_libraryName">Android Support Library</string>
-    <string name="library_androidsupportlibrary_libraryDescription">The Android Support Library
+    <string name="library_androidsupportlibrary_libraryName" translatable="false">Android Support Library</string>
+    <string name="library_androidsupportlibrary_libraryDescription" translatable="false">The Android Support Library
         package is a set of code libraries that provide backward-compatible versions of Android
         framework APIs as well as features that are only available through the library APIs.
     </string>
-    <string name="library_androidsupportlibrary_libraryWebsite">
+    <string name="library_androidsupportlibrary_libraryWebsite" translatable="false">
         https://developer.android.com/tools/support-library/index.html#overview
     </string>
-    <string name="library_androidsupportlibrary_libraryVersion">23.0.0</string>
+    <string name="library_androidsupportlibrary_libraryVersion" translatable="false">23.0.0</string>
     <!-- OpenSource section -->
-    <string name="library_androidsupportlibrary_isOpenSource">true</string>
-    <string name="library_androidsupportlibrary_repositoryLink">
+    <string name="library_androidsupportlibrary_isOpenSource" translatable="false">true</string>
+    <string name="library_androidsupportlibrary_repositoryLink" translatable="false">
         https://android.googlesource.com/platform/frameworks/support
     </string>
     <!-- ClassPath for autoDetect section -->
-    <string name="library_androidsupportlibrary_classPath">android.support</string>
+    <string name="library_androidsupportlibrary_classPath" translatable="false">android.support</string>
     <!-- License section -->
-    <string name="library_androidsupportlibrary_licenseId">apache_2_0</string>
+    <string name="library_androidsupportlibrary_licenseId" translatable="false">apache_2_0</string>
     <!-- Custom variables section -->
 
-    <string name="define_guava"></string>
+    <string name="define_opencsv" translatable="false"></string>
     <!-- Author section -->
-    <string name="library_guava_author">Google</string>
-    <string name="library_guava_authorWebsite"></string>
+    <string name="library_opencsv_author" translatable="false">Glen Smith</string>
+    <string name="library_opencsv_authorWebsite" translatable="false">https://sourceforge.net/u/userid-28390/profile/</string>
     <!-- Library section -->
-    <string name="library_guava_libraryName">Guava</string>
-    <string name="library_guava_libraryDescription">The Guava project contains several of Google\'s core libraries that we rely on in our Java-based projects: collections, caching, primitives support, concurrency libraries, common annotations, string processing, I/O, and so forth.</string>
-    <string name="library_guava_libraryWebsite">https://github.com/google/guava/blob/master/README.md</string>
-    <string name="library_guava_libraryVersion">19.0</string>
+    <string name="library_opencsv_libraryName" translatable="false">OpenCSV</string>
+    <string name="library_opencsv_libraryDescription" translatable="false">A Simple CSV Parser for Java under a commercial-friendly Apache 2.0 license.</string>
+    <string name="library_opencsv_libraryWebsite" translatable="false">http://opencsv.sourceforge.net</string>
+    <string name="library_opencsv_libraryVersion" translatable="false"></string>
     <!-- OpenSource section -->
-    <string name="library_guava_isOpenSource">true</string>
-    <string name="library_guava_repositoryLink">https://github.com/google/guava</string>
+    <string name="library_opencsv_isOpenSource" translatable="false">true</string>
+    <string name="library_opencsv_repositoryLink" translatable="false"></string>
     <!-- ClassPath for autoDetect section -->
-    <string name="library_guava_classPath">com.google.common</string>
+    <string name="library_opencsv_classPath" translatable="false"></string>
     <!-- License section -->
-    <string name="library_guava_licenseId">apache_2_0</string>
+    <string name="library_opencsv_licenseId" translatable="false">apache_2_0</string>
     <!-- Custom variables section -->
 
-    <string name="define_robospice"></string>
+    <string name="define_guava" translatable="false"></string>
     <!-- Author section -->
-    <string name="library_robospice_author">Stéphane Nicolas</string>
-    <string name="library_robospice_authorWebsite">https://github.com/stephanenicolas</string>
+    <string name="library_guava_author" translatable="false">Google</string>
+    <string name="library_guava_authorWebsite" translatable="false"></string>
     <!-- Library section -->
-    <string name="library_robospice_libraryName">RoboSpice</string>
-    <string name="library_robospice_libraryDescription">RoboSpice is a modular android library that
+    <string name="library_guava_libraryName" translatable="false">Guava</string>
+    <string name="library_guava_libraryDescription" translatable="false">The Guava project contains several of Google\'s core libraries that we rely on in our Java-based projects: collections, caching, primitives support, concurrency libraries, common annotations, string processing, I/O, and so forth.</string>
+    <string name="library_guava_libraryWebsite" translatable="false">https://github.com/google/guava/blob/master/README.md</string>
+    <string name="library_guava_libraryVersion" translatable="false">19.0</string>
+    <!-- OpenSource section -->
+    <string name="library_guava_isOpenSource" translatable="false">true</string>
+    <string name="library_guava_repositoryLink" translatable="false">https://github.com/google/guava</string>
+    <!-- ClassPath for autoDetect section -->
+    <string name="library_guava_classPath" translatable="false">com.google.common</string>
+    <!-- License section -->
+    <string name="library_guava_licenseId" translatable="false">apache_2_0</string>
+    <!-- Custom variables section -->
+
+    <string name="define_robospice" translatable="false"></string>
+    <!-- Author section -->
+    <string name="library_robospice_author" translatable="false">Stéphane Nicolas</string>
+    <string name="library_robospice_authorWebsite" translatable="false">https://github.com/stephanenicolas</string>
+    <!-- Library section -->
+    <string name="library_robospice_libraryName" translatable="false">RoboSpice</string>
+    <string name="library_robospice_libraryDescription" translatable="false">RoboSpice is a modular android library that
         makes writing asynchronous network requests easy!
     </string>
-    <string name="library_robospice_libraryWebsite">
+    <string name="library_robospice_libraryWebsite" translatable="false">
         https://github.com/stephanenicolas/robospice/blob/release/README.md
     </string>
-    <string name="library_robospice_libraryVersion">1.4.14</string>
+    <string name="library_robospice_libraryVersion" translatable="false">1.4.14</string>
     <!-- OpenSource section -->
-    <string name="library_robospice_isOpenSource">true</string>
-    <string name="library_robospice_repositoryLink">https://github.com/stephanenicolas/robospice
+    <string name="library_robospice_isOpenSource" translatable="false">true</string>
+    <string name="library_robospice_repositoryLink" translatable="false">https://github.com/stephanenicolas/robospice
     </string>
     <!-- ClassPath for autoDetect section -->
-    <string name="library_robospice_classPath">com.octo.android.robospice</string>
+    <string name="library_robospice_classPath" translatable="false">com.octo.android.robospice</string>
     <!-- License section -->
-    <string name="library_robospice_licenseId">apache_2_0</string>
+    <string name="library_robospice_licenseId" translatable="false">apache_2_0</string>
     <!-- Custom variables section -->
 
-    <string name="define_gson"></string>
+    <string name="define_supportpreferencefragment" translatable="false"></string>
     <!-- Author section -->
-    <string name="library_gson_author">Google Inc.</string>
-    <string name="library_gson_authorWebsite"></string>
-    <!-- Library section -->
-    <string name="library_gson_libraryName">Gson</string>
-    <string name="library_gson_libraryDescription">Gson is a Java library that can be used to convert Java Objects into their JSON representation. It can also be used to convert a JSON string to an equivalent Java object. Gson can work with arbitrary Java objects including pre-existing objects that you do not have source-code of.</string>
-    <string name="library_gson_libraryWebsite">https://github.com/google/gson/blob/master/README.md</string>
-    <string name="library_gson_libraryVersion">2.5</string>
-    <!-- OpenSource section -->
-    <string name="library_gson_isOpenSource">true</string>
-    <string name="library_gson_repositoryLink">https://github.com/google/gson</string>
-    <!-- ClassPath for autoDetect section -->
-    <string name="library_gson_classPath">com.google.gson</string>
-    <!-- License section -->
-    <string name="library_gson_licenseId">apache_2_0</string>
-    <!-- Custom variables section -->
-
-    <string name="define_supportpreferencefragment"></string>
-    <!-- Author section -->
-    <string name="library_supportpreferencefragment_author">Machinarius</string>
-    <string name="library_supportpreferencefragment_authorWebsite">https://github.com/Machinarius
+    <string name="library_supportpreferencefragment_author" translatable="false">Machinarius</string>
+    <string name="library_supportpreferencefragment_authorWebsite" translatable="false">https://github.com/Machinarius
     </string>
     <!-- Library section -->
-    <string name="library_supportpreferencefragment_libraryName">Support PreferenceFragment</string>
-    <string name="library_supportpreferencefragment_libraryDescription">Unofficial
+    <string name="library_supportpreferencefragment_libraryName" translatable="false">Support PreferenceFragment</string>
+    <string name="library_supportpreferencefragment_libraryDescription" translatable="false">Unofficial
         PreferenceFragment compatibility layer for Android 1.6 and up.
     </string>
-    <string name="library_supportpreferencefragment_libraryWebsite">
+    <string name="library_supportpreferencefragment_libraryWebsite" translatable="false">
         https://github.com/Machinarius/PreferenceFragment-Compat/blob/master/README.md
     </string>
-    <string name="library_supportpreferencefragment_libraryVersion">0.1.1</string>
+    <string name="library_supportpreferencefragment_libraryVersion" translatable="false">0.1.1</string>
     <!-- OpenSource section -->
-    <string name="library_supportpreferencefragment_isOpenSource">true</string>
-    <string name="library_supportpreferencefragment_repositoryLink">
+    <string name="library_supportpreferencefragment_isOpenSource" translatable="false">true</string>
+    <string name="library_supportpreferencefragment_repositoryLink" translatable="false">
         https://github.com/Machinarius/PreferenceFragment-Compat
     </string>
     <!-- ClassPath for autoDetect section -->
-    <string name="library_supportpreferencefragment_classPath">
+    <string name="library_supportpreferencefragment_classPath" translatable="false">
         com.github.machinarius.preferencefragment
     </string>
     <!-- License section -->
-    <string name="library_supportpreferencefragment_licenseId">apache_2_0</string>
+    <string name="library_supportpreferencefragment_licenseId" translatable="false">apache_2_0</string>
     <!-- Custom variables section -->
 </resources>

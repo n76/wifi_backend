@@ -28,6 +28,7 @@ import android.preference.Preference;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.util.Log;
 
 import com.github.machinarius.preferencefragment.PreferenceFragment;
 
@@ -81,9 +82,9 @@ public class MainSettingsFragment extends PreferenceFragment {
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     startActivityForResult(
                             new Intent(Intent.ACTION_CREATE_DOCUMENT)
-                                    .setType("text/json")
+                                    .setType("text/comma-separated-values")
                                     .addCategory(Intent.CATEGORY_OPENABLE)
-                                    .putExtra(Intent.EXTRA_TITLE, "wifi.json"),
+                                    .putExtra(Intent.EXTRA_TITLE, "wifi.csv"),
                             EXPORT_REQUEST_CODE
                     );
                 }
@@ -98,7 +99,7 @@ public class MainSettingsFragment extends PreferenceFragment {
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     startActivityForResult(
                             new Intent(Intent.ACTION_OPEN_DOCUMENT)
-                                    .setType("text/json")
+                                    .setType("text/comma-separated-values")
                                     .addCategory(Intent.CATEGORY_OPENABLE),
                             IMPORT_REQUEST_CODE
                     );

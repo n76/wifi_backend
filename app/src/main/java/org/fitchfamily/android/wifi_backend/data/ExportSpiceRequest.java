@@ -21,13 +21,15 @@ package org.fitchfamily.android.wifi_backend.data;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
+import android.text.TextUtils;
 
-import com.google.gson.stream.JsonWriter;
 import com.octo.android.robospice.request.SpiceRequest;
+import com.opencsv.CSVWriter;
 
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.database.AccessPoint;
 import org.fitchfamily.android.wifi_backend.database.Database;
+import org.fitchfamily.android.wifi_backend.database.Location;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
 
 import java.io.IOException;
@@ -62,7 +64,8 @@ public class ExportSpiceRequest extends SpiceRequest<ExportSpiceRequest.Result> 
         }
 
         try {
-            JsonWriter writer = new JsonWriter(new OutputStreamWriter(outputStream, "UTF-8")).beginArray();
+            CSVWriter writer = new CSVWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+            writer.writeNext(new String[]{"bssid","lat","lon","ssid"});
 
             Cursor cursor = SamplerDatabase.getInstance(context).getReadableDatabase().query(
                     Database.TABLE_SAMPLES,
@@ -76,23 +79,44 @@ public class ExportSpiceRequest extends SpiceRequest<ExportSpiceRequest.Result> 
                         AccessPoint accessPoint = SamplerDatabase.getInstance(context).query(cursor.getString(0));
 
                         if(accessPoint != null) {
-                            AccessPointAdapter.instance.write(writer, accessPoint);
+                            writeCSV(writer, accessPoint);
                         }
 
                         publishProgress(cursor.getPosition() * MAX_PROGRESS / cursor.getCount());
                     } while (cursor.moveToNext());
                 }
 
-                writer.endArray().flush();
             } finally {
                 if (cursor != null) {
                     cursor.close();
                 }
             }
+            writer.close();
         } finally {
             outputStream.close();
         }
 
         return null;
+    }
+
+    private void writeCSV(CSVWriter out, AccessPoint value) throws IOException {
+
+        if(value.moveGuard() != 0) {        // Don't export suspect (moved/moving) APs
+            return;
+        }
+
+        final String bssid = value.bssid();
+        String ssid = "";
+
+        if(!TextUtils.isEmpty(value.ssid())) {
+            ssid = value.ssid();
+        }
+
+        for(Location sample : value.samples()) {
+            out.writeNext(new String[]{bssid,
+                    Double.toString(sample.latitude()),
+                    Double.toString(sample.longitude()),
+                    ssid});
+        }
     }
 }

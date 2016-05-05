@@ -39,6 +39,14 @@ public abstract class Location {
                 .build();
     }
 
+    public static Location fromLatLon(double lat, double lon) {
+        return builder().latitude(lat).longitude(lon).build();
+    }
+
+    public static Location fromLatLon(String lat, String lon) {
+        return fromLatLon(Double.parseDouble(lat),Double.parseDouble(lon));
+    }
+
     public abstract double latitude();
     public abstract double longitude();
 

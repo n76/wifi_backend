@@ -22,13 +22,14 @@ import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.OpenableColumns;
+import android.util.Log;
 
-import com.google.gson.stream.JsonReader;
 import com.octo.android.robospice.request.SpiceRequest;
 
+import com.opencsv.CSVReader;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.data.util.CountingInputStream;
-import org.fitchfamily.android.wifi_backend.database.AccessPoint;
+import org.fitchfamily.android.wifi_backend.database.Location;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
 
 import java.io.IOException;
@@ -36,7 +37,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class ImportSpiceRequest extends SpiceRequest<ImportSpiceRequest.Result> {
-    public static final String TAG = "WiFiBackendImportSpiceRequest";
+    public static final String TAG = "WiFiBackendImport";
     private static final boolean DEBUG = BuildConfig.DEBUG;
     public static final int MAX_PROGRESS = 1000;
 
@@ -64,31 +65,55 @@ public class ImportSpiceRequest extends SpiceRequest<ImportSpiceRequest.Result> 
         }
 
         CountingInputStream countingInputStream = new CountingInputStream(inputStream);
+        SamplerDatabase database = SamplerDatabase.getInstance(context);
 
         try {
-            JsonReader reader = new JsonReader(new InputStreamReader(countingInputStream, "UTF-8"));
-            reader.beginArray();
+            CSVReader reader = new CSVReader(new InputStreamReader(countingInputStream, "UTF-8"));
+            final String[] headerLine = reader.readNext();
+            if (headerLine == null) {
+                throw new IOException();
+            }
 
-            while (reader.hasNext()) {
-                AccessPoint newAccessPoint = AccessPointAdapter.instance.read(reader);
-                AccessPoint oldAccessPoint = SamplerDatabase.getInstance(context).query(newAccessPoint.bssid());
+            int bssidIndex = -1;
+            int latIndex = -1;
+            int lonIndex = -1;
+            int ssidIndex = -1;
+            int idx = 0;
+            for (String s : headerLine) {
+                if (s.equals("bssid"))
+                    bssidIndex = idx;
+                else if (s.equals("lat"))
+                    latIndex = idx;
+                else if (s.equals("lon"))
+                    lonIndex = idx;
+                else if (s.equals("ssid"))
+                    ssidIndex = idx;
+                idx++;
+            }
+            Log.i(TAG, "bssidIndex=" + bssidIndex +
+                    ", latIndex=" + latIndex +
+                    ", lonIndex=" + lonIndex +
+                    ", ssidIndex=" + ssidIndex);
+            if ((bssidIndex < 0) || (latIndex < 0) || (lonIndex < 0)) {
+                throw new IOException();
+            }
+            String[] nextLine;
 
-                if(oldAccessPoint == null) {
-                    SamplerDatabase.getInstance(context).insert(newAccessPoint);
-                } else {
-                    if(newAccessPoint.perimeter() >= oldAccessPoint.perimeter()) {
-                        // only import if there is a higher perimeter
+            while ((nextLine = reader.readNext()) != null) {
+                String bssid = nextLine[bssidIndex];
+                String latString = nextLine[latIndex];
+                String lonString = nextLine[lonIndex];
+                String ssid = "";
+                if (ssidIndex >= 0)
+                    ssid = nextLine[ssidIndex];
 
-                        SamplerDatabase.getInstance(context).update(newAccessPoint);
-                    }
-                }
+                database.addSample(ssid, bssid, Location.fromLatLon(latString,lonString));
 
                 if(size != 0) {
                     publishProgress(countingInputStream.getBytesRead() * MAX_PROGRESS / size);
                 }
             }
 
-            reader.endArray();
         } finally {
             inputStream.close();
         }
