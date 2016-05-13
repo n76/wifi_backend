@@ -85,6 +85,7 @@ Changes
 1.0.0|6Jan2016|Thanks to @pejakm, update Serbian translation
 1.0.2|23Mar2016|Update for revised UnifiedNlp with aging of reports.
 1.1.0|5May2016|Change import/export format to comma separated value (CSV) format.
+1.1.1|13May2016|Fix divide by zero on minimum signal strength.
 
 License
 =======

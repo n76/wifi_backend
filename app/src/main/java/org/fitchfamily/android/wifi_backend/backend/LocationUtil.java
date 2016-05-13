@@ -147,7 +147,7 @@ public abstract class LocationUtil {
 
                 // We weight our average based on a linear value based on signal strength.
                 int dBm = value.getExtras().getInt(Configuration.EXTRA_SIGNAL_LEVEL);
-                double wgt = WifiManager.calculateSignalLevel(dBm, 100)/100.0;
+                double wgt = (WifiManager.calculateSignalLevel(dBm, 100)+1)/100.0;
 
                 if (DEBUG) {
                     Log.i(TAG,
