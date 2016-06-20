@@ -37,7 +37,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
 public class ExportSpiceRequest extends SpiceRequest<ExportSpiceRequest.Result> {
-    public static final String TAG = "WiFiBackendExportSpiceRequest";
+    public static final String TAG = "WiFiBackendExport";
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
     public static final int MAX_PROGRESS = 1000;

@@ -55,7 +55,7 @@ import java.util.Set;
 
 @EService
 public class BackendService extends LocationBackendService implements WifiReceivedCallback {
-    private static final String TAG = "WiFiBackendBackendService";
+    private static final String TAG = "WiFiBackendSrv";
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
     private static final int NOTIFICATION = 42;

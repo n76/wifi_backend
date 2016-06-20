@@ -48,7 +48,7 @@ import java.io.File;
  *      radius      - Estimated coverage radius of AP
  */
 public class SamplerDatabase extends Database {
-    private final static String TAG = "WiFiBackendSamplerDatabase";
+    private final static String TAG = "WiFiBackendSamplerDB";
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
     private static SamplerDatabase mInstance;

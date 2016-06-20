@@ -52,7 +52,7 @@ import java.util.concurrent.Executors;
 public class WifiSamplerService extends Service implements LocationListener,
         SharedPreferences.OnSharedPreferenceChangeListener, WifiReceiver.WifiReceivedCallback {
 
-    private final static String TAG = "WiFiBackendSamplerService";
+    private final static String TAG = "WiFiBackendSamplerSrv";
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();

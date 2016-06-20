@@ -38,7 +38,7 @@ import java.util.List;
 public class Database extends SQLiteOpenHelper {
     public static String ACTION_DATA_CHANGED = "org.fitchfamily.android.wifi_backend.database.DATA_CHANGED";
 
-    private static final String TAG = "WiFiBackendDatabase";
+    private static final String TAG = "WiFiBackendDB";
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
     private static final int VERSION = 4;

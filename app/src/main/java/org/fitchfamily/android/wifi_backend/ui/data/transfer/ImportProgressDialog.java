@@ -31,7 +31,7 @@ import org.fitchfamily.android.wifi_backend.data.ImportSpiceRequest;
 @EFragment
 public class ImportProgressDialog extends OperationProgressDialog<ImportSpiceRequest.Result> {
 
-    private static final String TAG = "WiFiBackendImportDialog";
+    private static final String TAG = "WiFiBackendImportDlg";
 
     @FragmentArg
     protected Uri uri;

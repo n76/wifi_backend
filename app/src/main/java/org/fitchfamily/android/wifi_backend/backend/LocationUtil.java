@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Set;
 
 public abstract class LocationUtil {
-    private static final String TAG = "WiFiBackendLocationUtil";
+    private static final String TAG = "WiFiBackendLocUtil";
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
     private LocationUtil() {
