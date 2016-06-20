@@ -59,7 +59,7 @@ dependencies {
     compile('com.mikepenz:aboutlibraries:5.3.7@aar') {
         transitive = true
     }
-    compile 'org.microg:unifiednlp-api:1.3.2'
+    compile 'org.microg:unifiednlp-api:1.5.0'
     compile 'com.google.guava:guava:19.0'
     compile 'com.mikepenz:google-material-typeface:2.1.0.1.original@aar'
     compile "com.android.support:support-v4:$ASVersion"
