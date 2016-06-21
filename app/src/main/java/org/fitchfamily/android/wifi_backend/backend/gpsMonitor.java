@@ -36,7 +36,6 @@ import org.androidannotations.annotations.EService;
 import org.androidannotations.annotations.SystemService;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.Configuration;
-import org.fitchfamily.android.wifi_backend.wifi.WifiReceiver;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -58,8 +57,6 @@ public class gpsMonitor extends Service implements LocationListener,
 
     private long sampleTime;
     private float sampleDistance;
-
-    private WifiReceiver wifiReceiver;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -100,8 +97,6 @@ public class gpsMonitor extends Service implements LocationListener,
         } catch (SecurityException ex) {
             // ignore
         }
-
-        unregisterReceiver(wifiReceiver);
 
         if (DEBUG) {
             Log.i(TAG, "service destroyed");
