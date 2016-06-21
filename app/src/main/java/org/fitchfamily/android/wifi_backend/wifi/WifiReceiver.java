@@ -89,7 +89,7 @@ public class WifiReceiver extends BroadcastReceiver {
             );
         }
 
-        callback.process(Collections.unmodifiableList(accessPoints));
+        callback.processWiFiScanResults(Collections.unmodifiableList(accessPoints));
     }
 
     public boolean isScanStarted() {
@@ -113,6 +113,6 @@ public class WifiReceiver extends BroadcastReceiver {
     }
 
     public interface WifiReceivedCallback {
-        void process(@NonNull List<WifiAccessPoint> accessPoints);
+        void processWiFiScanResults(@NonNull List<WifiAccessPoint> accessPoints);
     }
 }

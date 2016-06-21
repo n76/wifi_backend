@@ -23,46 +23,45 @@ import android.support.annotation.Nullable;
 import com.google.auto.value.AutoValue;
 
 @AutoValue
-public abstract class Location {
-    Location() {
+public abstract class SimpleLocation {
+    SimpleLocation() {
 
     }
 
     public static Builder builder() {
-        return new AutoValue_Location.Builder();
-    }
-
-    public static Location fromAndroidLocation(android.location.Location location) {
-        return builder()
-                .latitude(location.getLatitude())
-                .longitude(location.getLongitude())
-                .build();
-    }
-
-    public static Location fromLatLon(double lat, double lon) {
-        return builder().latitude(lat).longitude(lon).build();
-    }
-
-    public static Location fromLatLon(String lat, String lon) {
-        return fromLatLon(Double.parseDouble(lat),Double.parseDouble(lon));
+        return new AutoValue_SimpleLocation.Builder();
     }
 
     public abstract double latitude();
     public abstract double longitude();
+    public abstract float radius();
+
+    public static SimpleLocation fromAndroidLocation(android.location.Location location) {
+        return builder()
+                .latitude(location.getLatitude())
+                .longitude(location.getLongitude())
+                .radius(location.getAccuracy())
+                .build();
+    }
 
     public android.location.Location toAndroidLocation() {
         android.location.Location location = new android.location.Location("wifi");
         location.setLatitude(latitude());
         location.setLongitude(longitude());
+        location.setAccuracy(radius());
 
         return location;
     }
 
-    public float distanceTo(Location location) {
-        return distanceTo(location.toAndroidLocation());
+    public static SimpleLocation fromLatLon(double lat, double lon) {
+        return builder().latitude(lat).longitude(lon).radius(150f).build();
     }
 
-    public float distanceTo(EstimateLocation location) {
+    public static SimpleLocation fromLatLon(String lat, String lon) {
+        return fromLatLon(Double.parseDouble(lat),Double.parseDouble(lon));
+    }
+
+    public float distanceTo(SimpleLocation location) {
         return distanceTo(location.toAndroidLocation());
     }
 
@@ -78,6 +77,7 @@ public abstract class Location {
 
         public abstract Builder latitude(double latitude);
         public abstract Builder longitude(double longitude);
-        public abstract Location build();
+        public abstract Builder radius(float radius);
+        public abstract SimpleLocation build();
     }
 }

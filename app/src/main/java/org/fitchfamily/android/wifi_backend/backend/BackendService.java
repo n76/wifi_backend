@@ -39,9 +39,11 @@ import org.androidannotations.annotations.SystemService;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.Configuration;
 import org.fitchfamily.android.wifi_backend.R;
-import org.fitchfamily.android.wifi_backend.database.EstimateLocation;
+import org.fitchfamily.android.wifi_backend.database.SimpleLocation;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
+import org.fitchfamily.android.wifi_backend.sampler.WifiBlacklist;
 import org.fitchfamily.android.wifi_backend.sampler.WifiSamplerService_;
+import org.fitchfamily.android.wifi_backend.sampler.util.AgeValue;
 import org.fitchfamily.android.wifi_backend.ui.MainActivity;
 import org.fitchfamily.android.wifi_backend.ui.MainActivity_;
 import org.fitchfamily.android.wifi_backend.wifi.WifiAccessPoint;
@@ -60,10 +62,14 @@ public class BackendService extends LocationBackendService implements WifiReceiv
 
     private static final int NOTIFICATION = 42;
 
+    private static BackendService instance;
     private SamplerDatabase database;
     private WifiReceiver wifiReceiver;
+    private Thread thread;
     private boolean wifiSamplerServiceRunning = false;
     private boolean permissionNotificationShown = false;
+
+    private AgeValue<SimpleLocation> gpsLocation = AgeValue.create();
 
     @SystemService
     protected NotificationManager notificationManager;
@@ -82,7 +88,7 @@ public class BackendService extends LocationBackendService implements WifiReceiv
         if (DEBUG) {
             Log.i(TAG, "onOpen()");
         }
-
+        instance = this;
         registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
         if(Configuration.with(this).hasLocationAccess()) {
@@ -105,89 +111,67 @@ public class BackendService extends LocationBackendService implements WifiReceiv
 
     @Override
     protected Location update() {
-        if (DEBUG) {
-            Log.i(TAG, "update()");
-        }
-
         if(!Configuration.with(this).hasLocationAccess()) {
             if (DEBUG) {
                 Log.i(TAG, "update(): Permission missing");
             }
-
             setWifiSamplerServiceRunning(false);
             setShowPermissionNotification(true);
         } else if (wifiReceiver != null) {
             setWifiSamplerServiceRunning(true);
             setShowPermissionNotification(false);
-
             if (DEBUG) {
-                Log.i(TAG, "update(): Starting scan for WiFi APs");
+                Log.i(TAG, "Starting scan for WiFi APs");
             }
-
             wifiReceiver.startScan();
         } else {
             if (DEBUG) {
                 Log.i(TAG, "update(): no wifiReceiver???");
             }
         }
-
         return null;
     }
 
-    @Override
-    public void process(@NonNull List<WifiAccessPoint> accessPoints) {
-        if (accessPoints.isEmpty()) {
-            report(null);
-        } else {
-            Set<Location> locations = new HashSet<>(accessPoints.size());
-
-            for (WifiAccessPoint accessPoint : accessPoints) {
-                EstimateLocation result = database.getLocation(accessPoint.bssid());
-
-                if (result != null) {
-                    Bundle extras = new Bundle();
-                    extras.putInt(Configuration.EXTRA_SIGNAL_LEVEL, accessPoint.level());
-
-                    Location location = result.toAndroidLocation();
-                    location.setExtras(extras);
-                    locations.add(location);
-                }
-            }
-
-            if (locations.isEmpty()) {
-                if (DEBUG) {
-                    Log.i(TAG, "WifiDBResolver.process(): No APs with known locations");
-                }
-
-                report(null);
-            } else {
-                // Find largest group of AP locations. If we don't have at
-                // least two near each other then we don't have enough
-                // information to get a good location.
-                locations = LocationUtil.culledAPs(locations, BackendService.this);
-
-                if (locations == null || locations.size() < 2) {
-                    if (DEBUG) {
-                        Log.i(TAG, "WifiDBResolver.process(): Insufficient number of WiFi hotspots to resolve location");
-                    }
-
-                    report(null);
-                } else {
-                    Location avgLoc = LocationUtil.weightedAverage("wifi", locations);
-
-                    if (avgLoc == null) {
-                        if (DEBUG) {
-                            Log.e(TAG, "Averaging locations did not work.");
-                        }
-
-                        report(null);
-                    } else {
-                        avgLoc.setTime(System.currentTimeMillis());
-                        report(avgLoc);
-                    }
-                }
-            }
+    private void gpsLocationUpdated(final android.location.Location locReport) {
+        if (DEBUG) {
+            Log.i(TAG, "GPS Location update: " + locReport.toString());
         }
+        gpsLocation.value(SimpleLocation.fromAndroidLocation(locReport));
+        wifiReceiver.startScan();
+    }
+
+    public static void instanceGpsLocationUpdated(final android.location.Location locReport) {
+        if (instance != null) {
+            instance.gpsLocationUpdated(locReport);
+        }
+    }
+    @Override
+    public synchronized void processWiFiScanResults(@NonNull List<WifiAccessPoint> apList) {
+        if (thread != null) {
+            Log.d(TAG, "processWiFiScanResults() : Thread busy?!");
+            return;
+        }
+        final List<WifiAccessPoint> accessPoints = apList;
+
+        thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                long locationAge = gpsLocation.age();
+
+                // always accept value which are not more than 500 milliseconds old because
+                // scanning wifis (after receiving GPS) can take a short amount of time
+
+                if(locationAge < 500 ||
+                        (locationAge < Configuration.with(BackendService.this).validGpsTimeInMilliseconds())) {
+                    Log.d(TAG,"GPS Location fresh.");
+                    updateWiFiDatabase(gpsLocation.value(), accessPoints);
+                }
+                Location result = wiFiBasedLocation(accessPoints);
+                report(result);
+                thread = null;
+            }
+        });
+        thread.start();
     }
 
     // Stuff for binding to (basically starting) background AP location
@@ -256,6 +240,76 @@ public class BackendService extends LocationBackendService implements WifiReceiv
             }
 
             permissionNotificationShown = visible;
+        }
+    }
+
+    private Location wiFiBasedLocation(@NonNull List<WifiAccessPoint> accessPoints) {
+        if (accessPoints.isEmpty()) {
+            return null;
+        } else {
+            Set<Location> locations = new HashSet<>(accessPoints.size());
+
+            for (WifiAccessPoint accessPoint : accessPoints) {
+                SimpleLocation result = database.getLocation(accessPoint.bssid());
+
+                if (result != null) {
+                    Bundle extras = new Bundle();
+                    extras.putInt(Configuration.EXTRA_SIGNAL_LEVEL, accessPoint.level());
+
+                    Location location = result.toAndroidLocation();
+                    location.setExtras(extras);
+                    locations.add(location);
+                }
+            }
+
+            if (locations.isEmpty()) {
+                if (DEBUG) {
+                    Log.i(TAG, "WifiDBResolver.process(): No APs with known locations");
+                }
+                return null;
+            } else {
+                // Find largest group of AP locations. If we don't have at
+                // least two near each other then we don't have enough
+                // information to get a good location.
+                locations = LocationUtil.culledAPs(locations, BackendService.this);
+
+                if (locations == null || locations.size() < 2) {
+                    if (DEBUG) {
+                        Log.i(TAG, "WifiDBResolver.process(): Insufficient number of WiFi hotspots to resolve location");
+                    }
+                    return null;
+                } else {
+                    Location avgLoc = LocationUtil.weightedAverage("wifi", locations);
+
+                    if (avgLoc == null) {
+                        if (DEBUG) {
+                            Log.e(TAG, "Averaging locations did not work.");
+                        }
+                        return null;
+                    } else {
+                        avgLoc.setTime(System.currentTimeMillis());
+                        return avgLoc;
+                    }
+                }
+            }
+        }
+    }
+
+    private void updateWiFiDatabase(SimpleLocation location, final List<WifiAccessPoint> accessPoints) {
+        long entryTime = System.currentTimeMillis();
+
+        database.beginTransaction();
+        for (WifiAccessPoint accessPoint : accessPoints) {
+            if (WifiBlacklist.ignore(accessPoint.ssid())) {
+                database.dropAccessPoint(accessPoint.bssid());
+            } else {
+                database.addSample(accessPoint.ssid(), accessPoint.bssid(), location);
+            }
+        }
+        database.commitTransaction();
+
+        if (DEBUG) {
+            Log.i(TAG, "wifi database update process time: " + (System.currentTimeMillis() - entryTime) + " ms");
         }
     }
 }

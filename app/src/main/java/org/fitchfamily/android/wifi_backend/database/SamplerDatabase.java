@@ -80,7 +80,7 @@ public class SamplerDatabase extends Database {
         return mInstance;
     }
 
-    public void addSample(String ssid, String bssid, Location sampleLocation) {
+    public void addSample(String ssid, String bssid, SimpleLocation sampleLocation) {
         final long entryTime = System.currentTimeMillis();
 
         AccessPoint accessPoint = query(bssid);

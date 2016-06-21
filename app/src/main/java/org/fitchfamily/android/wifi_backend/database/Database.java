@@ -201,7 +201,7 @@ public class Database extends SQLiteOpenHelper {
     }
 
     @Nullable
-    public EstimateLocation getLocation(String bssid) {
+    public SimpleLocation getLocation(String bssid) {
         final long entryTime = System.currentTimeMillis();
         final String canonicalBSSID = AccessPoint.bssid(bssid);
 
@@ -231,7 +231,7 @@ public class Database extends SQLiteOpenHelper {
                 // So we will take the greater value (assumed max range) or actual measured
                 // range as our assumed accuracy.
 
-                EstimateLocation result = EstimateLocation.builder()
+                SimpleLocation result = SimpleLocation.builder()
                         .latitude(c.getDouble(0))
                         .longitude(c.getDouble(1))
                         .radius(Math.max(Configuration.with(context).accessPointAssumedAccuracy(), c.getFloat(2)))
@@ -280,7 +280,7 @@ public class Database extends SQLiteOpenHelper {
 
         try {
             if (cursor != null && cursor.moveToFirst()) {
-                List<org.fitchfamily.android.wifi_backend.database.Location> samples = new ArrayList<Location>();
+                List<org.fitchfamily.android.wifi_backend.database.SimpleLocation> samples = new ArrayList<SimpleLocation>();
 
                 addLocation(cursor, 4, samples);
                 addLocation(cursor, 6, samples);
@@ -342,24 +342,25 @@ public class Database extends SQLiteOpenHelper {
         return statement;
     }
 
-    private static void bind(SQLiteStatement statement, Location location, int index) {
+    private static void bind(SQLiteStatement statement, SimpleLocation location, int index) {
         statement.bindString(index, String.valueOf(location == null ? 0.f : location.latitude()));
         statement.bindString(index + 1, String.valueOf(location == null ? 0.f : location.longitude()));
     }
 
-    private static Location parse(Cursor cursor, int index) {
+    private static SimpleLocation parse(Cursor cursor, int index) {
         if(cursor.getDouble(index) != 0.d || cursor.getDouble(index + 1) != 0.d) {
-            return Location.builder()
+            return SimpleLocation.builder()
                     .latitude(cursor.getDouble(index))
                     .longitude(cursor.getDouble(index + 1))
+                    .radius(500)
                     .build();
         } else {
             return null;
         }
     }
 
-    private static List<Location> addLocation(Cursor cursor, int index, List<Location> list) {
-        Location location = parse(cursor, index);
+    private static List<SimpleLocation> addLocation(Cursor cursor, int index, List<SimpleLocation> list) {
+        SimpleLocation location = parse(cursor, index);
 
         if(location != null) {
             list.add(location);

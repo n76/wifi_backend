@@ -22,10 +22,13 @@ import android.content.Context;
 import android.location.Location;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.Configuration;
+import org.fitchfamily.android.wifi_backend.database.SimpleLocation;
+import org.fitchfamily.android.wifi_backend.wifi.WifiAccessPoint;
 import org.microg.nlp.api.LocationHelper;
 
 import java.util.ArrayList;

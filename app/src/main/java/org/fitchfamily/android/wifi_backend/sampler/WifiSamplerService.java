@@ -37,20 +37,15 @@ import org.androidannotations.annotations.EService;
 import org.androidannotations.annotations.SystemService;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.Configuration;
-import org.fitchfamily.android.wifi_backend.database.Location;
-import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
-import org.fitchfamily.android.wifi_backend.sampler.util.AgeValue;
-import org.fitchfamily.android.wifi_backend.wifi.WifiAccessPoint;
-import org.fitchfamily.android.wifi_backend.wifi.WifiCompat;
+import org.fitchfamily.android.wifi_backend.backend.BackendService;
 import org.fitchfamily.android.wifi_backend.wifi.WifiReceiver;
 
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @EService
 public class WifiSamplerService extends Service implements LocationListener,
-        SharedPreferences.OnSharedPreferenceChangeListener, WifiReceiver.WifiReceivedCallback {
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     private final static String TAG = "WiFiBackendSamplerSrv";
     private static final boolean DEBUG = BuildConfig.DEBUG;
@@ -62,10 +57,6 @@ public class WifiSamplerService extends Service implements LocationListener,
 
     @SystemService
     protected WifiManager wifi;
-
-    private AgeValue<Location> location = AgeValue.create();
-
-    private SamplerDatabase database;
 
     private long sampleTime;
     private float sampleDistance;
@@ -83,7 +74,6 @@ public class WifiSamplerService extends Service implements LocationListener,
             Log.i(TAG, "service started");
         }
 
-        database = SamplerDatabase.getInstance(this);
         sampleTime = Configuration.with(this).minimumGpsTimeInMilliseconds();
         sampleDistance = Configuration.with(this).minimumGpsDistanceInMeters();
 
@@ -99,9 +89,6 @@ public class WifiSamplerService extends Service implements LocationListener,
         }
 
         Configuration.with(this).register(this);
-
-        wifiReceiver = new WifiReceiver(wifi, this);
-        registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
     }
 
     @Override
@@ -174,78 +161,17 @@ public class WifiSamplerService extends Service implements LocationListener,
     }
 
     @Override
-    public void process(@NonNull final List<WifiAccessPoint> accessPoints) {
-        executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                long locationAge = location.age();
-
-                // always accept value which are not more than 500 milliseconds old because
-                // scanning wifis (after receiving GPS) can take a short amount of time
-
-                if(locationAge < 500 ||
-                        (locationAge < Configuration.with(WifiSamplerService.this).validGpsTimeInMilliseconds())) {
-
-                    wifiReceiver.setScanStarted(true);  // call this again if there is new data
-                    final Location location = WifiSamplerService.this.location.value();
-
-                    long entryTime = System.currentTimeMillis();
-
-                    database.beginTransaction();
-                    for (WifiAccessPoint accessPoint : accessPoints) {
-                        if (WifiBlacklist.ignore(accessPoint.ssid())) {
-                            database.dropAccessPoint(accessPoint.bssid());
-                        } else {
-                            database.addSample(accessPoint.ssid(), accessPoint.bssid(), location);
-                        }
-                    }
-                    database.commitTransaction();
-
-                    if (DEBUG) {
-                        Log.i(TAG, "Scan process time: " + (System.currentTimeMillis() - entryTime) + " ms");
-                    }
-                }
-            }
-        });
-    }
-
-    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         return Service.START_STICKY;
     }
 
     @Override
     public void onLocationChanged(final android.location.Location location) {
-        if (DEBUG) {
-            Log.i(TAG, "onLocationChanged(" + location + ")");
-        }
 
         if (location.getProvider().equals("gps")) {
             if (location.getAccuracy() <= Configuration.with(this).minimumGpsAccuracyInMeters()) {
-                if (DEBUG) {
-                    Log.i(TAG, "Accurate GPS location.");
-                }
-
-                // since this callback is asynchronous, we just pass the
-                // message back to the processing thread, to avoid race conditions
-
-                executor.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        WifiSamplerService.this.location.value(Location.fromAndroidLocation(location));
-
-                        // If WiFi scanning is possible, kick off a scan
-                        if (wifi.isWifiEnabled() || WifiCompat.isScanAlwaysAvailable(wifi)) {
-                            wifiReceiver.setScanStarted(true);
-                            wifi.startScan();
-                        } else {
-                            if (DEBUG) {
-                                Log.i(TAG, "Unable to start WiFi scan");
-                            }
-                        }
-                    }
-                });
-            } else {
+                BackendService.instanceGpsLocationUpdated(location);
+             } else {
                 if (DEBUG) {
                     Log.i(TAG, "Ignoring inaccurate GPS location ("+location.getAccuracy()+" meters).");
                 }

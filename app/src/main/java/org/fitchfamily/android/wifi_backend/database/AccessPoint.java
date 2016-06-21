@@ -20,6 +20,7 @@ package org.fitchfamily.android.wifi_backend.database;
 
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.util.SparseIntArray;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
@@ -54,10 +55,10 @@ public abstract class AccessPoint {
     public abstract String bssid();
     @Nullable
     public abstract String ssid();
-    public abstract ImmutableList<Location> samples();
+    public abstract ImmutableList<SimpleLocation> samples();
     public abstract int moveGuard();
 
-    public Location sample(int index) {
+    public SimpleLocation sample(int index) {
         if(index < samples().size()) {
             return samples().get(index);
         } else {
@@ -69,7 +70,7 @@ public abstract class AccessPoint {
      * Use this function to get the estimate location
      * @return the estimate location or null if no samples are available
      */
-    public EstimateLocation estimateLocation() {
+    public SimpleLocation estimateLocation() {
         if(samples().size() == 0) {
             return null;
         }
@@ -79,7 +80,7 @@ public abstract class AccessPoint {
         double latitude = 0.0;
         double longitude = 0.0;
 
-        for(Location sample : samples()) {
+        for(SimpleLocation sample : samples()) {
             latitude += sample.latitude();
             longitude += sample.longitude();
         }
@@ -87,21 +88,22 @@ public abstract class AccessPoint {
         latitude /= (double) samples().size();
         longitude /= (double) samples().size();
 
-        Location center = Location.builder()
+        SimpleLocation center = SimpleLocation.builder()
                 .latitude(latitude)
                 .longitude(longitude)
+                .radius(-1.0f)
                 .build();
 
         // get biggest distance
 
         float radius = 0.0f;
 
-        for(Location sample : samples()) {
+        for(SimpleLocation sample : samples()) {
             radius = Math.max(radius, center.distanceTo(sample));
         }
 
 
-        return EstimateLocation.builder()
+        return SimpleLocation.builder()
                 .latitude(latitude)
                 .longitude(longitude)
                 .radius(radius)
@@ -110,11 +112,11 @@ public abstract class AccessPoint {
 
     public abstract Builder buildUpon();
 
-    private static float perimeter(List<Location> samples) {
+    private static float perimeter(List<SimpleLocation> samples) {
         float result = 0.0f;
 
-        for (Location sample1 : samples) {
-            for (Location sample2 : samples) {
+        for (SimpleLocation sample1 : samples) {
+            for (SimpleLocation sample2 : samples) {
                 result += sample1.distanceTo(sample2);
             }
         }
@@ -130,13 +132,13 @@ public abstract class AccessPoint {
     public abstract static class Builder {
         public abstract Builder bssid(String bssid);
         public abstract Builder ssid(String ssid);
-        public abstract Builder samples(List<Location> samples);
+        public abstract Builder samples(List<SimpleLocation> samples);
         public abstract Builder moveGuard(int moveGuard);
         public abstract AccessPoint build();
 
         protected abstract String bssid();
         protected abstract int moveGuard();
-        protected abstract ImmutableList<Location> samples();
+        protected abstract ImmutableList<SimpleLocation> samples();
 
         protected int samplesCount() {
             try {
@@ -154,15 +156,15 @@ public abstract class AccessPoint {
             return moveGuard(Math.max(0, moveGuard()));
         }
 
-        public Builder addSample(Location location) {
+        public Builder addSample(SimpleLocation location) {
             return addSample(location, MIN_SAMPLES);
         }
 
-        public Builder addSample(Location location, int maxSamples) {
+        public Builder addSample(SimpleLocation location, int maxSamples) {
             maxSamples = Math.max(maxSamples, MIN_SAMPLES);
 
             if(samplesCount() < maxSamples) {
-                List<Location> samples = new ArrayList<>();
+                List<SimpleLocation> samples = new ArrayList<>();
 
                 if(samplesCount() != 0) {
                     samples.addAll(samples());
@@ -176,11 +178,11 @@ public abstract class AccessPoint {
                 // a larger perimeter by replacing one of our current samples with
                 // the new one.
 
-                List<Location> bestSamples = samples();
+                List<SimpleLocation> bestSamples = samples();
                 float bestPerimeter = perimeter(bestSamples);
 
                 for (int i = 0; i < samples().size(); i++) {
-                    List<Location> samples = new ArrayList<Location>(samples());
+                    List<SimpleLocation> samples = new ArrayList<SimpleLocation>(samples());
                     samples.set(i, location);
 
                     float guessPerimeter = perimeter(samples);
@@ -200,7 +202,7 @@ public abstract class AccessPoint {
         }
 
         public Builder clearSamples() {
-            return samples(new ArrayList<Location>());
+            return samples(new ArrayList<SimpleLocation>());
         }
     }
 }

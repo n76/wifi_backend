@@ -29,7 +29,7 @@ import com.opencsv.CSVWriter;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.database.AccessPoint;
 import org.fitchfamily.android.wifi_backend.database.Database;
-import org.fitchfamily.android.wifi_backend.database.Location;
+import org.fitchfamily.android.wifi_backend.database.SimpleLocation;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
 
 import java.io.IOException;
@@ -112,7 +112,7 @@ public class ExportSpiceRequest extends SpiceRequest<ExportSpiceRequest.Result> 
             ssid = value.ssid();
         }
 
-        for(Location sample : value.samples()) {
+        for(SimpleLocation sample : value.samples()) {
             out.writeNext(new String[]{bssid,
                     Double.toString(sample.latitude()),
                     Double.toString(sample.longitude()),

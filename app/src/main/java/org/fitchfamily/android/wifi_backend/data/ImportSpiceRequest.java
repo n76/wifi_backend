@@ -29,7 +29,7 @@ import com.octo.android.robospice.request.SpiceRequest;
 import com.opencsv.CSVReader;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.data.util.CountingInputStream;
-import org.fitchfamily.android.wifi_backend.database.Location;
+import org.fitchfamily.android.wifi_backend.database.SimpleLocation;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
 
 import java.io.IOException;
@@ -109,7 +109,7 @@ public class ImportSpiceRequest extends SpiceRequest<ImportSpiceRequest.Result> 
                 if (ssidIndex >= 0)
                     ssid = nextLine[ssidIndex];
 
-                database.addSample(ssid, bssid, Location.fromLatLon(latString,lonString));
+                database.addSample(ssid, bssid, SimpleLocation.fromLatLon(latString,lonString));
                 recCount++;
                 if ((recCount % 100) == 0) {
                     // Log.i(TAG, "recCount="+recCount+", committing transaction.");
