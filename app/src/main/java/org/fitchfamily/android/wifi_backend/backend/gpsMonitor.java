@@ -45,7 +45,7 @@ import java.util.concurrent.Executors;
 public class gpsMonitor extends Service implements LocationListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
-    private final static String TAG = "WiFiBackendSamplerSrv";
+    private final static String TAG = "WiFiBackendGpsMon";
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
