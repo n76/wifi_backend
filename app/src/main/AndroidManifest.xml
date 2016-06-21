@@ -33,7 +33,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".sampler.WifiSamplerService_" />
+        <service android:name=".backend.gpsMonitor_" />
 
         <activity
             android:name=".ui.data.WifiListActivity_"
