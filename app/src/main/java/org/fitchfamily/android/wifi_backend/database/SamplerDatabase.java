@@ -21,9 +21,9 @@ package org.fitchfamily.android.wifi_backend.database;
 import android.content.Context;
 import android.util.Log;
 
-import org.fitchfamily.android.wifi_backend.util.SimpleLocation;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.Configuration;
+import org.fitchfamily.android.wifi_backend.util.SimpleLocation;
 
 import java.io.File;
 

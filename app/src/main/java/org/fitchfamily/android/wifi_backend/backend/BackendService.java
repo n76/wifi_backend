@@ -36,19 +36,21 @@ import android.util.Log;
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.EService;
 import org.androidannotations.annotations.SystemService;
+
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.Configuration;
-import org.fitchfamily.android.wifi_backend.R;
-import org.fitchfamily.android.wifi_backend.util.SimpleLocation;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
-import org.fitchfamily.android.wifi_backend.wifi.WifiBlacklist;
-import org.fitchfamily.android.wifi_backend.util.LocationUtil;
-import org.fitchfamily.android.wifi_backend.util.AgeValue;
-import org.fitchfamily.android.wifi_backend.ui.MainActivity;
+import org.fitchfamily.android.wifi_backend.R;
 import org.fitchfamily.android.wifi_backend.ui.MainActivity_;
+import org.fitchfamily.android.wifi_backend.ui.MainActivity;
+import org.fitchfamily.android.wifi_backend.util.AgeValue;
+import org.fitchfamily.android.wifi_backend.util.LocationUtil;
+import org.fitchfamily.android.wifi_backend.util.SimpleLocation;
 import org.fitchfamily.android.wifi_backend.wifi.WifiAccessPoint;
+import org.fitchfamily.android.wifi_backend.wifi.WifiBlacklist;
 import org.fitchfamily.android.wifi_backend.wifi.WifiReceiver;
 import org.fitchfamily.android.wifi_backend.wifi.WifiReceiver.WifiReceivedCallback;
+
 import org.microg.nlp.api.LocationBackendService;
 
 import java.util.HashSet;

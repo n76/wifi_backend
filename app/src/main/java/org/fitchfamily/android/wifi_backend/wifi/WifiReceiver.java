@@ -33,7 +33,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.fitchfamily.android.wifi_backend.BuildConfig;
-import org.fitchfamily.android.wifi_backend.Configuration;
 
 public class WifiReceiver extends BroadcastReceiver {
     private static final String TAG = "WiFiReceiver";
