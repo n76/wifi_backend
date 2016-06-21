@@ -1,4 +1,4 @@
-package org.fitchfamily.android.wifi_backend.backend;
+package org.fitchfamily.android.wifi_backend.util;
 
 /*
  *  WiFi Backend for Unified Network Location
@@ -27,8 +27,6 @@ import android.util.Log;
 
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.Configuration;
-import org.fitchfamily.android.wifi_backend.database.SimpleLocation;
-import org.fitchfamily.android.wifi_backend.wifi.WifiAccessPoint;
 import org.microg.nlp.api.LocationHelper;
 
 import java.util.ArrayList;
@@ -64,7 +62,7 @@ public abstract class LocationUtil {
     // from two APs then those APs could be a distance of 2*apMovedThreshold apart.
     // So we will group the APs based on that large distance.
     //
-    static Set<Location> culledAPs(Collection<Location> locations, Context context) {
+    public static Set<Location> culledAPs(Collection<Location> locations, Context context) {
         Set<Set<Location>> locationGroups = divideInGroups(locations,
                 2 * Configuration.with(context).accessPointMoveThresholdInMeters());
 
@@ -125,7 +123,7 @@ public abstract class LocationUtil {
     // average of the range for a range estimate when the number of samples is
     // less than 3. If we have 3 or more samples we estimate the position error
     // based on the variance of our AP location averaging.
-    static Location weightedAverage(String source, Collection<Location> locations) {
+    public static Location weightedAverage(String source, Collection<Location> locations) {
         Location rslt;
 
         if (locations == null || locations.size() == 0) {

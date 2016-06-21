@@ -29,7 +29,7 @@ import com.opencsv.CSVWriter;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.database.AccessPoint;
 import org.fitchfamily.android.wifi_backend.database.Database;
-import org.fitchfamily.android.wifi_backend.database.SimpleLocation;
+import org.fitchfamily.android.wifi_backend.util.SimpleLocation;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
 
 import java.io.IOException;

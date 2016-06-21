@@ -1,4 +1,4 @@
-package org.fitchfamily.android.wifi_backend.database;
+package org.fitchfamily.android.wifi_backend.util;
 
 /*
  *  WiFi Backend for Unified Network Location

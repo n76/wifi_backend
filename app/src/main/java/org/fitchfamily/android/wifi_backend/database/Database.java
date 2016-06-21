@@ -31,6 +31,7 @@ import android.util.Log;
 
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.Configuration;
+import org.fitchfamily.android.wifi_backend.util.SimpleLocation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -280,7 +281,7 @@ public class Database extends SQLiteOpenHelper {
 
         try {
             if (cursor != null && cursor.moveToFirst()) {
-                List<org.fitchfamily.android.wifi_backend.database.SimpleLocation> samples = new ArrayList<SimpleLocation>();
+                List<SimpleLocation> samples = new ArrayList<SimpleLocation>();
 
                 addLocation(cursor, 4, samples);
                 addLocation(cursor, 6, samples);

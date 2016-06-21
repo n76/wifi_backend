@@ -1,4 +1,4 @@
-package org.fitchfamily.android.wifi_backend.sampler;
+package org.fitchfamily.android.wifi_backend.wifi;
 
 /*
  *  WiFi Backend for Unified Network Location
@@ -31,23 +31,23 @@ public abstract class WifiBlacklist {
         return (SSIDLower.endsWith("_nomap") ||            // Google unsubscibe option
                 SSID.startsWith("Audi") ||                        // some cars seem to have this AP on-board
                 SSID.startsWith("Samsung Galaxy") ||       // mobile AP
-                SSIDLower.contains("iphone") ||            // mobile AP
-                SSIDLower.contains("ipad") ||              // mobile AP
+                SSIDLower.contains("admin@ms ") ||         // WLAN network on Hurtigruten ships
                 SSIDLower.contains("android") ||           // mobile AP
-                SSIDLower.contains("motorola") ||          // mobile AP
-                SSIDLower.contains("deinbus.de") ||        // WLAN network on board of German bus
+                SSIDLower.contains("contiki-wifi") ||      // WLAN network on board of bus
                 SSIDLower.contains("db ic bus") ||         // WLAN network on board of German bus
-                SSIDLower.contains("fernbus") ||           // WLAN network on board of German bus
-                SSIDLower.contains("flixbus") ||           // WLAN network on board of German bus
-                SSIDLower.contains("postbus") ||           // WLAN network on board of bus line
+                SSIDLower.contains("deinbus.de") ||        // WLAN network on board of German bus
                 SSIDLower.contains("ecolines") ||          // WLAN network on board of German bus
                 SSIDLower.contains("eurolines_wifi") ||    // WLAN network on board of German bus
-                SSIDLower.contains("contiki-wifi") ||      // WLAN network on board of bus
-                SSIDLower.contains("muenchenlinie") ||     // WLAN network on board of bus
+                SSIDLower.contains("fernbus") ||           // WLAN network on board of German bus
+                SSIDLower.contains("flixbus") ||           // WLAN network on board of German bus
                 SSIDLower.contains("guest@ms ") ||         // WLAN network on Hurtigruten ships
-                SSIDLower.contains("admin@ms ") ||         // WLAN network on Hurtigruten ships
-                SSIDLower.contains("telekom_ice") ||       // WLAN network on DB trains
+                SSIDLower.contains("ipad") ||              // mobile AP
+                SSIDLower.contains("iphone") ||            // mobile AP
+                SSIDLower.contains("motorola") ||          // mobile AP
+                SSIDLower.contains("muenchenlinie") ||     // WLAN network on board of bus
                 SSIDLower.contains("nsb_interakti") ||
+                SSIDLower.contains("postbus") ||           // WLAN network on board of bus line
+                SSIDLower.contains("telekom_ice") ||       // WLAN network on DB trains
                 SSIDLower.contentEquals("amtrackconnect") ||    // WLAN network on USA Amtrak trains
                 SSIDLower.contentEquals("megabus")              // WLAN network on MegaBus US bus
         );

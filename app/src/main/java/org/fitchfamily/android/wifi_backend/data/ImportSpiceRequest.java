@@ -29,8 +29,8 @@ import com.octo.android.robospice.request.SpiceRequest;
 import com.opencsv.CSVReader;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.data.util.CountingInputStream;
-import org.fitchfamily.android.wifi_backend.database.SimpleLocation;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
+import org.fitchfamily.android.wifi_backend.util.SimpleLocation;
 
 import java.io.IOException;
 import java.io.InputStream;

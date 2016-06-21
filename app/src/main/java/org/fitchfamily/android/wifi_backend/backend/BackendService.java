@@ -39,11 +39,11 @@ import org.androidannotations.annotations.SystemService;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.Configuration;
 import org.fitchfamily.android.wifi_backend.R;
-import org.fitchfamily.android.wifi_backend.database.SimpleLocation;
+import org.fitchfamily.android.wifi_backend.util.SimpleLocation;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
-import org.fitchfamily.android.wifi_backend.sampler.WifiBlacklist;
-import org.fitchfamily.android.wifi_backend.sampler.WifiSamplerService_;
-import org.fitchfamily.android.wifi_backend.sampler.util.AgeValue;
+import org.fitchfamily.android.wifi_backend.wifi.WifiBlacklist;
+import org.fitchfamily.android.wifi_backend.util.LocationUtil;
+import org.fitchfamily.android.wifi_backend.util.AgeValue;
 import org.fitchfamily.android.wifi_backend.ui.MainActivity;
 import org.fitchfamily.android.wifi_backend.ui.MainActivity_;
 import org.fitchfamily.android.wifi_backend.wifi.WifiAccessPoint;
@@ -66,7 +66,7 @@ public class BackendService extends LocationBackendService implements WifiReceiv
     private SamplerDatabase database;
     private WifiReceiver wifiReceiver;
     private Thread thread;
-    private boolean wifiSamplerServiceRunning = false;
+    private boolean gpsMonitorRunning = false;
     private boolean permissionNotificationShown = false;
 
     private AgeValue<SimpleLocation> gpsLocation = AgeValue.create();
@@ -92,7 +92,7 @@ public class BackendService extends LocationBackendService implements WifiReceiv
         registerReceiver(wifiReceiver, new IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION));
 
         if(Configuration.with(this).hasLocationAccess()) {
-            setWifiSamplerServiceRunning(true);
+            setgpsMonitorRunning(true);
         }
     }
 
@@ -103,7 +103,7 @@ public class BackendService extends LocationBackendService implements WifiReceiv
         }
 
         unregisterReceiver(wifiReceiver);
-        setWifiSamplerServiceRunning(false);
+        setgpsMonitorRunning(false);
         setShowPermissionNotification(false);
 
         wifiReceiver = null;
@@ -115,10 +115,10 @@ public class BackendService extends LocationBackendService implements WifiReceiv
             if (DEBUG) {
                 Log.i(TAG, "update(): Permission missing");
             }
-            setWifiSamplerServiceRunning(false);
+            setgpsMonitorRunning(false);
             setShowPermissionNotification(true);
         } else if (wifiReceiver != null) {
-            setWifiSamplerServiceRunning(true);
+            setgpsMonitorRunning(true);
             setShowPermissionNotification(false);
             if (DEBUG) {
                 Log.i(TAG, "Starting scan for WiFi APs");
@@ -192,15 +192,15 @@ public class BackendService extends LocationBackendService implements WifiReceiv
         }
     };
 
-    private void setWifiSamplerServiceRunning(boolean enable) {
-        if(enable != wifiSamplerServiceRunning) {
+    private void setgpsMonitorRunning(boolean enable) {
+        if(enable != gpsMonitorRunning) {
             if (enable) {
-                bindService(new Intent(this, WifiSamplerService_.class), mConnection, Context.BIND_AUTO_CREATE);
+                bindService(new Intent(this, gpsMonitor_.class), mConnection, Context.BIND_AUTO_CREATE);
             } else {
                 unbindService(mConnection);
             }
 
-            wifiSamplerServiceRunning = enable;
+            gpsMonitorRunning = enable;
         }
     }
 

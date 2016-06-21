@@ -20,12 +20,12 @@ package org.fitchfamily.android.wifi_backend.database;
 
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.util.SparseIntArray;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 
 import org.fitchfamily.android.wifi_backend.BuildConfig;
+import org.fitchfamily.android.wifi_backend.util.SimpleLocation;
 
 import java.util.ArrayList;
 import java.util.List;

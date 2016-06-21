@@ -1,4 +1,4 @@
-package org.fitchfamily.android.wifi_backend.sampler;
+package org.fitchfamily.android.wifi_backend.backend;
 
 /*
  *  WiFi Backend for Unified Network Location
@@ -20,7 +20,6 @@ package org.fitchfamily.android.wifi_backend.sampler;
 
 import android.app.Service;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -37,14 +36,13 @@ import org.androidannotations.annotations.EService;
 import org.androidannotations.annotations.SystemService;
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.Configuration;
-import org.fitchfamily.android.wifi_backend.backend.BackendService;
 import org.fitchfamily.android.wifi_backend.wifi.WifiReceiver;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 @EService
-public class WifiSamplerService extends Service implements LocationListener,
+public class gpsMonitor extends Service implements LocationListener,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     private final static String TAG = "WiFiBackendSamplerSrv";
@@ -81,7 +79,7 @@ public class WifiSamplerService extends Service implements LocationListener,
             locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
                     sampleTime,
                     sampleDistance,
-                    WifiSamplerService.this);
+                    gpsMonitor.this);
         } catch (SecurityException ex) {
             if(DEBUG) {
                 Log.w(TAG, "init()", ex);
@@ -98,7 +96,7 @@ public class WifiSamplerService extends Service implements LocationListener,
         Configuration.with(this).unregister(this);
 
         try {
-            locationManager.removeUpdates(WifiSamplerService.this);
+            locationManager.removeUpdates(gpsMonitor.this);
         } catch (SecurityException ex) {
             // ignore
         }
@@ -116,8 +114,8 @@ public class WifiSamplerService extends Service implements LocationListener,
                 TextUtils.equals(key, Configuration.PREF_MIN_GPS_DISTANCE)) {
 
             updateSamplingConf(
-                    Configuration.with(WifiSamplerService.this).minimumGpsTimeInMilliseconds(),
-                    Configuration.with(WifiSamplerService.this).minimumGpsDistanceInMeters()
+                    Configuration.with(gpsMonitor.this).minimumGpsTimeInMilliseconds(),
+                    Configuration.with(gpsMonitor.this).minimumGpsDistanceInMeters()
             );
         }
     }
@@ -133,23 +131,23 @@ public class WifiSamplerService extends Service implements LocationListener,
         executor.submit(new Runnable() {
             @Override
             public void run() {
-                if ((WifiSamplerService.this.sampleTime != sampleTime) ||
-                        (WifiSamplerService.this.sampleDistance != sampleDistance)) {
+                if ((gpsMonitor.this.sampleTime != sampleTime) ||
+                        (gpsMonitor.this.sampleDistance != sampleDistance)) {
 
-                    WifiSamplerService.this.sampleTime = sampleTime;
-                    WifiSamplerService.this.sampleDistance = sampleDistance;
+                    gpsMonitor.this.sampleTime = sampleTime;
+                    gpsMonitor.this.sampleDistance = sampleDistance;
 
                     if (DEBUG) {
                         Log.i(TAG, "Changing GPS sampling configuration: " +
-                                WifiSamplerService.this.sampleTime + " ms, " + WifiSamplerService.this.sampleDistance + " meters");
+                                gpsMonitor.this.sampleTime + " ms, " + gpsMonitor.this.sampleDistance + " meters");
                     }
 
                     try {
-                        locationManager.removeUpdates(WifiSamplerService.this);
+                        locationManager.removeUpdates(gpsMonitor.this);
                         locationManager.requestLocationUpdates(LocationManager.PASSIVE_PROVIDER,
-                                WifiSamplerService.this.sampleTime,
-                                WifiSamplerService.this.sampleDistance,
-                                WifiSamplerService.this);
+                                gpsMonitor.this.sampleTime,
+                                gpsMonitor.this.sampleDistance,
+                                gpsMonitor.this);
                     } catch (SecurityException ex) {
                         if(DEBUG) {
                             Log.w(TAG, "updateSamplingConf()", ex);
