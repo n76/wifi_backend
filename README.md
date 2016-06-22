@@ -86,6 +86,7 @@ Changes
 1.0.2|23Mar2016|Update for revised UnifiedNlp with aging of reports.
 1.1.0|5May2016|Change import/export format to comma separated value (CSV) format.
 1.1.1|13May2016|Fix divide by zero on minimum signal strength.
+1.1.2|22June2016|Refactor some files and logic. Should be no user discernible change in operation.
 
 License
 =======
