@@ -56,6 +56,9 @@ public class ImportSpiceRequest extends SpiceRequest<ImportSpiceRequest.Result> 
 
     @Override
     public Result loadDataFromNetwork() throws Exception {
+        long entryTime = System.currentTimeMillis();
+        int recCount = 0;
+
         final long size = getFileSize(uri, context);
 
         InputStream inputStream = context.getContentResolver().openInputStream(uri);
@@ -99,7 +102,6 @@ public class ImportSpiceRequest extends SpiceRequest<ImportSpiceRequest.Result> 
             }
             String[] nextLine;
 
-            int recCount = 0;
             database.beginTransaction();
             while ((nextLine = reader.readNext()) != null) {
                 String bssid = nextLine[bssidIndex];
@@ -126,6 +128,8 @@ public class ImportSpiceRequest extends SpiceRequest<ImportSpiceRequest.Result> 
             inputStream.close();
             database.commitTransaction();
         }
+        Log.i(TAG, "Total Records processed: " + recCount);
+        Log.i(TAG, "Import data elapsed time: " + (System.currentTimeMillis() - entryTime) + " ms");
 
         return null;
     }
