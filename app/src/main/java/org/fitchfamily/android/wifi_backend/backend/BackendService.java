@@ -44,6 +44,7 @@ import org.fitchfamily.android.wifi_backend.R;
 import org.fitchfamily.android.wifi_backend.ui.MainActivity_;
 import org.fitchfamily.android.wifi_backend.ui.MainActivity;
 import org.fitchfamily.android.wifi_backend.util.AgeValue;
+import org.fitchfamily.android.wifi_backend.util.distanceCache;
 import org.fitchfamily.android.wifi_backend.util.LocationUtil;
 import org.fitchfamily.android.wifi_backend.util.SimpleLocation;
 import org.fitchfamily.android.wifi_backend.wifi.WifiAccessPoint;
@@ -70,6 +71,8 @@ public class BackendService extends LocationBackendService implements WifiReceiv
     private Thread thread;
     private boolean gpsMonitorRunning = false;
     private boolean permissionNotificationShown = false;
+
+    private static distanceCache distanceResults = new distanceCache();
 
     private AgeValue<SimpleLocation> gpsLocation = AgeValue.create();
 
@@ -300,6 +303,7 @@ public class BackendService extends LocationBackendService implements WifiReceiv
     private void updateWiFiDatabase(SimpleLocation location, final List<WifiAccessPoint> accessPoints) {
         long entryTime = System.currentTimeMillis();
 
+
         database.beginTransaction();
         for (WifiAccessPoint accessPoint : accessPoints) {
             if (WifiBlacklist.ignore(accessPoint.ssid())) {
@@ -311,7 +315,7 @@ public class BackendService extends LocationBackendService implements WifiReceiv
         database.commitTransaction();
 
         if (DEBUG) {
-            Log.i(TAG, "wifi database update process time: " + (System.currentTimeMillis() - entryTime) + " ms");
+            distanceResults.logCacheStats();
         }
     }
 }

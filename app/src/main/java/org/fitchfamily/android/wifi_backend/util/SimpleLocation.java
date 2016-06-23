@@ -21,13 +21,10 @@ package org.fitchfamily.android.wifi_backend.util;
 import android.support.annotation.Nullable;
 
 import com.google.auto.value.AutoValue;
-import android.support.v4.util.LruCache;
+import org.fitchfamily.android.wifi_backend.util.distanceCache;
 
 @AutoValue
 public abstract class SimpleLocation {
-    SimpleLocation() {
-
-    }
 
     public static Builder builder() {
         return new AutoValue_SimpleLocation.Builder();
@@ -37,11 +34,7 @@ public abstract class SimpleLocation {
     public abstract double longitude();
     public abstract float radius();
 
-    private class distanceRec {
-        public float distance;
-    }
-
-    private final LruCache<android.location.Location, distanceRec> distanceCache = new LruCache<>(10);
+    private static distanceCache distance = new distanceCache();
 
     public static SimpleLocation fromAndroidLocation(android.location.Location location) {
         return builder()
@@ -72,27 +65,13 @@ public abstract class SimpleLocation {
         return distanceTo(location.toAndroidLocation());
     }
 
-    // In deciding whether to add a new data point into our AP we do a lot
-    // of distance computations. Easy to code as it is just a single call.
-    // But that call has to do a lot of spherical trig so it can be slow
-    // and power hungry. We will attempt to reduce the load by taking advantage
-    // of the fact that we are looking for the distance between the same set
-    // of points time after time and cache the results.
     public float distanceTo(android.location.Location location) {
-        distanceRec cachedValue= distanceCache.get(location);
-
-        if (cachedValue == null) {
-            cachedValue = new distanceRec();
-            cachedValue.distance = toAndroidLocation().distanceTo(location);
-            distanceCache.put(location,cachedValue);
-        }
-        return cachedValue.distance;
+        return distance.distanceBetween(this.toAndroidLocation(), location);
     }
 
     @AutoValue.Builder
     public abstract static class Builder {
         Builder() {
-
         }
 
         public abstract Builder latitude(double latitude);

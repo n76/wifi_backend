@@ -88,6 +88,7 @@ Changes
 1.1.1|13May2016|Fix divide by zero on minimum signal strength.
 1.1.2|22June2016|Refactor some files and logic. Should be no user discernible change in operation.
 1.1.3|23June2016|Improve performance on often used distance calculations
+1.1.4|23June2016|Fix calculation cache to miss less often.
 
 License
 =======
