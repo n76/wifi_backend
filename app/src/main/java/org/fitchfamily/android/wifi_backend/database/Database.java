@@ -42,11 +42,16 @@ public class Database extends SQLiteOpenHelper {
     private static final String TAG = "WiFiBackendDB";
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
-    private static final int VERSION = 4;
+    private static final int VERSION = 5;
     private static final String NAME = "wifi.db";
 
     public static final String TABLE_SAMPLES = "APs";
+    @Deprecated
     public static final String COL_BSSID = "bssid";
+    public static final String COL_RFID = "rfID";
+    public static final String COL_MOVED_GUARD = "move_guard";
+    public static final String COL_SSID = "ssid";
+    public static final String COL_TYPE = "type";
     public static final String COL_LATITUDE = "latitude";
     public static final String COL_LONGITUDE = "longitude";
     public static final String COL_RADIUS = "radius";
@@ -65,8 +70,9 @@ public class Database extends SQLiteOpenHelper {
     // not used anymore
     @Deprecated
     private static final String COL_D31 = "d31";
-    public static final String COL_MOVED_GUARD = "move_guard";
-    public static final String COL_SSID = "ssid";
+
+    public static final Integer TYPE_WIFI = 0;
+    public static final Integer TYPE_CELL = 1;
 
     private SQLiteStatement sqlSampleInsert;
     private SQLiteStatement sqlSampleUpdate;
@@ -128,6 +134,58 @@ public class Database extends SQLiteOpenHelper {
         if(oldVersion < 4) {  // upgrade to 4
             sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_SAMPLES + " ADD COLUMN " + COL_SSID + " TEXT;");
         }
+
+        if(oldVersion < 5) {  // upgrade to 5
+            // Sqlite3 does not support dropping columns so we create a new table with our
+            // current fields and copy the old data into it.
+            sqLiteDatabase.execSQL("BEGIN TRANSACTION;");
+            sqLiteDatabase.execSQL("ALTER TABLE " + TABLE_SAMPLES + " RENAME TO " + TABLE_SAMPLES + "_old;");
+            sqLiteDatabase.execSQL("CREATE TABLE " + TABLE_SAMPLES + "(" +
+                    COL_RFID + " STRING PRIMARY KEY, " +
+                    COL_TYPE + " INTEGER, " +
+                    COL_SSID + " TEXT, " +
+                    COL_LATITUDE + " REAL, " +
+                    COL_LONGITUDE + " REAL, " +
+                    COL_RADIUS + " REAL, " +
+                    COL_MOVED_GUARD + " INTEGER, " +
+                    COL_LAT1 + " REAL, " +
+                    COL_LON1 + " REAL, " +
+                    COL_LAT2 + " REAL, " +
+                    COL_LON2 + " REAL, " +
+                    COL_LAT3 + " REAL, " +
+                    COL_LON3 + " REAL);");
+
+            sqLiteDatabase.execSQL("INSERT INTO " + TABLE_SAMPLES + "(" +
+                    COL_RFID + ", " +
+                    COL_SSID + ", " +
+                    COL_LATITUDE + ", " +
+                    COL_LONGITUDE + ", " +
+                    COL_RADIUS + ", " +
+                    COL_MOVED_GUARD + ", " +
+                    COL_LAT1 + ", " +
+                    COL_LON1 + ", " +
+                    COL_LAT2 + ", " +
+                    COL_LON2 + ", " +
+                    COL_LAT3 + ", " +
+                    COL_LON3 +
+                ") SELECT " +
+                    COL_BSSID + ", " +
+                    COL_SSID + ", " +
+                    COL_LATITUDE + ", " +
+                    COL_LONGITUDE + ", " +
+                    COL_RADIUS + ", " +
+                    COL_MOVED_GUARD + ", " +
+                    COL_LAT1 + ", " +
+                    COL_LON1 + ", " +
+                    COL_LAT2 + ", " +
+                    COL_LON2 + ", " +
+                    COL_LAT3 + ", " +
+                    COL_LON3 +
+                    " FROM " + TABLE_SAMPLES + "_old;");
+            sqLiteDatabase.execSQL("DROP TABLE " + TABLE_SAMPLES + "_old;");
+            sqLiteDatabase.execSQL("UPDATE " + TABLE_SAMPLES + " SET " + COL_TYPE + "=" + TYPE_WIFI + ";");
+            sqLiteDatabase.execSQL("COMMIT;");
+        }
     }
 
     @Override
@@ -137,7 +195,7 @@ public class Database extends SQLiteOpenHelper {
         this.db = db;
         sqlSampleInsert = db.compileStatement("INSERT INTO " +
                 TABLE_SAMPLES + "("+
-                COL_BSSID + ", " +
+                COL_RFID + ", " +
                 COL_LATITUDE + ", " +
                 COL_LONGITUDE + ", " +
                 COL_RADIUS + ", " +
@@ -148,8 +206,9 @@ public class Database extends SQLiteOpenHelper {
                 COL_LAT3 + ", " +
                 COL_LON3 + ", " +
                 COL_MOVED_GUARD + ", " +
-                COL_SSID + ") " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+                COL_SSID + ", " +
+                COL_TYPE + ") " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 
         sqlSampleUpdate = db.compileStatement("UPDATE " +
                 TABLE_SAMPLES + " SET "+
@@ -164,15 +223,15 @@ public class Database extends SQLiteOpenHelper {
                 COL_LON3 + "=?, " +
                 COL_MOVED_GUARD + "=?, " +
                 COL_SSID + "=? " +
-                "WHERE " + COL_BSSID + "=?;");
+                "WHERE " + COL_RFID + "=?;");
 
         sqlAPdrop = db.compileStatement("DELETE FROM " +
                 TABLE_SAMPLES +
-                " WHERE " + COL_BSSID + "=?;");
+                " WHERE " + COL_RFID + "=?;");
     }
 
-    public void dropAP(String bssid) {
-        final String canonicalBSSID = AccessPoint.bssid(bssid);
+    public void dropAP(String rfId) {
+        final String canonicalBSSID = AccessPoint.bssid(rfId);
 
         if (DEBUG) {
             Log.i(TAG, "Dropping " + canonicalBSSID + " from db");
@@ -202,16 +261,16 @@ public class Database extends SQLiteOpenHelper {
     }
 
     @Nullable
-    public SimpleLocation getLocation(String bssid) {
+    public SimpleLocation getLocation(String rfId) {
         final long entryTime = System.currentTimeMillis();
-        final String canonicalBSSID = AccessPoint.bssid(bssid);
+        final String canonicalBSSID = AccessPoint.bssid(rfId);
 
         Cursor c = getReadableDatabase().query(TABLE_SAMPLES,
                 new String[]{COL_LATITUDE,
                         COL_LONGITUDE,
                         COL_RADIUS
                 },
-                COL_BSSID+"=? AND " +
+                COL_RFID+"=? AND " +
                         COL_MOVED_GUARD + "=0",
                 new String[]{canonicalBSSID},
                 null,
@@ -239,7 +298,7 @@ public class Database extends SQLiteOpenHelper {
                         .build();
 
                 if (DEBUG) {
-                    Log.i(TAG, bssid + " at " + result.toString());
+                    Log.i(TAG, rfId + " at " + result.toString());
                 }
 
                 if (DEBUG) {
@@ -258,9 +317,9 @@ public class Database extends SQLiteOpenHelper {
     }
 
     @Nullable
-    public AccessPoint query(String bssid) {
+    public AccessPoint query(String rfId) {
         Cursor cursor = getReadableDatabase().query(TABLE_SAMPLES,
-                new String[]{COL_BSSID,
+                new String[]{COL_RFID,
                         COL_LATITUDE,
                         COL_LONGITUDE,
                         COL_RADIUS,
@@ -271,10 +330,11 @@ public class Database extends SQLiteOpenHelper {
                         COL_LAT3,
                         COL_LON3,
                         COL_MOVED_GUARD,
-                        COL_SSID
+                        COL_SSID,
+                        COL_TYPE
                 },
-                COL_BSSID + "=?",
-                new String[]{AccessPoint.bssid(bssid)},
+                COL_RFID + "=?",
+                new String[]{AccessPoint.bssid(rfId)},
                 null,
                 null,
                 null);
@@ -289,9 +349,10 @@ public class Database extends SQLiteOpenHelper {
 
                 return AccessPoint.builder()
                         .ssid(cursor.getString(11))
-                        .bssid(AccessPoint.bssid(bssid))
+                        .rfId(AccessPoint.bssid(rfId))
                         .samples(samples)
                         .moveGuard(cursor.getInt(10))
+                        .rfType(cursor.getInt(12))
                         .build();
             } else {
                 return null;
@@ -309,7 +370,7 @@ public class Database extends SQLiteOpenHelper {
             if(!TextUtils.isEmpty(accessPoint.ssid())) {
                 sqlSampleUpdate.bindString(11, accessPoint.ssid());
             }
-            sqlSampleUpdate.bindString(12, accessPoint.bssid());
+            sqlSampleUpdate.bindString(12, accessPoint.rfId());
             sqlSampleUpdate.executeInsert();
             sqlSampleUpdate.clearBindings();
         }
@@ -319,11 +380,12 @@ public class Database extends SQLiteOpenHelper {
 
     public void insert(AccessPoint accessPoint) {
         synchronized (sqlSampleInsert) {
-            sqlSampleInsert.bindString(1, accessPoint.bssid());
+            sqlSampleInsert.bindString(1, accessPoint.rfId());
             bind(sqlSampleInsert, accessPoint, 2);
             if(!TextUtils.isEmpty(accessPoint.ssid())) {
                 sqlSampleInsert.bindString(12, accessPoint.ssid());
             }
+            sqlSampleInsert.bindLong(13, accessPoint.rfType());
             sqlSampleInsert.executeInsert();
             sqlSampleInsert.clearBindings();
         }

@@ -59,19 +59,19 @@ public class WifiListActivity extends AppCompatActivity {
 
     private WifiListAdapter adapter = new WifiListAdapter().listener(new WifiListAdapter.Listener() {
         @Override
-        public void onWifiClicked(String bssid) {
+        public void onWifiClicked(String rfId) {
             if (twoPane) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(
                                 R.id.wifi_detail_container,
                                 WifiDetailFragment_.builder()
-                                        .bssid(bssid)
+                                        .rfId(rfId)
                                         .build()
                         )
                         .commit();
             } else {
                 WifiDetailActivity_.intent(WifiListActivity.this)
-                        .bssid(bssid)
+                        .rfId(rfId)
                         .start();
             }
         }
@@ -93,7 +93,7 @@ public class WifiListActivity extends AppCompatActivity {
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                 return new CursorLoader(WifiListActivity.this)
                         .table(Database.TABLE_SAMPLES)
-                        .columns(new String[]{Database.COL_SSID, Database.COL_BSSID})
+                        .columns(new String[]{Database.COL_SSID, Database.COL_RFID})
                         .sortOrder(Database.COL_SSID + " ASC");
             }
 

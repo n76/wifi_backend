@@ -36,17 +36,21 @@ import java.io.File;
  * perimeter distance.
  *
  * Field naming conventions are:
- *      bssid       - Basically the MAC address of the AP
- *      latitude    - Latitude estimate for the AP
- *      longitude   - Longitude estimate for the AP
+ *      rfid        - ID for RF source. For WiFi this is 
+ *                    the MAC address of the AP
+ *      type        - Type of RF source:
+ *                    0 - WiFi AP
+ *                    1 - Mobile/Cell Tower
+ *      latitude    - Latitude estimate for the RF source
+ *      longitude   - Longitude estimate for the RF source
+ *      move_guard  - Count down of times to ignore moved wifi AP
+ *      radius      - Estimated coverage radius of RF source
  *      lat1        - Latitude measure for sample 1
  *      lon1        - Longitude measure for sample 1
  *      lat2        - Latitude measure for sample 2
  *      lon2        - Longitude measure for sample 2
  *      lat3        - Latitude measure for sample 3
  *      lon3        - Longitude measure for sample 3
- *      move_guard  - Count down of times to ignore moved AP
- *      radius      - Estimated coverage radius of AP
  */
 public class SamplerDatabase extends Database {
     private final static String TAG = "WiFiBackendSamplerDB";
@@ -81,10 +85,10 @@ public class SamplerDatabase extends Database {
         return mInstance;
     }
 
-    public void addSample(String ssid, String bssid, SimpleLocation sampleLocation) {
+    public void addSample(int rfType, String ssid, String rfId, SimpleLocation sampleLocation) {
         final long entryTime = System.currentTimeMillis();
 
-        AccessPoint accessPoint = query(bssid);
+        AccessPoint accessPoint = query(rfId);
 
         if (accessPoint != null) {
             // We attempt to estimate the position of the AP by making as
@@ -103,7 +107,7 @@ public class SamplerDatabase extends Database {
                         .build();
 
                 if (DEBUG) {
-                    Log.i(TAG, "Sample is " + diff + " from AP, assume AP " + accessPoint.bssid() + " has moved.");
+                    Log.i(TAG, "Sample is " + diff + " from AP, assume AP " + accessPoint.rfId() + " has moved.");
                 }
             } else {
                 accessPoint = accessPoint.buildUpon()
@@ -122,9 +126,10 @@ public class SamplerDatabase extends Database {
             insert(
                     AccessPoint.builder()
                             .ssid(ssid)
-                            .bssid(AccessPoint.bssid(bssid))
+                            .rfId(AccessPoint.bssid(rfId))
                             .moveGuard(0)
                             .addSample(sampleLocation)
+                            .rfType(rfType)
                             .build()
             );
         }
@@ -134,8 +139,8 @@ public class SamplerDatabase extends Database {
         }
     }
 
-    public SamplerDatabase dropAccessPoint(String bssid) {
-        dropAP(bssid);
+    public SamplerDatabase dropAccessPoint(String rfId) {
+        dropAP(rfId);
 
         return this;
     }

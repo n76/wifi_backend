@@ -29,6 +29,7 @@ import com.opencsv.CSVReader;
 
 import org.fitchfamily.android.wifi_backend.BuildConfig;
 import org.fitchfamily.android.wifi_backend.data.util.CountingInputStream;
+import org.fitchfamily.android.wifi_backend.database.Database;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
 import org.fitchfamily.android.wifi_backend.util.SimpleLocation;
 
@@ -104,14 +105,14 @@ public class ImportSpiceRequest extends SpiceRequest<ImportSpiceRequest.Result> 
 
             database.beginTransaction();
             while ((nextLine = reader.readNext()) != null) {
-                String bssid = nextLine[bssidIndex];
+                String rfId = nextLine[bssidIndex];
                 String latString = nextLine[latIndex];
                 String lonString = nextLine[lonIndex];
                 String ssid = "";
                 if (ssidIndex >= 0)
                     ssid = nextLine[ssidIndex];
 
-                database.addSample(ssid, bssid, SimpleLocation.fromLatLon(latString,lonString));
+                database.addSample(Database.TYPE_WIFI, ssid, rfId, SimpleLocation.fromLatLon(latString,lonString));
                 recCount++;
                 if ((recCount % 100) == 0) {
                     // Log.i(TAG, "recCount="+recCount+", committing transaction.");

@@ -69,7 +69,7 @@ public class ExportSpiceRequest extends SpiceRequest<ExportSpiceRequest.Result> 
 
             Cursor cursor = SamplerDatabase.getInstance(context).getReadableDatabase().query(
                     Database.TABLE_SAMPLES,
-                    new String[]{Database.COL_BSSID},
+                    new String[]{Database.COL_RFID},
                     null, null, null, null, null
             );
 
@@ -105,7 +105,7 @@ public class ExportSpiceRequest extends SpiceRequest<ExportSpiceRequest.Result> 
             return;
         }
 
-        final String bssid = value.bssid();
+        final String rfId = value.rfId();
         String ssid = "";
 
         if(!TextUtils.isEmpty(value.ssid())) {
@@ -113,7 +113,7 @@ public class ExportSpiceRequest extends SpiceRequest<ExportSpiceRequest.Result> 
         }
 
         for(SimpleLocation sample : value.samples()) {
-            out.writeNext(new String[]{bssid,
+            out.writeNext(new String[]{rfId,
                     Double.toString(sample.latitude()),
                     Double.toString(sample.longitude()),
                     ssid});

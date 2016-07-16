@@ -255,7 +255,7 @@ public class BackendService extends LocationBackendService implements WifiReceiv
             Set<Location> locations = new HashSet<>(accessPoints.size());
 
             for (WifiAccessPoint accessPoint : accessPoints) {
-                SimpleLocation result = database.getLocation(accessPoint.bssid());
+                SimpleLocation result = database.getLocation(accessPoint.rfId());
 
                 if (result != null) {
                     Bundle extras = new Bundle();
@@ -307,9 +307,9 @@ public class BackendService extends LocationBackendService implements WifiReceiv
         database.beginTransaction();
         for (WifiAccessPoint accessPoint : accessPoints) {
             if (WifiBlacklist.ignore(accessPoint.ssid())) {
-                database.dropAccessPoint(accessPoint.bssid());
+                database.dropAccessPoint(accessPoint.rfId());
             } else {
-                database.addSample(accessPoint.ssid(), accessPoint.bssid(), location);
+                database.addSample(accessPoint.rfType(), accessPoint.ssid(), accessPoint.rfId(), location);
             }
         }
         database.commitTransaction();

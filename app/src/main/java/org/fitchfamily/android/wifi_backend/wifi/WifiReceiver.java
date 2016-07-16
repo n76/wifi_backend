@@ -33,6 +33,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import org.fitchfamily.android.wifi_backend.BuildConfig;
+import org.fitchfamily.android.wifi_backend.database.Database;
 
 public class WifiReceiver extends BroadcastReceiver {
     private static final String TAG = "WiFiReceiver";
@@ -82,8 +83,9 @@ public class WifiReceiver extends BroadcastReceiver {
                     WifiAccessPoint.builder()
                             .ssid(config.SSID)
                                     // some strange devices use a dot instead of :
-                            .bssid(config.BSSID.toUpperCase(Locale.US).replace(".", ":"))
+                            .rfId(config.BSSID.toUpperCase(Locale.US).replace(".", ":"))
                             .level(config.level)
+                            .rfType(Database.TYPE_WIFI)
                             .build()
             );
         }

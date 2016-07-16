@@ -46,7 +46,7 @@ import org.fitchfamily.android.wifi_backend.database.Database;
 @EFragment(R.layout.wifi_detail)
 public class WifiDetailFragment extends Fragment {
     @FragmentArg
-    protected String bssid;
+    protected String rfId;
 
     @ViewById
     protected TextView accuracy;
@@ -70,8 +70,8 @@ public class WifiDetailFragment extends Fragment {
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
                 return new CursorLoader(getContext())
                         .table(Database.TABLE_SAMPLES)
-                        .selection(Database.COL_BSSID + " = ?")
-                        .selectionArgs(new String[]{bssid})
+                        .selection(Database.COL_RFID + " = ?")
+                        .selectionArgs(new String[]{rfId})
                         .columns(new String[]{
                                 Database.COL_LATITUDE,
                                 Database.COL_LONGITUDE,

@@ -35,16 +35,16 @@ public class WifiListAdapter extends CursorAdapter<WifiListAdapter.ViewHolder> {
         @Override
         public void onClick(View v) {
             if(listener != null) {
-                String bssid = (String) v.getTag();
+                String rfId = (String) v.getTag();
 
-                listener.onWifiClicked(bssid);
+                listener.onWifiClicked(rfId);
             }
         }
     };
 
     private Listener listener;
     private int columnSsid;
-    private int columnBssid;
+    private int columnRfId;
 
     public WifiListAdapter() {
         setHasStableIds(true);
@@ -52,7 +52,7 @@ public class WifiListAdapter extends CursorAdapter<WifiListAdapter.ViewHolder> {
 
     @Override
     public long getItemId(int position) {
-        return getItem(position).getString(columnBssid).hashCode();
+        return getItem(position).getString(columnRfId).hashCode();
     }
 
     @Override
@@ -67,12 +67,12 @@ public class WifiListAdapter extends CursorAdapter<WifiListAdapter.ViewHolder> {
     protected void onCursorChanged(@NonNull Cursor cursor) {
         super.onCursorChanged(cursor);
         columnSsid = cursor.getColumnIndexOrThrow(Database.COL_SSID);
-        columnBssid = cursor.getColumnIndexOrThrow(Database.COL_BSSID);
+        columnRfId = cursor.getColumnIndexOrThrow(Database.COL_RFID);
     }
 
     @Override
     public void bind(ViewHolder holder, Cursor cursor) {
-        holder.bind(cursor.getString(columnSsid), cursor.getString(columnBssid));
+        holder.bind(cursor.getString(columnSsid), cursor.getString(columnRfId));
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -87,11 +87,11 @@ public class WifiListAdapter extends CursorAdapter<WifiListAdapter.ViewHolder> {
             title = (TextView) view.findViewById(R.id.title);
         }
 
-        public ViewHolder bind(String ssid, String bssid) {
-            view.setTag(bssid);
+        public ViewHolder bind(String ssid, String rfId) {
+            view.setTag(rfId);
 
             title.setText(ssid);
-            id.setText(AccessPoint.readableBssid(bssid));
+            id.setText(AccessPoint.readableBssid(rfId));
 
             return this;
         }
@@ -107,6 +107,6 @@ public class WifiListAdapter extends CursorAdapter<WifiListAdapter.ViewHolder> {
     }
 
     public interface Listener {
-        void onWifiClicked(String bssid);
+        void onWifiClicked(String rfId);
     }
 }

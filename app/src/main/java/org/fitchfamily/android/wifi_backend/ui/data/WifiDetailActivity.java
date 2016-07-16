@@ -49,7 +49,7 @@ public class WifiDetailActivity extends AppCompatActivity {
     protected Toolbar toolbar;
 
     @Extra
-    protected String bssid;
+    protected String rfId;
 
     @InstanceState
     protected boolean initialized;
@@ -80,7 +80,7 @@ public class WifiDetailActivity extends AppCompatActivity {
                     .replace(
                             R.id.container,
                             WifiDetailFragment_.builder()
-                                    .bssid(bssid)
+                                    .rfId(rfId)
                                     .build()
                     )
                     .commit();
@@ -94,24 +94,24 @@ public class WifiDetailActivity extends AppCompatActivity {
                 return new CursorLoader(WifiDetailActivity.this)
                         .table(Database.TABLE_SAMPLES)
                         .columns(new String[]{Database.COL_SSID})
-                        .selection(Database.COL_BSSID + " = ?")
-                        .selectionArgs(new String[]{bssid});
+                        .selection(Database.COL_RFID + " = ?")
+                        .selectionArgs(new String[]{rfId});
             }
 
             @Override
             public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
                 if(data != null && data.moveToFirst()) {
                     getSupportActionBar().setTitle(data.getString(0));
-                    getSupportActionBar().setSubtitle(AccessPoint.readableBssid(bssid));
+                    getSupportActionBar().setSubtitle(AccessPoint.readableBssid(rfId));
                 } else {
-                    getSupportActionBar().setTitle(AccessPoint.readableBssid(bssid));
+                    getSupportActionBar().setTitle(AccessPoint.readableBssid(rfId));
                     getSupportActionBar().setSubtitle(null);
                 }
             }
 
             @Override
             public void onLoaderReset(Loader<Cursor> loader) {
-                getSupportActionBar().setTitle(bssid);
+                getSupportActionBar().setTitle(rfId);
                 getSupportActionBar().setSubtitle(null);
             }
         });

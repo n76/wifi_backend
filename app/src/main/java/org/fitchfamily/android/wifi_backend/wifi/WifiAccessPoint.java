@@ -31,8 +31,9 @@ public abstract class WifiAccessPoint {
     }
 
     public abstract String ssid();
-    public abstract String bssid();
+    public abstract String rfId();
     public abstract int level();
+    public abstract int rfType();
 
     @AutoValue.Builder
     public abstract static class Builder {
@@ -41,8 +42,9 @@ public abstract class WifiAccessPoint {
         }
 
         public abstract Builder ssid(String ssid);
-        public abstract Builder bssid(String bssid);
+        public abstract Builder rfId(String rfId);
         public abstract Builder level(int level);
         public abstract WifiAccessPoint build();
+        public abstract Builder rfType(int type);
     }
 }

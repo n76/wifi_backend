@@ -52,11 +52,12 @@ public abstract class AccessPoint {
         return new AutoValue_AccessPoint.Builder();
     }
 
-    public abstract String bssid();
+    public abstract String rfId();
     @Nullable
     public abstract String ssid();
     public abstract ImmutableList<SimpleLocation> samples();
     public abstract int moveGuard();
+    public abstract int rfType();
 
     public SimpleLocation sample(int index) {
         if(index < samples().size()) {
@@ -130,15 +131,17 @@ public abstract class AccessPoint {
 
     @AutoValue.Builder
     public abstract static class Builder {
-        public abstract Builder bssid(String bssid);
+        public abstract Builder rfId(String rfId);
         public abstract Builder ssid(String ssid);
         public abstract Builder samples(List<SimpleLocation> samples);
         public abstract Builder moveGuard(int moveGuard);
+        public abstract Builder rfType(int rfType);
         public abstract AccessPoint build();
 
-        protected abstract String bssid();
+        protected abstract String rfId();
         protected abstract int moveGuard();
         protected abstract ImmutableList<SimpleLocation> samples();
+        protected abstract int rfType();
 
         protected int samplesCount() {
             try {
@@ -192,7 +195,7 @@ public abstract class AccessPoint {
                         bestPerimeter = guessPerimeter;
 
                         if (DEBUG) {
-                            Log.i(TAG, "Better perimeter point found on " + bssid() + ", i=" + i);
+                            Log.i(TAG, "Better perimeter point found on " + rfId() + ", i=" + i);
                         }
                     }
                 }
