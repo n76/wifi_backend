@@ -88,6 +88,9 @@ public class SamplerDatabase extends Database {
     public void addSample(int rfType, String ssid, String rfId, SimpleLocation sampleLocation) {
         final long entryTime = System.currentTimeMillis();
 
+        if (DEBUG) {
+            Log.i(TAG,"ID="+rfId+": Adding location="+sampleLocation.toString());
+        }
         AccessPoint accessPoint = query(rfId);
 
         if (accessPoint != null) {

@@ -112,7 +112,7 @@ public class ImportSpiceRequest extends SpiceRequest<ImportSpiceRequest.Result> 
                 if (ssidIndex >= 0)
                     ssid = nextLine[ssidIndex];
 
-                database.addSample(Database.TYPE_WIFI, ssid, rfId, SimpleLocation.fromLatLon(latString,lonString));
+                database.addSample(Database.TYPE_WIFI, ssid, rfId, SimpleLocation.fromLatLon(latString,lonString,false));
                 recCount++;
                 if ((recCount % 100) == 0) {
                     // Log.i(TAG, "recCount="+recCount+", committing transaction.");

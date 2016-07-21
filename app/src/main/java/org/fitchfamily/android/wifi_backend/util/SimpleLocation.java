@@ -33,6 +33,7 @@ public abstract class SimpleLocation {
     public abstract double latitude();
     public abstract double longitude();
     public abstract float radius();
+    public abstract boolean changed();
 
     private static distanceCache distance = new distanceCache();
 
@@ -41,6 +42,7 @@ public abstract class SimpleLocation {
                 .latitude(location.getLatitude())
                 .longitude(location.getLongitude())
                 .radius(location.getAccuracy())
+                .changed(true)
                 .build();
     }
 
@@ -53,12 +55,12 @@ public abstract class SimpleLocation {
         return location;
     }
 
-    public static SimpleLocation fromLatLon(double lat, double lon) {
-        return builder().latitude(lat).longitude(lon).radius(150f).build();
+    public static SimpleLocation fromLatLon(double lat, double lon, boolean changed) {
+        return builder().latitude(lat).longitude(lon).radius(150f).changed(changed).build();
     }
 
-    public static SimpleLocation fromLatLon(String lat, String lon) {
-        return fromLatLon(Double.parseDouble(lat),Double.parseDouble(lon));
+    public static SimpleLocation fromLatLon(String lat, String lon, boolean changed) {
+        return fromLatLon(Double.parseDouble(lat),Double.parseDouble(lon),changed);
     }
 
     public float distanceTo(SimpleLocation location) {
@@ -77,6 +79,7 @@ public abstract class SimpleLocation {
         public abstract Builder latitude(double latitude);
         public abstract Builder longitude(double longitude);
         public abstract Builder radius(float radius);
+        public abstract Builder changed(boolean changed);
         public abstract SimpleLocation build();
     }
 }

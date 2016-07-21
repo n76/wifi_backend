@@ -93,6 +93,7 @@ public abstract class AccessPoint {
                 .latitude(latitude)
                 .longitude(longitude)
                 .radius(-1.0f)
+                .changed(false)
                 .build();
 
         // get biggest distance
@@ -108,6 +109,7 @@ public abstract class AccessPoint {
                 .latitude(latitude)
                 .longitude(longitude)
                 .radius(radius)
+                .changed(false)
                 .build();
     }
 
@@ -174,6 +176,9 @@ public abstract class AccessPoint {
                 }
 
                 samples.add(location);
+                if (DEBUG) {
+                    Log.i(TAG, "Simple add to " + rfId() + ", add " + location + ", result="+samples);
+                }
 
                 return samples(samples);
             } else {

@@ -95,7 +95,7 @@ public class ExportSpiceRequest extends SpiceRequest<ExportSpiceRequest.Result> 
         } finally {
             outputStream.close();
         }
-
+        SamplerDatabase.getInstance(context).exportComplete();
         return null;
     }
 

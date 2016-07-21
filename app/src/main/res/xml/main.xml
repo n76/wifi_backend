@@ -9,6 +9,10 @@
         android:title="@string/db_size_label" />
 
     <Preference
+        android:key="db_change_preference"
+        android:title="@string/db_change_label" />
+
+    <Preference
         android:enabled="@bool/is_kitkat_or_later"
         android:key="db_import"
         android:title="@string/data_import" />

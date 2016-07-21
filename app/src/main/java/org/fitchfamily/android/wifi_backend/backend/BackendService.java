@@ -303,16 +303,19 @@ public class BackendService extends LocationBackendService implements WifiReceiv
     private void updateWiFiDatabase(SimpleLocation location, final List<WifiAccessPoint> accessPoints) {
         long entryTime = System.currentTimeMillis();
 
-
-        database.beginTransaction();
-        for (WifiAccessPoint accessPoint : accessPoints) {
-            if (WifiBlacklist.ignore(accessPoint.ssid())) {
-                database.dropAccessPoint(accessPoint.rfId());
-            } else {
-                database.addSample(accessPoint.rfType(), accessPoint.ssid(), accessPoint.rfId(), location);
+        try {
+            database.beginTransaction();
+            for (WifiAccessPoint accessPoint : accessPoints) {
+                if (WifiBlacklist.ignore(accessPoint.ssid())) {
+                    database.dropAccessPoint(accessPoint.rfId());
+                } else {
+                    database.addSample(accessPoint.rfType(), accessPoint.ssid(), accessPoint.rfId(), location);
+                }
             }
+            database.commitTransaction();
+        } catch (Exception ex) {
+            Log.i(TAG, "updateWiFiDatabase(): " + ex);
         }
-        database.commitTransaction();
 
         if (DEBUG) {
             distanceResults.logCacheStats();

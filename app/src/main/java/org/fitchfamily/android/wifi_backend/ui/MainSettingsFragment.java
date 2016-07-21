@@ -52,10 +52,12 @@ public class MainSettingsFragment extends PreferenceFragment {
 
     private Preference statistic;
     private Preference permission;
+    private Preference changedStat;
 
     @AfterPreferences
     protected void init() {
         statistic = findPreference("db_size_preference");
+        changedStat = findPreference("db_change_preference");
         permission = findPreference("grant_permission");
         final Preference export = findPreference("db_export");
         final Preference importPref = findPreference("db_import");
@@ -118,11 +120,13 @@ public class MainSettingsFragment extends PreferenceFragment {
             @Override
             public void onLoadFinished(Loader<DatabaseStatistic> loader, DatabaseStatistic databaseStatistic) {
                 setRecords(databaseStatistic.accessPointCount());
+                setChangedStat(databaseStatistic.accessPointChangeCount());
             }
 
             @Override
             public void onLoaderReset(Loader<DatabaseStatistic> loader) {
                 setRecords(0);
+                setChangedStat(0);
             }
         });
 
@@ -151,6 +155,10 @@ public class MainSettingsFragment extends PreferenceFragment {
 
     private void setRecords(int number) {
         statistic.setSummary(getResources().getString(R.string.statistic_records, number));
+    }
+
+    private void setChangedStat(int number) {
+        changedStat.setSummary(getResources().getString(R.string.statistic_changed, number));
     }
 
     private void requestPermission() {

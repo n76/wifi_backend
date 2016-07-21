@@ -97,20 +97,20 @@ public class WifiReceiver extends BroadcastReceiver {
         return scanStarted;
     }
 
-    public void setScanStarted(boolean scanStarted) {
+    private void setScanStarted(boolean scanStarted) {
         this.scanStarted = scanStarted;
     }
 
     public void startScan() {
-        setScanStarted(true);
-
         if (!wifiManager.isWifiEnabled() && !WifiCompat.isScanAlwaysAvailable(wifiManager)) {
             if(DEBUG) {
                 Log.i(TAG, "Wifi is disabled and we can't scan either. Not doing anything.");
             }
+            setScanStarted(false);
+        } else {
+            setScanStarted(true);
+            wifiManager.startScan();
         }
-
-        wifiManager.startScan();
     }
 
     public interface WifiReceivedCallback {

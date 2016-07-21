@@ -37,7 +37,8 @@ public class DatabaseStatisticLoader extends AsyncTaskLoader<DatabaseStatistic> 
     @Override
     public DatabaseStatistic loadInBackground() {
         return DatabaseStatistic.builder()
-                .accessPointCount(SamplerDatabase.getInstance(getContext()).getAccessPointCount())
+                .accessPointCount(SamplerDatabase.getInstance(getContext()).getAccessPointCount(false))
+                .accessPointChangeCount(SamplerDatabase.getInstance(getContext()).getAccessPointCount(true))
                 .build();
     }
 

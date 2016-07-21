@@ -36,11 +36,14 @@
 
     <string name="db_size_label">Number of known APs</string>
 
+    <string name="db_change_label">Number of new or updated APs</string>
+
     <!-- Generic suffix strings -->
     <string name="pref_meters"><xliff:g id="number of meters" exmaple="42">%s</xliff:g> meters</string>
     <string name="pref_seconds"><xliff:g id="number of seconds" exmaple="42">%s</xliff:g> seconds</string>
     <string name="pref_samples"><xliff:g id="number of samples" exmaple="42">%s</xliff:g> samples</string>
     <string name="statistic_records"><xliff:g id="number of APs" example="12">%1$d</xliff:g> APs</string>
+    <string name="statistic_changed"><xliff:g id="number of new or updated APs" example="12">%1$d</xliff:g> APs</string>
 
     <string name="drawer_settings">Settings</string>
     <string name="drawer_advanced">Advanced</string>

@@ -31,6 +31,7 @@ public abstract class DatabaseStatistic {
     }
 
     public abstract int accessPointCount();
+    public abstract int accessPointChangeCount();
 
     @AutoValue.Builder
     public abstract static class Builder {
@@ -39,6 +40,7 @@ public abstract class DatabaseStatistic {
         }
 
         public abstract Builder accessPointCount(int count);
+        public abstract Builder accessPointChangeCount(int count);
         public abstract DatabaseStatistic build();
     }
 }

@@ -55,6 +55,7 @@ public class Database extends SQLiteOpenHelper {
     public static final String COL_LATITUDE = "latitude";
     public static final String COL_LONGITUDE = "longitude";
     public static final String COL_RADIUS = "radius";
+    public static final String COL_CHANGED = "changed";
     public static final String COL_LAT1 = "lat1";
     public static final String COL_LON1 = "lon1";
     public static final String COL_LAT2 = "lat2";
@@ -73,6 +74,11 @@ public class Database extends SQLiteOpenHelper {
 
     public static final Integer TYPE_WIFI = 0;
     public static final Integer TYPE_CELL = 1;
+
+    public static final Integer CHANGED_NONE = 0;
+    public static final Integer CHANGED_AP1 = 1;
+    public static final Integer CHANGED_AP2 = 2;
+    public static final Integer CHANGED_AP3 = 4;
 
     private SQLiteStatement sqlSampleInsert;
     private SQLiteStatement sqlSampleUpdate;
@@ -148,6 +154,7 @@ public class Database extends SQLiteOpenHelper {
                     COL_LONGITUDE + " REAL, " +
                     COL_RADIUS + " REAL, " +
                     COL_MOVED_GUARD + " INTEGER, " +
+                    COL_CHANGED + " INTEGER, " +
                     COL_LAT1 + " REAL, " +
                     COL_LON1 + " REAL, " +
                     COL_LAT2 + " REAL, " +
@@ -184,6 +191,7 @@ public class Database extends SQLiteOpenHelper {
                     " FROM " + TABLE_SAMPLES + "_old;");
             sqLiteDatabase.execSQL("DROP TABLE " + TABLE_SAMPLES + "_old;");
             sqLiteDatabase.execSQL("UPDATE " + TABLE_SAMPLES + " SET " + COL_TYPE + "=" + TYPE_WIFI + ";");
+            sqLiteDatabase.execSQL("UPDATE " + TABLE_SAMPLES + " SET " + COL_CHANGED + "=" + (CHANGED_AP1+CHANGED_AP2+CHANGED_AP3) + ";");
             sqLiteDatabase.execSQL("COMMIT;");
         }
     }
@@ -196,33 +204,35 @@ public class Database extends SQLiteOpenHelper {
         sqlSampleInsert = db.compileStatement("INSERT INTO " +
                 TABLE_SAMPLES + "("+
                 COL_RFID + ", " +
+                COL_TYPE + ", " +
+                COL_SSID + ", " +
                 COL_LATITUDE + ", " +
                 COL_LONGITUDE + ", " +
                 COL_RADIUS + ", " +
+                COL_MOVED_GUARD + ", " +
+                COL_CHANGED + ", " +
                 COL_LAT1 + ", " +
                 COL_LON1 + ", " +
                 COL_LAT2 + ", " +
                 COL_LON2 + ", " +
                 COL_LAT3 + ", " +
-                COL_LON3 + ", " +
-                COL_MOVED_GUARD + ", " +
-                COL_SSID + ", " +
-                COL_TYPE + ") " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
+                COL_LON3 + ") " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);");
 
         sqlSampleUpdate = db.compileStatement("UPDATE " +
                 TABLE_SAMPLES + " SET "+
+                COL_SSID + "=?, " +
                 COL_LATITUDE + "=?, " +
                 COL_LONGITUDE + "=?, " +
                 COL_RADIUS + "=?, " +
+                COL_MOVED_GUARD + "=?, " +
+                COL_CHANGED + "=?, " +
                 COL_LAT1 + "=?, " +
                 COL_LON1 + "=?, " +
                 COL_LAT2 + "=?, " +
                 COL_LON2 + "=?, " +
                 COL_LAT3 + "=?, " +
-                COL_LON3 + "=?, " +
-                COL_MOVED_GUARD + "=?, " +
-                COL_SSID + "=? " +
+                COL_LON3 + "=? " +
                 "WHERE " + COL_RFID + "=?;");
 
         sqlAPdrop = db.compileStatement("DELETE FROM " +
@@ -230,6 +240,12 @@ public class Database extends SQLiteOpenHelper {
                 " WHERE " + COL_RFID + "=?;");
     }
 
+    public void exportComplete() {
+        ensureOpened();
+        db.execSQL("UPDATE " + TABLE_SAMPLES + " SET " + COL_CHANGED + "=" + CHANGED_NONE + ";");
+        onAccessPointCountChanged();
+    }
+    
     public void dropAP(String rfId) {
         final String canonicalBSSID = AccessPoint.bssid(rfId);
 
@@ -244,8 +260,12 @@ public class Database extends SQLiteOpenHelper {
         onAccessPointCountChanged();
     }
 
-    public int getAccessPointCount() {
-        Cursor cursor = getReadableDatabase().rawQuery("SELECT COUNT(*) FROM " + TABLE_SAMPLES + ";", null);
+    public int getAccessPointCount(boolean changed) {
+        String whereClause = "";
+        if (changed) {
+            whereClause = " WHERE " + COL_CHANGED + "<> 0";
+        }
+        Cursor cursor = getReadableDatabase().rawQuery("SELECT COUNT(*) FROM " + TABLE_SAMPLES + whereClause + ";", null);
 
         try {
             if(cursor.moveToFirst()) {
@@ -295,6 +315,7 @@ public class Database extends SQLiteOpenHelper {
                         .latitude(c.getDouble(0))
                         .longitude(c.getDouble(1))
                         .radius(Math.max(Configuration.with(context).accessPointAssumedAccuracy(), c.getFloat(2)))
+                        .changed(false)
                         .build();
 
                 if (DEBUG) {
@@ -319,19 +340,20 @@ public class Database extends SQLiteOpenHelper {
     @Nullable
     public AccessPoint query(String rfId) {
         Cursor cursor = getReadableDatabase().query(TABLE_SAMPLES,
-                new String[]{COL_RFID,
-                        COL_LATITUDE,
-                        COL_LONGITUDE,
-                        COL_RADIUS,
-                        COL_LAT1,
-                        COL_LON1,
-                        COL_LAT2,
-                        COL_LON2,
-                        COL_LAT3,
-                        COL_LON3,
-                        COL_MOVED_GUARD,
-                        COL_SSID,
-                        COL_TYPE
+                new String[]{COL_RFID,      //0
+                        COL_LATITUDE,       //1
+                        COL_LONGITUDE,      //2
+                        COL_RADIUS,         //3
+                        COL_LAT1,           //4
+                        COL_LON1,           //5
+                        COL_LAT2,           //6
+                        COL_LON2,           //7
+                        COL_LAT3,           //8
+                        COL_LON3,           //9
+                        COL_MOVED_GUARD,    //10
+                        COL_SSID,           //11
+                        COL_TYPE,           //12
+                        COL_CHANGED         //13
                 },
                 COL_RFID + "=?",
                 new String[]{AccessPoint.bssid(rfId)},
@@ -343,9 +365,13 @@ public class Database extends SQLiteOpenHelper {
             if (cursor != null && cursor.moveToFirst()) {
                 List<SimpleLocation> samples = new ArrayList<SimpleLocation>();
 
-                addLocation(cursor, 4, samples);
-                addLocation(cursor, 6, samples);
-                addLocation(cursor, 8, samples);
+                Integer changed = cursor.getInt(13);
+                addLocation(cursor, 4, ((changed & CHANGED_AP1)!= 0), samples);
+                addLocation(cursor, 6, ((changed & CHANGED_AP2)!= 0), samples);
+                addLocation(cursor, 8, ((changed & CHANGED_AP3)!= 0), samples);
+                if (DEBUG) {
+                    Log.i(TAG, "query("+rfId+"): change="+changed+", samples="+samples);
+                }
 
                 return AccessPoint.builder()
                         .ssid(cursor.getString(11))
@@ -367,10 +393,7 @@ public class Database extends SQLiteOpenHelper {
     public void update(AccessPoint accessPoint) {
         synchronized (sqlSampleUpdate) {
             bind(sqlSampleUpdate, accessPoint, 1);
-            if(!TextUtils.isEmpty(accessPoint.ssid())) {
-                sqlSampleUpdate.bindString(11, accessPoint.ssid());
-            }
-            sqlSampleUpdate.bindString(12, accessPoint.rfId());
+            sqlSampleUpdate.bindString(13, accessPoint.rfId());  // where clause
             sqlSampleUpdate.executeInsert();
             sqlSampleUpdate.clearBindings();
         }
@@ -381,11 +404,8 @@ public class Database extends SQLiteOpenHelper {
     public void insert(AccessPoint accessPoint) {
         synchronized (sqlSampleInsert) {
             sqlSampleInsert.bindString(1, accessPoint.rfId());
-            bind(sqlSampleInsert, accessPoint, 2);
-            if(!TextUtils.isEmpty(accessPoint.ssid())) {
-                sqlSampleInsert.bindString(12, accessPoint.ssid());
-            }
-            sqlSampleInsert.bindLong(13, accessPoint.rfType());
+            sqlSampleInsert.bindLong(2, accessPoint.rfType());
+            bind(sqlSampleInsert, accessPoint, 3);
             sqlSampleInsert.executeInsert();
             sqlSampleInsert.clearBindings();
         }
@@ -393,15 +413,30 @@ public class Database extends SQLiteOpenHelper {
         onAccessPointCountChanged();
     }
 
+    private static Integer changedValue(AccessPoint accessPoint) {
+        Integer result = CHANGED_NONE;
+        for (Integer i=0; i <= 2; i++) {
+            if ((accessPoint.sample(i) != null) && accessPoint.sample(i).changed()) {
+                result |= (1 << i);
+            }
+        }
+        if (DEBUG) {
+            Log.i(TAG, "changedValue="+result+", accessPoint="+accessPoint);
+        }
+        return result;
+    }
     private static SQLiteStatement bind(SQLiteStatement statement, AccessPoint accessPoint, int start) {
-        statement.bindString(start, String.valueOf(accessPoint.estimateLocation().latitude()));
-        statement.bindString(start + 1, String.valueOf(accessPoint.estimateLocation().longitude()));
-        statement.bindString(start + 2, String.valueOf(accessPoint.estimateLocation().radius()));
-        bind(statement, accessPoint.sample(0), start + 3);
-        bind(statement, accessPoint.sample(1), start + 5);
-        bind(statement, accessPoint.sample(2), start + 7);
-        statement.bindString(start + 9, String.valueOf(accessPoint.moveGuard()));
-
+        if(!TextUtils.isEmpty(accessPoint.ssid())) {
+            statement.bindString(start, accessPoint.ssid());
+        }
+        statement.bindString(start + 1, String.valueOf(accessPoint.estimateLocation().latitude()));
+        statement.bindString(start + 2, String.valueOf(accessPoint.estimateLocation().longitude()));
+        statement.bindString(start + 3, String.valueOf(accessPoint.estimateLocation().radius()));
+        statement.bindString(start + 4, String.valueOf(accessPoint.moveGuard()));
+        statement.bindLong(start + 5 ,changedValue(accessPoint));
+        bind(statement, accessPoint.sample(0), start + 6);
+        bind(statement, accessPoint.sample(1), start + 8);
+        bind(statement, accessPoint.sample(2), start + 10);
         return statement;
     }
 
@@ -410,20 +445,21 @@ public class Database extends SQLiteOpenHelper {
         statement.bindString(index + 1, String.valueOf(location == null ? 0.f : location.longitude()));
     }
 
-    private static SimpleLocation parse(Cursor cursor, int index) {
+    private static SimpleLocation parse(Cursor cursor, int index, boolean changed) {
         if(cursor.getDouble(index) != 0.d || cursor.getDouble(index + 1) != 0.d) {
             return SimpleLocation.builder()
                     .latitude(cursor.getDouble(index))
                     .longitude(cursor.getDouble(index + 1))
                     .radius(500)
+                    .changed(changed)
                     .build();
         } else {
             return null;
         }
     }
 
-    private static List<SimpleLocation> addLocation(Cursor cursor, int index, List<SimpleLocation> list) {
-        SimpleLocation location = parse(cursor, index);
+    private static List<SimpleLocation> addLocation(Cursor cursor, int index, boolean changed, List<SimpleLocation> list) {
+        SimpleLocation location = parse(cursor, index, changed);
 
         if(location != null) {
             list.add(location);
