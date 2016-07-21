@@ -288,7 +288,13 @@ public class Database extends SQLiteOpenHelper {
         Cursor c = getReadableDatabase().query(TABLE_SAMPLES,
                 new String[]{COL_LATITUDE,
                         COL_LONGITUDE,
-                        COL_RADIUS
+                        COL_RADIUS,
+                        COL_LAT1,
+                        COL_LON1,
+                        COL_LAT2,
+                        COL_LON2,
+                        COL_LAT3,
+                        COL_LON3
                 },
                 COL_RFID+"=? AND " +
                         COL_MOVED_GUARD + "=0",
@@ -299,36 +305,55 @@ public class Database extends SQLiteOpenHelper {
 
         try {
             if (c != null && c.moveToFirst()) {
-                // radius is our observed coverage but it can be quite small, as little as
-                // zero if we have only one sample. We want to report an accuracy value that
-                // is likely to actually contain the AP's real location and no matter how
-                // many samples we have collected systemic/sampling errors will mean we dont
-                // know the actual coverage radius.
-                //
-                // Web search indicates that 40m coverage on older WiFi protocols and 100m
-                // coverage on newer APs (both ranges for outdoor conditions).
-                //
-                // So we will take the greater value (assumed max range) or actual measured
-                // range as our assumed accuracy.
+                // We only want to return location data for APs that we have received at least
+                // three samples.
+                Integer sampleCount = 0;
+                if (c.getDouble(3) != 0.d || c.getDouble(4) != 0.d)
+                    sampleCount++;
+                if (c.getDouble(5) != 0.d || c.getDouble(6) != 0.d)
+                    sampleCount++;
+                if (c.getDouble(7) != 0.d || c.getDouble(8) != 0.d)
+                    sampleCount++;
+                if (sampleCount == 3) {
 
-                SimpleLocation result = SimpleLocation.builder()
-                        .latitude(c.getDouble(0))
-                        .longitude(c.getDouble(1))
-                        .radius(Math.max(Configuration.with(context).accessPointAssumedAccuracy(), c.getFloat(2)))
-                        .changed(false)
-                        .build();
+                    // radius is our observed coverage but it can be quite small, as little as
+                    // zero if we have only one sample. We want to report an accuracy value that
+                    // is likely to actually contain the AP's real location and no matter how
+                    // many samples we have collected systemic/sampling errors will mean we dont
+                    // know the actual coverage radius.
+                    //
+                    // Web search indicates that 40m coverage on older WiFi protocols and 100m
+                    // coverage on newer APs (both ranges for outdoor conditions).
+                    //
+                    // So we will take the greater value (assumed max range) or actual measured
+                    // range as our assumed accuracy.
 
-                if (DEBUG) {
-                    Log.i(TAG, rfId + " at " + result.toString());
+                    SimpleLocation result = SimpleLocation.builder()
+                            .latitude(c.getDouble(0))
+                            .longitude(c.getDouble(1))
+                            .radius(Math.max(Configuration.with(context).accessPointAssumedAccuracy(), c.getFloat(2)))
+                            .changed(false)
+                            .build();
+
+                    if (DEBUG) {
+                        Log.i(TAG, rfId + " at " + result.toString());
+                    }
+
+                    if (DEBUG) {
+                        Log.i(TAG, "getLocation time: " + (System.currentTimeMillis() - entryTime) + "ms");
+                    }
+                    c.close();
+                    c = null;
+                    return result;
+                } else {
+                    if (DEBUG) {
+                        Log.i(TAG, "getLocation(): Insufficient samples (" + sampleCount + ")");
+                        Log.i(TAG, "getLocation time: " + (System.currentTimeMillis() - entryTime) + "ms");
+                    }
                 }
-
-                if (DEBUG) {
-                    Log.i(TAG, "ApLocation time: " + (System.currentTimeMillis() - entryTime) + "ms");
-                }
-
-                return result;
             }
-
+            c.close();
+            c = null;
             return null;
         } finally {
             if (c != null) {
@@ -445,12 +470,12 @@ public class Database extends SQLiteOpenHelper {
         statement.bindString(index + 1, String.valueOf(location == null ? 0.f : location.longitude()));
     }
 
-    private static SimpleLocation parse(Cursor cursor, int index, boolean changed) {
+    private SimpleLocation parse(Cursor cursor, int index, boolean changed) {
         if(cursor.getDouble(index) != 0.d || cursor.getDouble(index + 1) != 0.d) {
             return SimpleLocation.builder()
                     .latitude(cursor.getDouble(index))
                     .longitude(cursor.getDouble(index + 1))
-                    .radius(500)
+                    .radius(Configuration.with(context).accessPointAssumedAccuracy())
                     .changed(changed)
                     .build();
         } else {
@@ -458,7 +483,7 @@ public class Database extends SQLiteOpenHelper {
         }
     }
 
-    private static List<SimpleLocation> addLocation(Cursor cursor, int index, boolean changed, List<SimpleLocation> list) {
+    private List<SimpleLocation> addLocation(Cursor cursor, int index, boolean changed, List<SimpleLocation> list) {
         SimpleLocation location = parse(cursor, index, changed);
 
         if(location != null) {

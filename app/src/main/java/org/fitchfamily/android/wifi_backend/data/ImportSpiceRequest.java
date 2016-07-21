@@ -120,11 +120,13 @@ public class ImportSpiceRequest extends SpiceRequest<ImportSpiceRequest.Result> 
                     database.beginTransaction();
                 }
 
-                if(size != 0) {
+                if (size != 0) {
                     publishProgress(countingInputStream.getBytesRead() * MAX_PROGRESS / size);
                 }
             }
-
+        } catch (Exception e) {
+            Log.i(TAG, e.toString());
+            e.printStackTrace();
         } finally {
             inputStream.close();
             database.commitTransaction();
