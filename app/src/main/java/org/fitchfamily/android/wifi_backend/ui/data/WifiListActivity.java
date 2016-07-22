@@ -32,6 +32,7 @@ import android.view.MenuItem;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
+import org.fitchfamily.android.wifi_backend.Configuration;
 import org.fitchfamily.android.wifi_backend.R;
 import org.fitchfamily.android.wifi_backend.database.Database;
 
@@ -91,9 +92,20 @@ public class WifiListActivity extends AppCompatActivity {
         getSupportLoaderManager().initLoader(0, null, new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+                int option = Configuration.listOption();
+                String selection = null;
+                switch (Configuration.listOption()) {
+                    case Configuration.LIST_OPTION_CHANGED:
+                        selection = Database.COL_CHANGED + "<> 0";
+                        break;
+
+                    default:
+                        selection = null;
+                }
                 return new CursorLoader(WifiListActivity.this)
                         .table(Database.TABLE_SAMPLES)
                         .columns(new String[]{Database.COL_SSID, Database.COL_RFID})
+                        .selection(selection)
                         .sortOrder(Database.COL_SSID + " ASC");
             }
 

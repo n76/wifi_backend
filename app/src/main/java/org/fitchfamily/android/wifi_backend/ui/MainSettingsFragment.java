@@ -73,6 +73,16 @@ public class MainSettingsFragment extends PreferenceFragment {
         statistic.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
+                Configuration.listOption(Configuration.LIST_OPTION_ALL);
+                WifiListActivity_.intent(getActivity()).start();
+                return true;
+            }
+        });
+
+        changedStat.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                Configuration.listOption(Configuration.LIST_OPTION_CHANGED);
                 WifiListActivity_.intent(getActivity()).start();
                 return true;
             }

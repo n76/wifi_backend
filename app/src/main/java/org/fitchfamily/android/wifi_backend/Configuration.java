@@ -64,6 +64,10 @@ public class Configuration {
     private Resources resources;
     private Context context;
 
+    public static final int LIST_OPTION_ALL = 0;
+    public static final int LIST_OPTION_CHANGED = 1;
+    private static int listOptionValue = LIST_OPTION_ALL;
+
     private Configuration(Context context) {
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
         resources = context.getResources();
@@ -126,6 +130,14 @@ public class Configuration {
 
     public boolean hasLocationAccess() {
         return ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public static int listOption() {
+        return listOptionValue;
+    }
+
+    public static void listOption(int newVal ) {
+        listOptionValue = newVal;
     }
 
     private float parseFloat(String preferenceKey, int defaultResource) {
