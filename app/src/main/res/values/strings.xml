@@ -55,7 +55,7 @@
     <string name="title_wifi_list">WiFis</string>
     <string name="title_wifi_detail">WiFi Detail</string>
 
-    <string name="wifi_detail_accuracy">Accuracy: %s</string>
+    <string name="wifi_detail_accuracy">Observed Range: %s</string>
     <string name="wifi_show_map">Show on map</string>
 
     <string name="data_export">Export data</string>
