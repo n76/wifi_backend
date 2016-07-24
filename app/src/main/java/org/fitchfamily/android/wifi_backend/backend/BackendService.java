@@ -142,7 +142,9 @@ public class BackendService extends LocationBackendService implements WifiReceiv
             Log.i(TAG, "GPS Location update: " + locReport.toString());
         }
         gpsLocation.value(SimpleLocation.fromAndroidLocation(locReport));
-        wifiReceiver.startScan();
+        if (wifiReceiver != null){
+            wifiReceiver.startScan();
+        }
     }
 
     public static void instanceGpsLocationUpdated(final android.location.Location locReport) {
