@@ -27,6 +27,7 @@ import com.octo.android.robospice.request.SpiceRequest;
 import com.opencsv.CSVWriter;
 
 import org.fitchfamily.android.wifi_backend.BuildConfig;
+import org.fitchfamily.android.wifi_backend.Configuration;
 import org.fitchfamily.android.wifi_backend.database.AccessPoint;
 import org.fitchfamily.android.wifi_backend.database.Database;
 import org.fitchfamily.android.wifi_backend.database.SamplerDatabase;
@@ -66,11 +67,23 @@ public class ExportSpiceRequest extends SpiceRequest<ExportSpiceRequest.Result> 
         try {
             CSVWriter writer = new CSVWriter(new OutputStreamWriter(outputStream, "UTF-8"));
             writer.writeNext(new String[]{"bssid","lat","lon","ssid"});
+            String selection;
+            boolean exportAll = true;
+            switch (Configuration.exportOption()) {
+                case Configuration.EXPORT_OPTION_CHANGED:
+                    selection = Database.COL_CHANGED + "<> 0";
+                    break;
+
+                default:
+                    selection = null;
+                    exportAll = true;
+            }
 
             Cursor cursor = SamplerDatabase.getInstance(context).getReadableDatabase().query(
                     Database.TABLE_SAMPLES,
                     new String[]{Database.COL_RFID},
-                    null, null, null, null, null
+                    selection,
+                    null, null, null, null
             );
 
             try {
@@ -79,7 +92,10 @@ public class ExportSpiceRequest extends SpiceRequest<ExportSpiceRequest.Result> 
                         AccessPoint accessPoint = SamplerDatabase.getInstance(context).query(cursor.getString(0));
 
                         if(accessPoint != null) {
-                            writeCSV(writer, accessPoint);
+                            writeCSV(writer,
+                                    accessPoint,
+                                    exportAll
+                            );
                         }
 
                         publishProgress(cursor.getPosition() * MAX_PROGRESS / cursor.getCount());
@@ -99,7 +115,7 @@ public class ExportSpiceRequest extends SpiceRequest<ExportSpiceRequest.Result> 
         return null;
     }
 
-    private void writeCSV(CSVWriter out, AccessPoint value) throws IOException {
+    private void writeCSV(CSVWriter out, AccessPoint value, boolean exportAll) throws IOException {
 
         if(value.moveGuard() != 0) {        // Don't export suspect (moved/moving) APs
             return;
@@ -113,10 +129,12 @@ public class ExportSpiceRequest extends SpiceRequest<ExportSpiceRequest.Result> 
         }
 
         for(SimpleLocation sample : value.samples()) {
-            out.writeNext(new String[]{rfId,
-                    Double.toString(sample.latitude()),
-                    Double.toString(sample.longitude()),
-                    ssid});
+            if (exportAll || sample.changed()) {
+                out.writeNext(new String[]{rfId,
+                        Double.toString(sample.latitude()),
+                        Double.toString(sample.longitude()),
+                        ssid});
+            }
         }
     }
 }

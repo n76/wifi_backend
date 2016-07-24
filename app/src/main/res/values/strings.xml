@@ -58,7 +58,8 @@
     <string name="wifi_detail_accuracy">Observed Range: %s</string>
     <string name="wifi_show_map">Show on map</string>
 
-    <string name="data_export">Export data</string>
+    <string name="data_export_all">Export all data</string>
+    <string name="data_export_changed">Export changed data</string>
     <string name="data_export_error">Couldn\'t export data</string>
 
     <string name="data_import">Import data</string>

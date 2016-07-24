@@ -68,6 +68,10 @@ public class Configuration {
     public static final int LIST_OPTION_CHANGED = 1;
     private static int listOptionValue = LIST_OPTION_ALL;
 
+    public static final int EXPORT_OPTION_ALL = 0;
+    public static final int EXPORT_OPTION_CHANGED = 1;
+    private static int exportOptionValue = LIST_OPTION_ALL;
+
     private Configuration(Context context) {
         preferences = PreferenceManager.getDefaultSharedPreferences(context);
         resources = context.getResources();
@@ -139,6 +143,9 @@ public class Configuration {
     public static void listOption(int newVal ) {
         listOptionValue = newVal;
     }
+
+    public static int exportOption() { return  exportOptionValue; }
+    public static void exportOption(int newVal) { exportOptionValue = newVal; }
 
     private float parseFloat(String preferenceKey, int defaultResource) {
         String defaultValue = resources.getString(defaultResource);

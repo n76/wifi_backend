@@ -25,6 +25,7 @@ import com.octo.android.robospice.request.SpiceRequest;
 
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.FragmentArg;
+import org.fitchfamily.android.wifi_backend.Configuration;
 import org.fitchfamily.android.wifi_backend.R;
 import org.fitchfamily.android.wifi_backend.data.ExportSpiceRequest;
 
@@ -38,7 +39,16 @@ public class ExportProgressDialog extends OperationProgressDialog<ExportSpiceReq
 
     @Override
     protected String getMessage() {
-        return getString(R.string.data_export);
+        String message = getString(R.string.data_export_all);
+        switch (Configuration.exportOption()) {
+            case Configuration.EXPORT_OPTION_CHANGED:
+                message = getString(R.string.data_export_changed);;
+                break;
+
+            default:
+        }
+
+        return message;
     }
 
     @Override

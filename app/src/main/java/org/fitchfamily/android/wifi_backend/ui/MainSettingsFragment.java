@@ -59,7 +59,8 @@ public class MainSettingsFragment extends PreferenceFragment {
         statistic = findPreference("db_size_preference");
         changedStat = findPreference("db_change_preference");
         permission = findPreference("grant_permission");
-        final Preference export = findPreference("db_export");
+        final Preference exportAll = findPreference("db_export");
+        final Preference exportChanged = findPreference("db_export_changed");
         final Preference importPref = findPreference("db_import");
 
         permission.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -88,10 +89,11 @@ public class MainSettingsFragment extends PreferenceFragment {
             }
         });
 
-        export.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+        exportAll.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
                 if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    Configuration.exportOption(Configuration.EXPORT_OPTION_ALL);
                     startActivityForResult(
                             new Intent(Intent.ACTION_CREATE_DOCUMENT)
                                     .setType("text/comma-separated-values")
@@ -100,7 +102,23 @@ public class MainSettingsFragment extends PreferenceFragment {
                             EXPORT_REQUEST_CODE
                     );
                 }
+                return true;
+            }
+        });
 
+        exportChanged.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                    Configuration.exportOption(Configuration.EXPORT_OPTION_CHANGED);
+                    startActivityForResult(
+                            new Intent(Intent.ACTION_CREATE_DOCUMENT)
+                                    .setType("text/comma-separated-values")
+                                    .addCategory(Intent.CATEGORY_OPENABLE)
+                                    .putExtra(Intent.EXTRA_TITLE, "wifi.csv"),
+                            EXPORT_REQUEST_CODE
+                    );
+                }
                 return true;
             }
         });

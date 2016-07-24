@@ -55,6 +55,8 @@
     <string name="wifi_show_map">Прикажи на мапи</string>
 
     <string name="data_export">Извоз података</string>
+    <string name="data_export_all">извести све податке</string>
+    <string name="data_export_changed">извоз измену података</string>
     <string name="data_export_error">Не могох да извезем податке</string>
 
     <string name="data_import">Увоз података</string>
