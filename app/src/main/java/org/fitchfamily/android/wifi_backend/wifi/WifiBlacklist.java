@@ -29,8 +29,14 @@ public abstract class WifiBlacklist {
         String SSIDLower = SSID.toLowerCase(Locale.US);
 
         return (SSIDLower.endsWith("_nomap") ||            // Google unsubscibe option
-                SSID.startsWith("Audi") ||                        // some cars seem to have this AP on-board
+
+                SSID.startsWith("Audi") ||                 // some cars seem to have this AP on-board
+                SSID.startsWith("BusWiFi") ||              // Some transit buses in LA Calif metro area
+                SSID.startsWith("CellSpot") ||             // T-Mobile US portable cell based WiFi
+                SSID.startsWith("CoachAmerica") ||         // Charter bus service with on board WiFi
+                SSID.startsWith("DisneyLandResortExpress") ||              // Bus with on board WiFi
                 SSID.startsWith("Samsung Galaxy") ||       // mobile AP
+
                 SSIDLower.contains("admin@ms ") ||         // WLAN network on Hurtigruten ships
                 SSIDLower.contains("android") ||           // mobile AP
                 SSIDLower.contains("contiki-wifi") ||      // WLAN network on board of bus
@@ -43,12 +49,15 @@ public abstract class WifiBlacklist {
                 SSIDLower.contains("guest@ms ") ||         // WLAN network on Hurtigruten ships
                 SSIDLower.contains("ipad") ||              // mobile AP
                 SSIDLower.contains("iphone") ||            // mobile AP
+                SSIDLower.contains("mobile hotspot") ||    // e.g "MetroPCS Portable Mobile Hotspot"
                 SSIDLower.contains("motorola") ||          // mobile AP
                 SSIDLower.contains("muenchenlinie") ||     // WLAN network on board of bus
                 SSIDLower.contains("nsb_interakti") ||
                 SSIDLower.contains("postbus") ||           // WLAN network on board of bus line
                 SSIDLower.contains("telekom_ice") ||       // WLAN network on DB trains
-                SSIDLower.contentEquals("amtrackconnect") ||    // WLAN network on USA Amtrak trains
+
+                SSIDLower.contentEquals("amtrakconnect") ||    // WLAN network on USA Amtrak trains
+                SSIDLower.contentEquals("amtrak") ||      // WLAN network on USA Amtrak trains
                 SSIDLower.contentEquals("megabus")              // WLAN network on MegaBus US bus
         );
     }
