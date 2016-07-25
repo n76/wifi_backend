@@ -36,6 +36,7 @@ public abstract class WifiBlacklist {
                 SSID.startsWith("CoachAmerica") ||         // Charter bus service with on board WiFi
                 SSID.startsWith("DisneyLandResortExpress") ||              // Bus with on board WiFi
                 SSID.startsWith("Samsung Galaxy") ||       // mobile AP
+                SSID.startsWith("TaxiLinQ") ||             // Mobile AP, see http://www.mobile-knowledge.com/products/driver-solutions/taxilinq/
 
                 SSIDLower.contains("admin@ms ") ||         // WLAN network on Hurtigruten ships
                 SSIDLower.contains("android") ||           // mobile AP
