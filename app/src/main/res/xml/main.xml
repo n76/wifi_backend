@@ -20,7 +20,7 @@
     <Preference
         android:enabled="@bool/is_kitkat_or_later"
         android:key="db_export"
-        android:title="@string/data_export" />
+        android:title="@string/data_export_all" />
     <Preference
         android:enabled="@bool/is_kitkat_or_later"
         android:key="db_export_changed"
