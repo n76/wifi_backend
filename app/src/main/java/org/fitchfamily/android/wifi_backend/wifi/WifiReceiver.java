@@ -40,6 +40,7 @@ public class WifiReceiver extends BroadcastReceiver {
     private static final boolean DEBUG = BuildConfig.DEBUG;
 
     private boolean scanStarted = false;
+    private static long scanStartTime;
     private final WifiManager wifiManager;
     private final WifiReceivedCallback callback;
 
@@ -53,15 +54,14 @@ public class WifiReceiver extends BroadcastReceiver {
     }
 
     public void onReceive(Context c, Intent intent) {
-        if (!isScanStarted()) {
+        if (!scanStarted()) {
             if(DEBUG) {
-                Log.d(TAG, "no scan started");
+                Log.i(TAG, "Scan received but no scan started");
             }
-
-            return;
+        } else {
+            scanStarted(false);
         }
-
-        setScanStarted(false);
+        
         List<ScanResult> configs = wifiManager.getScanResults();
 
         if(configs == null) {
@@ -93,11 +93,17 @@ public class WifiReceiver extends BroadcastReceiver {
         callback.processWiFiScanResults(Collections.unmodifiableList(accessPoints));
     }
 
-    public boolean isScanStarted() {
+    public boolean scanStarted() {
         return scanStarted;
     }
 
-    private void setScanStarted(boolean scanStarted) {
+    private void scanStarted(boolean scanStarted) {
+        if (scanStarted)
+            this.scanStartTime = System.currentTimeMillis();
+        else {
+            if (DEBUG)
+                Log.i(TAG, "WiFi Scan time = " + (System.currentTimeMillis()-this.scanStartTime));
+        }
         this.scanStarted = scanStarted;
     }
 
@@ -106,10 +112,19 @@ public class WifiReceiver extends BroadcastReceiver {
             if(DEBUG) {
                 Log.i(TAG, "Wifi is disabled and we can't scan either. Not doing anything.");
             }
-            setScanStarted(false);
+            scanStarted(false);
         } else {
-            setScanStarted(true);
-            wifiManager.startScan();
+            if (scanStarted()) {
+                if (DEBUG) {
+                    Log.i(TAG, "startScan(): Scan already in progress.");
+                }
+            } else {
+                if (DEBUG) {
+                    Log.i(TAG, "startScan(): Starting scan.");
+                }
+                scanStarted(true);
+                wifiManager.startScan();
+            }
         }
     }
 

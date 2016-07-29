@@ -75,6 +75,7 @@ public class BackendService extends LocationBackendService implements WifiReceiv
     private static distanceCache distanceResults = new distanceCache();
 
     private AgeValue<SimpleLocation> gpsLocation = AgeValue.create();
+    private List<WifiAccessPoint> apList = null;
 
     @SystemService
     protected NotificationManager notificationManager;
@@ -141,9 +142,10 @@ public class BackendService extends LocationBackendService implements WifiReceiv
         if (DEBUG) {
             Log.i(TAG, "GPS Location update: " + locReport.toString());
         }
-        gpsLocation.value(SimpleLocation.fromAndroidLocation(locReport));
+        gpsLocation(SimpleLocation.fromAndroidLocation(locReport));
         if (wifiReceiver != null){
             wifiReceiver.startScan();
+            calculate();
         }
     }
 
@@ -152,26 +154,36 @@ public class BackendService extends LocationBackendService implements WifiReceiv
             instance.gpsLocationUpdated(locReport);
         }
     }
+
+    // WiFi scanning can several seconds (seen over 11 seconds on my phone). So store
+    // our latest seen results and we will update our calculations when we get either a
+    // new WiFi scan or a GPS location.
     @Override
-    public synchronized void processWiFiScanResults(@NonNull List<WifiAccessPoint> apList) {
+    public void processWiFiScanResults(@NonNull List<WifiAccessPoint> apList) {
+        if (DEBUG) {
+            Log.i(TAG,"processWiFiScanResults() - entry.");
+        }
+        this.apList = apList;
+        calculate();
+    }
+
+    private synchronized void calculate() {
         if (thread != null) {
-            Log.d(TAG, "processWiFiScanResults() : Thread busy?!");
+            Log.d(TAG, "calculate() : Thread busy?!");
             return;
         }
-        final List<WifiAccessPoint> accessPoints = apList;
+        final List<WifiAccessPoint> accessPoints = this.apList;
+        final SimpleLocation gpsLocation = gpsLocation();
 
+        if (accessPoints == null) {
+            return;
+        }
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                long locationAge = gpsLocation.age();
-
-                // always accept value which are not more than 500 milliseconds old because
-                // scanning wifis (after receiving GPS) can take a short amount of time
-
-                if(locationAge < 500 ||
-                        (locationAge < Configuration.with(BackendService.this).validGpsTimeInMilliseconds())) {
+                if (gpsLocation != null) {
                     Log.d(TAG,"GPS Location fresh.");
-                    updateWiFiDatabase(gpsLocation.value(), accessPoints);
+                    updateWiFiDatabase(gpsLocation, accessPoints);
                 }
                 Location result = wiFiBasedLocation(accessPoints);
                 report(result);
@@ -322,5 +334,23 @@ public class BackendService extends LocationBackendService implements WifiReceiv
         if (DEBUG) {
             distanceResults.logCacheStats();
         }
+    }
+
+    // gpsLocation is set and used in different thread contexts, make accessors for them
+    // synchronized.
+    private synchronized void gpsLocation(SimpleLocation locReport) {
+        gpsLocation.value(locReport);
+    }
+
+    private synchronized SimpleLocation gpsLocation() {
+
+        // Only use for GPS location is for updating the AP database and we only want
+        // to do that if the location is relatively fresh. So if not fresh, return null.
+        long locationAge = gpsLocation.age();
+        if(locationAge < 500 ||
+                (locationAge < Configuration.with(BackendService.this).validGpsTimeInMilliseconds())) {
+            return gpsLocation.value();
+        }
+        return null;
     }
 }
