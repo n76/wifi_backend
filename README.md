@@ -90,6 +90,7 @@ Changes
 1.1.3|23June2016|Improve performance on often used distance calculations
 1.1.4|23June2016|Fix calculation cache to miss less often.
 1.1.5|30July2016|Add permission to write to external storage so export data will work.
+1.1.6|10Aug2016|New database schema (probably want to backup/export existing data before upgrading just in case). Now supports backup/export of new/changed data in addition to full backup/export. Various other internal changes and fixes to work toward goal of supporting other types of RF sources for position estimation.
 
 License
 =======
