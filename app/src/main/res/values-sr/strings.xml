@@ -2,9 +2,7 @@
 <resources xmlns:xliff="http://schemas.android.com/tools">
     <string name="app_name">Услуга локације помоћу бежичних</string>
     <string name="app_title">Услуга локације помоћу бежичних</string>
-    <!--
     <string name="summary">Лоцирање помоћу личне базе података бежичних мрежа на телефону</string>
-    -->
 
     <!-- GPS preferences -->
     <string name="gps_config">ГПС поставке</string>
@@ -35,11 +33,13 @@
 
     <string name="db_size_label">Број познатих АП-а</string>
 
+    <string name="db_change_label">Број нових или ажурираних АП-а</string>
+
     <!-- Generic suffix strings -->
-    <string name="pref_meters"><xliff:g id="number of meters" exmaple="42">%s</xliff:g> метара</string>
-    <string name="pref_seconds"><xliff:g id="number of seconds" exmaple="42">%s</xliff:g> секунди</string>
-    <string name="pref_samples"><xliff:g id="number of samples" exmaple="42">%s</xliff:g> узорака</string>
-    <string name="statistic_records"><xliff:g id="number of APs" example="12">%1$d</xliff:g> АП-а</string>
+    <string name="pref_meters">%s метара</string>
+    <string name="pref_seconds">%s секунди</string>
+    <string name="pref_samples">%s узорака</string>
+    <string name="statistic_records">%1$d АП-а</string>
 
     <string name="drawer_settings">Поставке</string>
     <string name="drawer_advanced">Напредно</string>
@@ -54,10 +54,10 @@
     <string name="wifi_detail_accuracy">Прецизност: %s</string>
     <string name="wifi_show_map">Прикажи на мапи</string>
 
-    <string name="data_export_all">извести све податке</string>
-    <string name="data_export_changed">извоз измену података</string>
-    <string name="data_export_error">Не могох да извезем податке</string>
+    <string name="data_export_all">Извоз свих података</string>
+    <string name="data_export_changed">Извоз измењених података</string>
+    <string name="data_export_error">Не могу да извезем податке</string>
 
     <string name="data_import">Увоз података</string>
-    <string name="data_import_error">Не могох да увезем податке</string>
+    <string name="data_import_error">Не могу да увезем податке</string>
 </resources>
