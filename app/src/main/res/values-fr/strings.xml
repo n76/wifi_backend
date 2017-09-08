@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"
+    tools:ignore="MissingTranslation">
+    <string name="app_name">WiFi Location Service</string>
+    <string name="app_title">Service de localisation Wi-Fi</string>
+    <string name="summary">Géolocalise en utilisant une base de données des antennes Wi-Fi générée et stockée sur le téléphone</string>
+
+    <!-- GPS preferences -->
+    <string name="gps_config">Paramétrage GPS</string>
+
+    <string name="gps_accuracy">Précision exigée</string>
+    <string name="gps_accuracy_description">L\'erreur de précision GPS ne doit pas dépasser cette valeur (en mètres).</string>
+
+    <string name="gps_min_distance">Distance entre les enregistrements</string>
+    <string name="gps_min_distance_description">Distance minimale entre les enregistrements GPS (en mètres)</string>
+
+    <string name="gps_min_time">Intervalle entre les enregistrements</string>
+    <string name="gps_min_time_description">Intervalle de temps entre les enregistrements GPS (en secondes)</string>
+
+    <string name="gps_valid_time">Temps de validité de la position GPS</string>
+    <string name="gps_valid_time_description">Temps pendant lequel la dernière position GPS est valide (en secondes)</string>
+
+    <!-- AP preferences -->
+    <string name="ap_config">Paramétrage des points d\'accès Wi-Fi</string>
+
+    <string name="ap_min_range">Portée minimale du point d\'accès Wi-Fi</string>
+    <string name="ap_min_range_description">Portée minimale présumée pour un point d\'accès Wi-Fi (en mètres).</string>
+
+    <string name="ap_moved_range">Seuil de déplacement</string>
+    <string name="ap_moved_range_description">Portée maximale présumée pour un point d\'accès Wi-Fi (en mètres).</string>
+
+    <string name="ap_moved_guard">Protection contre le déplacement</string>
+    <string name="ap_moved_guard_description">Nombre de détections à une nouvelle position avant de déplacer le point d\'accès Wi-Fi.</string>
+
+    <string name="db_size_label">Nombre de points d\'accès Wi-Fi connus</string>
+
+    <string name="db_change_label">Nombre de points d\'accès Wi-Fi (nouveaux ou mis à jour)</string>
+
+    <!-- Generic suffix strings -->
+    <string name="pref_meters">xliff:g id=\"number of meters\" exmaple=\"42\" &gt;%s&lt;/xliff:g&gt; mètres</string>
+    <string name="pref_seconds">&lt;xliff:g id=\"number of seconds\" exmaple=\"42\" &gt;%s&lt;/xliff:g&gt; secondes</string>
+    <string name="pref_samples">xliff:g id=\"number of meters\" exmaple=\"42\" &gt;%s&lt;/xliff:g&gt; enregistrements</string>
+    <string name="statistic_records">&lt;xliff:g id=\"number of APs\" example=\"12\" &gt;%1$d&lt;/xliff:g&gt; APs</string>
+    <string name="statistic_changed">&lt;xliff:g id=\"number of new or updated APs\" example=\"12\" &gt;%1$d&lt;/xliff:g&gt; APs</string>
+
+    <string name="drawer_settings">Paramètres</string>
+    <string name="drawer_advanced">Avancé</string>
+    <string name="drawer_libraries">Bibliothèques externes</string>
+    <string name="drawer_website">Site internet</string>
+
+    <string name="preference_grant_permission">Taper pour autoriser la permission de localisation (nécessaire)</string>
+
+    <string name="title_wifi_list">Wi-Fi</string>
+    <string name="title_wifi_detail">Détails Wi-Fi</string>
+
+    <string name="wifi_detail_accuracy">Portée observée : %s</string>
+    <string name="wifi_show_map">Voir sur la carte</string>
+
+    <string name="data_export_all">Exporter toutes les données</string>
+    <string name="data_export_changed">Exporter les données modifiées</string>
+    <string name="data_export_error">Impossible d\'exporter les données</string>
+
+    <string name="data_import">Importer les données</string>
+    <string name="data_import_error">Impossible d\'importer les données</string>
+</resources>

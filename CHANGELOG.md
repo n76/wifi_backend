@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
-- Not applicable
+- Add French translation. Thanks to @Massedil
 
 ### Changed
 - Move change log into separate file.
