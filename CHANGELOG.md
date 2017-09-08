@@ -6,14 +6,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
+- Not applicable
+
+### Changed
+- Not applicable
+
+### Removed
+- Not applicable
+
+## [1.1.7] - 2017-09-08
+### Added
 - Add French translation. Thanks to @Massedil
 
 ### Changed
 - Move change log into separate file.
 - Update build tools and gradle
-
-### Removed
-- Not applicable
 
 ## [1.1.6] - 2016-08-10
 ### Added
