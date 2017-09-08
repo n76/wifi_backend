@@ -74,23 +74,7 @@ Notification icon created with the [Android Asset Studio](https://romannurik.git
 
 Changes
 =======
-
-|Version|Date|Comment|
-|:-------|:----:|:-------|
-0.1.0| |Initial version by n76
-0.6.0| |Configurable settings for data collection and use. Some improvements in performance
-0.6.1| |Fix up Android Studio/Gradle build environment
-0.17.0|21Aug2015|Increase location uncertainty if no position found.
-0.9.9|16Jan2016|Thanks to @UnknownUntilNow, new UI, refactored code, import and export of WiFi AP location information, support for Marshmallow
-1.0.0|6Jan2016|Thanks to @pejakm, update Serbian translation
-1.0.2|23Mar2016|Update for revised UnifiedNlp with aging of reports.
-1.1.0|5May2016|Change import/export format to comma separated value (CSV) format.
-1.1.1|13May2016|Fix divide by zero on minimum signal strength.
-1.1.2|22June2016|Refactor some files and logic. Should be no user discernible change in operation.
-1.1.3|23June2016|Improve performance on often used distance calculations
-1.1.4|23June2016|Fix calculation cache to miss less often.
-1.1.5|30July2016|Add permission to write to external storage so export data will work.
-1.1.6|10Aug2016|New database schema (probably want to backup/export existing data before upgrading just in case). Now supports backup/export of new/changed data in addition to full backup/export. Various other internal changes and fixes to work toward goal of supporting other types of RF sources for position estimation.
+[History is now a separate file](CHANGELOG.md)
 
 License
 =======
