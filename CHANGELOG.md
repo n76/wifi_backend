@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 - Not applicable
 
+## [1.1.8] 2017-09-12
+### Changed
+- Build changed to compile dependency rather than import jar file.
+
 ## [1.1.7] - 2017-09-08
 ### Added
 - Add French translation. Thanks to @Massedil
