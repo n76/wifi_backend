@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
 
     dependencies {
@@ -37,14 +37,6 @@ android {
     }
 }
 
-repositories {
-    mavenCentral()
-
-    maven {
-        url "https://oss.sonatype.org/content/repositories/snapshots/"
-    }
-}
-
 def AAVersion = '3.3.2'
 def ASVersion = '23.0.0'
 
@@ -67,7 +59,7 @@ dependencies {
     compile 'com.google.code.gson:gson:2.5'
     compile 'com.octo.android.robospice:robospice:1.4.14'
     compile 'com.github.machinarius:preferencefragment:0.1.1'
-    compile files('libs/opencsv-3.7.jar')
+    compile 'com.opencsv:opencsv:3.7'
 }
 
 apt {
