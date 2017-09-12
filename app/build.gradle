@@ -1,6 +1,6 @@
 buildscript {
     repositories {
-        mavenCentral()
+        jcenter()
     }
 
     dependencies {
@@ -34,14 +34,6 @@ android {
     packagingOptions {
         exclude 'META-INF/LICENSE.txt'
         exclude 'META-INF/NOTICE.txt'
-    }
-}
-
-repositories {
-    mavenCentral()
-
-    maven {
-        url "https://oss.sonatype.org/content/repositories/snapshots/"
     }
 }
 
