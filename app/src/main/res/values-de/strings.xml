@@ -36,9 +36,9 @@
     <string name="db_size_label">Bekannte WLANs</string>
 
     <!-- Generic suffix strings -->
-    <string name="pref_meters"><xliff:g id="number of meters" exmaple="42">%s</xliff:g> Meter</string>
-    <string name="pref_seconds"><xliff:g id="number of seconds" exmaple="42">%s</xliff:g> Sekunden</string>
-    <string name="pref_samples"><xliff:g id="number of samples" exmaple="42">%s</xliff:g> Messwerte</string>
+    <string name="pref_meters"><xliff:g id="number of meters" example="42">%s</xliff:g> Meter</string>
+    <string name="pref_seconds"><xliff:g id="number of seconds" example="42">%s</xliff:g> Sekunden</string>
+    <string name="pref_samples"><xliff:g id="number of samples" example="42">%s</xliff:g> Messwerte</string>
     <string name="statistic_records"><xliff:g id="number of APs" example="12">%1$d</xliff:g> WLANs</string>
 
     <string name="drawer_settings">Einstellungen</string>

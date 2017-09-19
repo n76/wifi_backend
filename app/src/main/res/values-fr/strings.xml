@@ -39,11 +39,11 @@
     <string name="db_change_label">Nombre de points d\'accès Wi-Fi (nouveaux ou mis à jour)</string>
 
     <!-- Generic suffix strings -->
-    <string name="pref_meters">xliff:g id=\"number of meters\" exmaple=\"42\" &gt;%s&lt;/xliff:g&gt; mètres</string>
-    <string name="pref_seconds">&lt;xliff:g id=\"number of seconds\" exmaple=\"42\" &gt;%s&lt;/xliff:g&gt; secondes</string>
-    <string name="pref_samples">xliff:g id=\"number of meters\" exmaple=\"42\" &gt;%s&lt;/xliff:g&gt; enregistrements</string>
-    <string name="statistic_records">&lt;xliff:g id=\"number of APs\" example=\"12\" &gt;%1$d&lt;/xliff:g&gt; APs</string>
-    <string name="statistic_changed">&lt;xliff:g id=\"number of new or updated APs\" example=\"12\" &gt;%1$d&lt;/xliff:g&gt; APs</string>
+    <string name="pref_meters"><xliff:g id="number of meters" example="42">%s</xliff:g> mètres</string>
+    <string name="pref_seconds"><xliff:g id="number of seconds" example="42">%s</xliff:g> secondes</string>
+    <string name="pref_samples"><xliff:g id="number of samples" example="42">%s</xliff:g> enregistrements</string>
+    <string name="statistic_records"><xliff:g id="number of APs" example="12">%1$d</xliff:g> APs</string>
+    <string name="statistic_changed"><xliff:g id="number of new or updated APs" example="12">%1$d</xliff:g> APs</string>
 
     <string name="drawer_settings">Paramètres</string>
     <string name="drawer_advanced">Avancé</string>
