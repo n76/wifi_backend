@@ -9,10 +9,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Not applicable
 
 ### Changed
-- Correct XML errors in French translation.
+- Not applicable
 
 ### Removed
 - Not applicable
+
+## [1.1.9] 2017-09-19
+### Changed
+- Correct XML errors in French translation.
 
 ## [1.1.8] 2017-09-12
 ### Changed
