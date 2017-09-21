@@ -1,1 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"
+    tools:ignore="MissingTranslation">
+    <string name="app_name">Usługa lokalizacji WiFi</string>
+    <string name="app_title">Usługa lokalizacji WiFi</string>
+    <string name="summary">Określaj lokalizację za pomocą bazy sieci WiFi na telefonie</string>
 
+    <!-- GPS preferences -->
+    <string name="gps_config">Ustawienia GPS</string>
+
+    <string name="gps_accuracy">Wymagana precyzja</string>
+    <string name="gps_accuracy_description">Maksymalny akceptowalny błąd odczytu GPS (w metrach).</string>
+
+    <string name="gps_min_distance">Odległość próbki</string>
+    <string name="gps_min_distance_description">Minimalna odległość pomiędzy próbkami lokalizacji GPS (w metrach).</string>
+
+    <string name="gps_min_time">Interwał próbki</string>
+    <string name="gps_min_time_description">Czas pomiędzy próbkami lokalizacji GPS (w sekundach).</string>
+
+    <string name="gps_valid_time">Czas poprawności GPS</string>
+    <string name="gps_valid_time_description">Czas poprawności ostatniego odczytu GPS (w sekundach).</string>
+
+    <!-- AP preferences -->
+    <string name="ap_config">Założenia nadajników WiFi</string>
+
+    <string name="ap_min_range">Minimalny zasięg nadajnika</string>
+    <string name="ap_min_range_description">Minimalny założony zasięg nadajnika WiFi (w metrach).</string>
+
+    <string name="ap_moved_range">Próg przemieszczenia</string>
+    <string name="ap_moved_range_description">Maksymalny założony zasięg nadajnika WiFi (w metrach).</string>
+
+    <string name="ap_moved_guard">Potwierdzenie przemieszczenia </string>
+    <string name="ap_moved_guard_description">Liczba próbek nadajnika w nowej lokalizacji, zanim zostanie zaufany.</string>
+
+    <string name="db_size_label">Liczba znanych nadajników</string>
+
+    <string name="db_change_label">Liczba nowych i uaktualnionych nadajników</string>
+
+    <!-- Generic suffix strings -->
+    <string name="pref_meters"><xliff:g id="number of meters" example="42">%s</xliff:g> metrów</string>
+    <string name="pref_seconds"><xliff:g id="number of seconds" example="42">%s</xliff:g> sekund</string>
+    <string name="pref_samples"><xliff:g id="number of samples" example="42">%s</xliff:g> próbek</string>
+    <string name="statistic_records"><xliff:g id="number of APs" example="12">%1$d</xliff:g> sieci</string>
+    <string name="statistic_changed"><xliff:g id="number of new or updated APs" example="12">%1$d</xliff:g> sieci</string>
+
+    <string name="drawer_settings">Ustawienia</string>
+    <string name="drawer_advanced">Zaawansowane</string>
+    <string name="drawer_libraries">Zewnętrzne biblioteki</string>
+    <string name="drawer_website">Strona internetowa</string>
+
+    <string name="preference_grant_permission">Stuknij, aby udzielić wymaganego uprawnienia lokalizacji</string>
+
+    <string name="title_wifi_list">Sieci</string>
+    <string name="title_wifi_detail">Szczegóły</string>
+
+    <string name="wifi_detail_accuracy">Zaobserwowany zasięg: %s</string>
+    <string name="wifi_show_map">Pokaż na mapie</string>
+
+    <string name="data_export_all">Eksportuj wszystkie dane</string>
+    <string name="data_export_changed">Eksportuj zmienione dane</string>
+    <string name="data_export_error">Nie można wyeksportować danych</string>
+
+    <string name="data_import">Importuj dane</string>
+    <string name="data_import_error">Nie możne zaimportować danych</string>
+</resources>
