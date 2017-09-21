@@ -63,5 +63,5 @@
     <string name="data_export_error">Nie można wyeksportować danych</string>
 
     <string name="data_import">Importuj dane</string>
-    <string name="data_import_error">Nie możne zaimportować danych</string>
+    <string name="data_import_error">Nie można zaimportować danych</string>
 </resources>
