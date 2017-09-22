@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 - Not applicable
 
+## [1.1.10] 2017-09-21
+### Added
+- Polish translation. Thanks to @verdulo
+
 ## [1.1.9] 2017-09-19
 ### Changed
 - Correct XML errors in French translation.
