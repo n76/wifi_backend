@@ -28,7 +28,6 @@ import android.preference.Preference;
 import android.support.annotation.NonNull;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
-import android.util.Log;
 
 import com.github.machinarius.preferencefragment.PreferenceFragment;
 
@@ -38,6 +37,7 @@ import org.androidannotations.annotations.OnActivityResult;
 import org.androidannotations.annotations.PreferenceScreen;
 import org.fitchfamily.android.wifi_backend.Configuration;
 import org.fitchfamily.android.wifi_backend.R;
+import org.fitchfamily.android.wifi_backend.ui.data.reset.ResetDatabaseDialogFragment;
 import org.fitchfamily.android.wifi_backend.ui.data.WifiListActivity_;
 import org.fitchfamily.android.wifi_backend.ui.data.transfer.ExportProgressDialog_;
 import org.fitchfamily.android.wifi_backend.ui.data.transfer.ImportProgressDialog_;
@@ -62,6 +62,7 @@ public class MainSettingsFragment extends PreferenceFragment {
         final Preference exportAll = findPreference("db_export");
         final Preference exportChanged = findPreference("db_export_changed");
         final Preference importPref = findPreference("db_import");
+        final Preference resetPref = findPreference("db_reset");
 
         permission.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -134,6 +135,15 @@ public class MainSettingsFragment extends PreferenceFragment {
                             IMPORT_REQUEST_CODE
                     );
                 }
+
+                return true;
+            }
+        });
+
+        resetPref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                new ResetDatabaseDialogFragment().show(getFragmentManager());
 
                 return true;
             }
