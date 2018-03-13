@@ -60,4 +60,9 @@
 
     <string name="data_import">Daten importieren</string>
     <string name="data_import_error">Datenimport fehlgeschlagen</string>
+
+    <string name="data_reset">Datenbank zurücksetzen</string>
+    <string name="data_reset_warning">Die Datenbank kann nur widerhergestellt werden, wenn ein Backup angelegt wurde</string>
+    <string name="data_reset_yes">Daten löschen</string>
+    <string name="data_reset_no">Daten behalten</string>
 </resources>
