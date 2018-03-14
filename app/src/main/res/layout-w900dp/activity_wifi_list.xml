@@ -26,14 +26,28 @@
 
         -->
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/wifi_list"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="@dimen/item_width"
             android:layout_height="match_parent"
             android:layout_marginLeft="@dimen/activity_margin"
-            android:layout_marginRight="@dimen/activity_margin"
-            app:layoutManager="LinearLayoutManager"
-            tools:listitem="@layout/wifi_list_content"/>
+            android:layout_marginRight="@dimen/activity_margin">
+
+            <EditText
+                android:hint="@string/wifi_list_seach_hint"
+                android:inputType="textFilter"
+                android:id="@+id/search_term"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/wifi_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layoutManager="LinearLayoutManager"
+                tools:listitem="@layout/wifi_list_content"/>
+
+        </LinearLayout>
 
         <FrameLayout
             android:id="@+id/wifi_detail_container"

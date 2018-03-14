@@ -60,4 +60,6 @@
 
     <string name="data_import">Daten importieren</string>
     <string name="data_import_error">Datenimport fehlgeschlagen</string>
+
+    <string name="wifi_list_seach_hint">Suchen (mit SSID oder RFID)</string>
 </resources>

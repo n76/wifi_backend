@@ -27,14 +27,20 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.MenuItem;
+import android.widget.EditText;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.TextChange;
 import org.androidannotations.annotations.ViewById;
 import org.fitchfamily.android.wifi_backend.Configuration;
 import org.fitchfamily.android.wifi_backend.R;
 import org.fitchfamily.android.wifi_backend.database.Database;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An activity representing a list of WiFis. This activity
@@ -46,6 +52,8 @@ import org.fitchfamily.android.wifi_backend.database.Database;
  */
 @EActivity(R.layout.activity_wifi_list)
 public class WifiListActivity extends AppCompatActivity {
+    private static final int LOADER_ID = 0;
+
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
@@ -57,6 +65,9 @@ public class WifiListActivity extends AppCompatActivity {
 
     @ViewById
     protected Toolbar toolbar;
+
+    @ViewById
+    EditText searchTerm;
 
     private WifiListAdapter adapter = new WifiListAdapter().listener(new WifiListAdapter.Listener() {
         @Override
@@ -89,24 +100,17 @@ public class WifiListActivity extends AppCompatActivity {
         }
 
         recyclerView.setAdapter(adapter);
-        getSupportLoaderManager().initLoader(0, null, new LoaderManager.LoaderCallbacks<Cursor>() {
+        getSupportLoaderManager().initLoader(LOADER_ID, null, new LoaderManager.LoaderCallbacks<Cursor>() {
             @Override
             public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-                int option = Configuration.listOption();
-                String selection = null;
-                switch (Configuration.listOption()) {
-                    case Configuration.LIST_OPTION_CHANGED:
-                        selection = Database.COL_CHANGED + "<> 0";
-                        break;
-
-                    default:
-                        selection = null;
-                }
-                return new CursorLoader(WifiListActivity.this)
+                CursorLoader loader = new CursorLoader(WifiListActivity.this)
                         .table(Database.TABLE_SAMPLES)
                         .columns(new String[]{Database.COL_SSID, Database.COL_RFID})
-                        .selection(selection)
                         .sortOrder(Database.COL_SSID + " ASC");
+
+                updateLoaderSelection(loader);
+
+                return loader;
             }
 
             @Override
@@ -146,5 +150,54 @@ public class WifiListActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @TextChange(R.id.search_term)
+    protected void searchTermChanged() {
+        Loader loader = getSupportLoaderManager().getLoader(LOADER_ID);
+
+        if (loader != null) {
+            updateLoaderSelection((CursorLoader) loader);
+            loader.forceLoad();
+        }
+    }
+
+    private void updateLoaderSelection(CursorLoader loader) {
+        boolean onlyChanged = Configuration.listOption() == 1;
+        final String search = searchTerm.getText().toString();
+
+        String selection = "";
+        List<String> selectionArgs = new ArrayList<>();
+
+        if (!TextUtils.isEmpty(search)) {
+            selection = Database.COL_RFID + " LIKE ? OR " + Database.COL_SSID + " LIKE ?";
+
+            // two times because there are two placeholders
+            selectionArgs.add("%" + /* remove ":" because they are not saved at the database */ search.replaceAll(":", "") + "%");
+            selectionArgs.add("%" + search + "%");
+        }
+
+        if (onlyChanged) {
+            if (TextUtils.isEmpty(selection)) {
+                selection = Database.COL_CHANGED + "<> 0";
+            } else {
+                selection = Database.COL_CHANGED + "<> 0 AND (" + selection + ")";
+            }
+        }
+
+        loader
+                .selection(selection)
+                .selectionArgs(selectionArgs.toArray(new String[selectionArgs.size()]));
+    }
+
+    @Override
+    public void onBackPressed() {
+        // clear search field on first back press
+
+        if (TextUtils.isEmpty(searchTerm.getText().toString())) {
+            super.onBackPressed();
+        } else {
+            searchTerm.setText("");
+        }
     }
 }
