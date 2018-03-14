@@ -64,7 +64,7 @@ Export and Import of WiFi (WLAN) Access Point (AP) data
 
 Clearing the database
 ---------------------
-This software does have a clear or reset database function built in. Touch "Reset Database" in its UI to use it.
+To clear or reset database, touch the "Reset Database" in the backend setting.
 
 Libraries Used
 --------------
