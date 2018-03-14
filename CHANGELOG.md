@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Removed
 - Not applicable
 
+## [1.1.11] - 2018-03-13
+### Added
+- Reset database control added. Thanks to @l-jonas
+
 ## [1.1.10] 2017-09-21
 ### Added
 - Polish translation. Thanks to @verdulo

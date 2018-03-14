@@ -147,4 +147,10 @@ public class SamplerDatabase extends Database {
 
         return this;
     }
+
+    public SamplerDatabase dropAll() {
+        dropAllAPs();
+
+        return this;
+    }
 }

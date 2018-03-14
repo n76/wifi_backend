@@ -83,6 +83,7 @@ public class Database extends SQLiteOpenHelper {
     private SQLiteStatement sqlSampleInsert;
     private SQLiteStatement sqlSampleUpdate;
     private SQLiteStatement sqlAPdrop;
+    private SQLiteStatement sqlAPdropAll;
     private SQLiteDatabase db = null;
     private final LocalBroadcastManager localBroadcastManager;
     private final Context context;
@@ -238,6 +239,8 @@ public class Database extends SQLiteOpenHelper {
         sqlAPdrop = db.compileStatement("DELETE FROM " +
                 TABLE_SAMPLES +
                 " WHERE " + COL_RFID + "=?;");
+
+        sqlAPdropAll = db.compileStatement("DELETE FROM " + TABLE_SAMPLES);
     }
 
     public void exportComplete() {
@@ -256,6 +259,12 @@ public class Database extends SQLiteOpenHelper {
         sqlAPdrop.bindString(1, canonicalBSSID);
         sqlAPdrop.executeInsert();
         sqlAPdrop.clearBindings();
+
+        onAccessPointCountChanged();
+    }
+
+    protected void dropAllAPs() {
+        sqlAPdropAll.execute();
 
         onAccessPointCountChanged();
     }
