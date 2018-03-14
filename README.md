@@ -64,7 +64,7 @@ Export and Import of WiFi (WLAN) Access Point (AP) data
 
 Clearing the database
 ---------------------
-This software does not have a clear or reset database function built it but you can use settings->apps->WiFi Location Service->Storage->Clear Data to remove the current database.
+This software does have a clear or reset database function built in. Touch "Reset Database" in its UI to use it.
 
 Libraries Used
 --------------
