@@ -10,12 +10,19 @@
 
     <include layout="@layout/toolbar" />
 
+    <EditText
+        android:hint="@string/wifi_list_seach_hint"
+        android:inputType="textFilter"
+        android:layout_margin="@dimen/view_margin"
+        android:id="@+id/search_term"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <android.support.v7.widget.RecyclerView
+        android:scrollbars="vertical"
         android:id="@+id/wifi_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginLeft="@dimen/activity_margin"
-        android:layout_marginRight="@dimen/activity_margin"
         app:layoutManager="LinearLayoutManager"
         tools:listitem="@layout/wifi_list_content"/>
 

@@ -65,6 +65,8 @@
     <string name="data_import">Import data</string>
     <string name="data_import_error">Couldn\'t import data</string>
 
+    <string name="wifi_list_seach_hint">Search (by SSID or RFID)</string>
+
     <string name="data_reset">Reset database</string>
     <string name="data_reset_warning">The database can only be restored if you created an backup before the deletion</string>
     <string name="data_reset_yes">Delete the data</string>
