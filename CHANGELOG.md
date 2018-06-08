@@ -6,13 +6,20 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Added
-- Ability to filter or search for specific AP or group of APs by SSID or BSSIS.
+- Not applicable
 
 ### Changed
 - Not applicable
 
 ### Removed
 - Not applicable
+
+## [1.1.12] - 2018-06-08
+### Added
+- Ability to filter or search for specific AP or group of APs by SSID or BSSIS.
+
+### Changed
+- Correct typographic error in German translation. Thanks to @N3dal
 
 ## [1.1.11] - 2018-03-13
 ### Added
