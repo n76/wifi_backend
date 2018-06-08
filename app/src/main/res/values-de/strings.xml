@@ -28,7 +28,7 @@
     <string name="ap_min_range_description">Kleinstmögliche angenommene WLAN-Reichweite (Meter).</string>
 
     <string name="ap_moved_range">Bewegungserkennung</string>
-    <string name="ap_moved_range_description">Größtmögliche angenommene WLAN-Recihweite (Meter).</string>
+    <string name="ap_moved_range_description">Größtmögliche angenommene WLAN-Reichweite (Meter).</string>
 
     <string name="ap_moved_guard">Bewegungserkennungsschutz</string>
     <string name="ap_moved_guard_description">Messwerte an einem neuen Ort bevor einem WLAN vertraut wird</string>
