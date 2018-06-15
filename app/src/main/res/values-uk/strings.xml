@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2"
+    tools:ignore="MissingTranslation">
+    <string name="app_name">WiFi Location Service</string>
+    <string name="app_title">Сервіс позиціювання WiFi</string>
+    <string name="summary">Позиціювання на основі локальної бази даних WiFi телефона.</string>
+
+    <!-- GPS preferences -->
+    <string name="gps_config">Налаштування GPS</string>
+
+    <string name="gps_accuracy">Необхідна точність</string>
+    <string name="gps_accuracy_description">Похибка GPS повинна бути не більшою за вказане число (метрів).</string>
+
+    <string name="gps_min_distance">Відстань між зразками</string>
+    <string name="gps_min_distance_description">Мінімальна відстань між зразками позиціювання GPS (метрів).</string>
+
+    <string name="gps_min_time">Інтервал між зразками</string>
+    <string name="gps_min_time_description">Час між зразками позиціювання GPS  (секунд).</string>
+
+    <string name="gps_valid_time">час валідності GPS</string>
+    <string name="gps_valid_time_description">Час, на протязі якого сигнал GPS вважається дійсним (секунд).</string>
+
+    <!-- AP preferences -->
+    <string name="ap_config">Припущення WiFi точки доступу</string>
+
+    <string name="ap_min_range">Мінімальний діапазон точки доступу</string>
+    <string name="ap_min_range_description">Мінімальний допустимий діапазон точки доступу (метрів).</string>
+
+    <string name="ap_moved_range">Поріг зсуву</string>
+    <string name="ap_moved_range_description">Максимально допустимий діапазон точки доступу (метрів).</string>
+
+    <string name="ap_moved_guard">Захист зсуву</string>
+    <string name="ap_moved_guard_description">Кількість зразків позиціювання перед підтвердженням зсуву точки доступу.</string>
+
+    <string name="db_size_label">Кількість відомих точок доступу</string>
+
+    <string name="db_change_label">Кількість нових чи оновлених точок доступу</string>
+
+    <!-- Generic suffix strings -->
+    <string name="pref_meters">Метрів: <xliff:g id="number of meters" example="42">%s</xliff:g></string>
+    <string name="pref_seconds">Секунд: <xliff:g id="number of seconds" example="42">%s</xliff:g></string>
+    <string name="pref_samples">Зразків: <xliff:g id="number of samples" example="42">%s</xliff:g></string>
+    <string name="statistic_records">Точок доступу: <xliff:g id="number of APs" example="12">%1$d</xliff:g></string>
+    <string name="statistic_changed">Точок доступу: <xliff:g id="number of new or updated APs" example="12">%1$d</xliff:g></string>
+
+    <string name="drawer_settings">Налаштування</string>
+    <string name="drawer_advanced">Розширені</string>
+    <string name="drawer_libraries">Зовнішні бібліотеки</string>
+    <string name="drawer_website">Сайт</string>
+
+    <string name="preference_grant_permission">Натисніть для надання доступу до позиціювання</string>
+
+    <string name="title_wifi_list">WiFi мережі</string>
+    <string name="title_wifi_detail">Подробиці WiFi</string>
+
+    <string name="wifi_detail_accuracy">Діапазон спостереження: %s</string>
+    <string name="wifi_show_map">Показати на карті</string>
+
+    <string name="data_export_all">Експортувати всі дані</string>
+    <string name="data_export_changed">Експортувати лише змінені дані</string>
+    <string name="data_export_error">Не вдалося експортувати дані</string>
+
+    <string name="data_import">Імпорт даних</string>
+    <string name="data_import_error">Не вдалося імпортувати дані</string>
+
+    <string name="wifi_list_seach_hint">Пошук (за SSID чи RFID)</string>
+
+    <string name="data_reset">Скинути базу даних</string>
+    <string name="data_reset_warning">Базу даних можливо буде відновити лише за умови, що зроблено резервну копію перед видаленням</string>
+    <string name="data_reset_yes">Видалити дані</string>
+    <string name="data_reset_no">Лишити дані</string>
+</resources>
