@@ -1,1 +1,1 @@
-Local WiFi Backend
+WiFi Location Service - A local RF based back end for the µg Project
