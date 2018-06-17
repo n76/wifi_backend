@@ -9,10 +9,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Not applicable
 
 ### Changed
-- Add Ukrainian translation
+- Not applicable
 
 ### Removed
 - Not applicable
+
+## [1.1.13] - 2018-06-17
+### Added
+- Add Ukrainian translation
+
+### Changed
+- Update build environment
 
 ## [1.1.12] - 2018-06-08
 ### Added

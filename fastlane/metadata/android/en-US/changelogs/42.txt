@@ -1,1 +1,2 @@
 - Add Ukrainian translation
+- Update build environment
