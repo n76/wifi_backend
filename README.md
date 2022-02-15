@@ -1,6 +1,6 @@
 NOTICE
 ======
-The author of this backend is now primarily focused on the [Déjá Vu backend](https://github.com/n76/DejaVu). Bug fixes and pull requests will be accepted for this backend but it will not be as well supported as Déjá Vu going forward.
+The author of this backend is now primarily focused on the [Déjà Vu backend](/n76/DejaVu). Bug fixes and pull requests will be accepted for this backend but it will not be as well supported as Déjà Vu going forward.
 
 Local WiFi Backend
 ==================
